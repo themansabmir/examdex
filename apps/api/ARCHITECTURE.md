@@ -4,6 +4,9 @@ This document explains our flat feature-based architecture with separation of co
 
 ```
 src/
+├── config/           # Environment configuration
+│   ├── env.ts
+│   └── index.ts
 ├── features/         # Feature modules (user, exam, etc.)
 │   ├── user/
 │   │   ├── user.entity.ts
@@ -15,7 +18,21 @@ src/
 │   ├── exam/
 │   │   └── ... (same structure)
 │   └── index.ts
+├── lib/              # External service connections
+│   ├── prisma.ts
+│   └── index.ts
+├── middleware/       # Express middleware
+│   ├── error-handler.ts
+│   ├── not-found.ts
+│   ├── request-logger.ts
+│   ├── validate-request.ts
+│   └── index.ts
 ├── routes/           # Route definitions
+│   └── index.ts
+├── utils/            # Shared utilities
+│   ├── app-error.ts
+│   ├── async-handler.ts
+│   ├── logger.ts
 │   └── index.ts
 ├── container.ts      # Dependency injection
 └── main.ts           # App bootstrap
@@ -359,6 +376,96 @@ export class ExamService {
 
 ---
 
+## Production Folders
+
+### Config (`config/`)
+
+Centralized environment configuration with validation.
+
+```typescript
+// config/env.ts
+export const env = {
+  NODE_ENV: process.env.NODE_ENV || "development",
+  PORT: parseInt(process.env.PORT || "3001", 10),
+  DATABASE_URL: process.env.DATABASE_URL || "",
+  isDevelopment: process.env.NODE_ENV === "development",
+  isProduction: process.env.NODE_ENV === "production",
+};
+
+export function validateEnv(): void {
+  const required = ["DATABASE_URL"];
+  const missing = required.filter((key) => !process.env[key]);
+  if (missing.length > 0 && env.isProduction) {
+    throw new Error(`Missing: ${missing.join(", ")}`);
+  }
+}
+```
+
+### Lib (`lib/`)
+
+External service connections (database, cache, etc.).
+
+```typescript
+// lib/prisma.ts
+import { PrismaClient } from "@prisma/client";
+
+export const prisma = new PrismaClient();
+
+export async function connectDatabase(): Promise<void> {
+  await prisma.$connect();
+}
+
+export async function disconnectDatabase(): Promise<void> {
+  await prisma.$disconnect();
+}
+```
+
+### Middleware (`middleware/`)
+
+Express middleware for cross-cutting concerns.
+
+| File                  | Purpose                                        |
+| --------------------- | ---------------------------------------------- |
+| `error-handler.ts`    | Global error handling, formats error responses |
+| `not-found.ts`        | 404 handler for unknown routes                 |
+| `request-logger.ts`   | Logs incoming requests with timing             |
+| `validate-request.ts` | Request body validation                        |
+
+### Utils (`utils/`)
+
+Shared utilities used across the application.
+
+| File               | Purpose                                       |
+| ------------------ | --------------------------------------------- |
+| `app-error.ts`     | Custom error class with status codes          |
+| `async-handler.ts` | Wraps async route handlers for error catching |
+| `logger.ts`        | Structured logging utility                    |
+
+---
+
+## Main Entry Point (`main.ts`)
+
+Production-ready bootstrap with:
+
+- **Security**: Helmet, CORS configuration
+- **Error handling**: Global error handler, uncaught exception handling
+- **Graceful shutdown**: SIGTERM/SIGINT handlers, database disconnect
+- **Request logging**: All requests logged with timing
+
+```typescript
+// main.ts
+async function bootstrap(): Promise<void> {
+  await connectDatabase();
+  app.listen(env.PORT, () => {
+    logger.info(`Server running on port ${env.PORT}`);
+  });
+}
+
+bootstrap();
+```
+
+---
+
 ## Benefits
 
 1. **Colocation** - All user-related code in one folder
@@ -366,6 +473,7 @@ export class ExamService {
 3. **Scalability** - Add new features without touching existing ones
 4. **Discoverability** - Easy to find code by feature name
 5. **Flexibility** - Change database by swapping repository implementation
+6. **Production-ready** - Error handling, logging, graceful shutdown
 
 ---
 
@@ -375,4 +483,4 @@ export class ExamService {
 2. Add files: `[name].entity.ts`, `[name].dto.ts`, `[name].repository.ts`, `[name].service.ts`, `[name].controller.ts`, `index.ts`
 3. Export from `features/index.ts`
 4. Wire in `container.ts`
-5. Add routes in `routes/index.ts`
+5. Add routes with validation in `routes/index.ts`

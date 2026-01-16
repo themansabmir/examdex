@@ -2,6 +2,7 @@ import type { IExamRepository } from "./exam.repository";
 import type { IUserRepository } from "../user/user.repository";
 import { Exam } from "./exam.entity";
 import type { CreateExamInputDTO, ExamOutputDTO, PublishExamInputDTO } from "./exam.dto";
+import { NotFoundError, ForbiddenError } from "../../utils";
 
 export class ExamService {
   constructor(
@@ -12,7 +13,7 @@ export class ExamService {
   async createExam(input: CreateExamInputDTO): Promise<ExamOutputDTO> {
     const user = await this.userRepository.findById(input.userId);
     if (!user) {
-      throw new Error("User not found");
+      throw new NotFoundError("User not found", "USER_NOT_FOUND");
     }
 
     const exam = new Exam({
@@ -31,11 +32,11 @@ export class ExamService {
   async publishExam(input: PublishExamInputDTO): Promise<ExamOutputDTO> {
     const exam = await this.examRepository.findById(input.examId);
     if (!exam) {
-      throw new Error("Exam not found");
+      throw new NotFoundError("Exam not found", "EXAM_NOT_FOUND");
     }
 
     if (exam.userId !== input.userId) {
-      throw new Error("You do not have permission to publish this exam");
+      throw new ForbiddenError("You do not have permission to publish this exam", "NOT_OWNER");
     }
 
     const publishedExam = exam.publish();

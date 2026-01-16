@@ -14,3 +14,6 @@ export { ExamService } from "./exam.service";
 
 // Controller
 export { ExamController } from "./exam.controller";
+
+// Schemas
+export * from "./exam.schema";

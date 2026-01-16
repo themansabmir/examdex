@@ -14,6 +14,9 @@ import { UserService } from "./user.service";
 // Controller
 import { UserController } from "./user.controller";
 
+// Schemas
+export * from "./user.schema";
+
 export { User, UserProps };
 export type { CreateUserInputDTO, CreateUserOutputDTO };
 export type { IUserRepository };

@@ -1,6 +1,7 @@
 import type { IUserRepository } from "./user.repository";
 import { User } from "./user.entity";
 import type { CreateUserInputDTO, CreateUserOutputDTO } from "./user.dto";
+import { ConflictError } from "../../utils";
 
 export class UserService {
   constructor(private readonly userRepository: IUserRepository) {}
@@ -8,7 +9,7 @@ export class UserService {
   async createUser(input: CreateUserInputDTO): Promise<CreateUserOutputDTO> {
     const existingUser = await this.userRepository.findByEmail(input.email);
     if (existingUser) {
-      throw new Error("User with this email already exists");
+      throw new ConflictError("User with this email already exists", "USER_EXISTS");
     }
 
     const user = new User({
