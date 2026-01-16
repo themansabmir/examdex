@@ -1,7 +1,5 @@
-version: '3.8'
-
 services:
-  # PostgreSQL Database
+  # PostgreSQL Database (Development Infrastructure)
   postgres:
     image: postgres:15-alpine
     container_name: examdex-db
@@ -20,7 +18,7 @@ services:
       timeout: 5s
       retries: 5
 
-  # Redis Cache
+  # Redis Cache (Development Infrastructure)
   redis:
     image: redis:7-alpine
     container_name: examdex-redis
@@ -34,30 +32,6 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
-
-  # Backend API (optional - for containerized dev)
-  api:
-    build:
-      context: .
-      dockerfile: apps/api/Dockerfile
-    container_name: examdex-api
-    restart: unless-stopped
-    ports:
-      - "3001:3001"
-    environment:
-      NODE_ENV: development
-      PORT: 3001
-      DATABASE_URL: postgresql://examdex:examdex_dev_password@postgres:5432/examdex
-      REDIS_URL: redis://redis:6379
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-    volumes:
-      - ./apps/api:/app
-      - /app/node_modules
-    command: pnpm dev
 
 volumes:
   postgres_data:
