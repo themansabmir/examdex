@@ -12,4 +12,20 @@ model User {
   name      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+  exams     Exam[]
+}
+
+model Exam {
+  id           String   @id @default(uuid())
+  title        String
+  description  String?
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  status       String   @default("draft")
+  duration     Int      @default(60)
+  passingScore Int      @default(70)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([userId])
 }
