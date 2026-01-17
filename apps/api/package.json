@@ -14,6 +14,7 @@
     "db:studio": "prisma studio"
   },
   "dependencies": {
+    "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
     "@repo/config": "workspace:^",
     "@repo/infra": "workspace:^",
@@ -22,12 +23,14 @@
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "helmet": "^8.1.0",
+    "pg": "^8.17.1",
     "zod": "^3.25.76"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.3",
+    "@types/pg": "^8.16.0",
     "eslint": "^9.17.0",
     "prisma": "^7.2.0",
     "tsx": "^4.19.2",
