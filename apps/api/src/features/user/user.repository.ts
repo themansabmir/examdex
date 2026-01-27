@@ -5,6 +5,7 @@ export interface IUserRepository {
   save(user: User): Promise<User>;
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
+  findByMobileNumber(mobileNumber: string): Promise<User | null>;
   findAll(): Promise<User[]>;
 }
 
@@ -15,20 +16,29 @@ export class PrismaUserRepository implements IUserRepository {
     const savedUser = await this.prisma.user.upsert({
       where: { id: user.id },
       update: {
-        email: user.email,
-        name: user.name,
+        email: user.email ?? undefined,
+        mobileNumber: user.mobileNumber ?? undefined,
+        password: user.password ?? undefined,
+        name: user.name ?? undefined,
+        role: user.role,
       },
       create: {
         id: user.id,
-        email: user.email,
-        name: user.name,
+        email: user.email ?? undefined,
+        mobileNumber: user.mobileNumber ?? undefined,
+        password: user.password ?? undefined,
+        name: user.name ?? undefined,
+        role: user.role,
       },
     });
 
     return new User({
       id: savedUser.id,
       email: savedUser.email,
+      mobileNumber: savedUser.mobileNumber,
+      password: savedUser.password,
       name: savedUser.name,
+      role: savedUser.role,
       createdAt: savedUser.createdAt,
       updatedAt: savedUser.updatedAt,
     });
@@ -44,7 +54,10 @@ export class PrismaUserRepository implements IUserRepository {
     return new User({
       id: user.id,
       email: user.email,
+      mobileNumber: user.mobileNumber,
+      password: user.password,
       name: user.name,
+      role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
@@ -60,7 +73,29 @@ export class PrismaUserRepository implements IUserRepository {
     return new User({
       id: user.id,
       email: user.email,
+      mobileNumber: user.mobileNumber,
+      password: user.password,
       name: user.name,
+      role: user.role,
+      createdAt: user.createdAt,
+      updatedAt: user.updatedAt,
+    });
+  }
+
+  async findByMobileNumber(mobileNumber: string): Promise<User | null> {
+    const user = await this.prisma.user.findUnique({
+      where: { mobileNumber },
+    });
+
+    if (!user) return null;
+
+    return new User({
+      id: user.id,
+      email: user.email,
+      mobileNumber: user.mobileNumber,
+      password: user.password,
+      name: user.name,
+      role: user.role,
       createdAt: user.createdAt,
       updatedAt: user.updatedAt,
     });
@@ -74,7 +109,10 @@ export class PrismaUserRepository implements IUserRepository {
         new User({
           id: user.id,
           email: user.email,
+          mobileNumber: user.mobileNumber,
+          password: user.password,
           name: user.name,
+          role: user.role,
           createdAt: user.createdAt,
           updatedAt: user.updatedAt,
         })
@@ -97,6 +135,15 @@ export class InMemoryUserRepository implements IUserRepository {
   async findByEmail(email: string): Promise<User | null> {
     for (const user of this.users.values()) {
       if (user.email === email) {
+        return user;
+      }
+    }
+    return null;
+  }
+
+  async findByMobileNumber(mobileNumber: string): Promise<User | null> {
+    for (const user of this.users.values()) {
+      if (user.mobileNumber === mobileNumber) {
         return user;
       }
     }

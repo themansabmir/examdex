@@ -4,15 +4,29 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  url      = env("DATABASE_URL")
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  name      String?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  exams     Exam[]
+  id           String   @id @default(uuid())
+  email        String?  @unique
+  mobileNumber String?  @unique
+  password     String?
+  name         String?
+  role         String   @default("student")
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  exams        Exam[]
+}
+
+model Otp {
+  id           String   @id @default(uuid())
+  mobileNumber String
+  code         String
+  expiresAt    DateTime
+  createdAt    DateTime @default(now())
+
+  @@index([mobileNumber])
 }
 
 model Exam {

@@ -7,6 +7,8 @@ import type { CreateUserInputDTO, CreateUserOutputDTO } from "./user.dto";
 // Repository
 import type { IUserRepository } from "./user.repository";
 import { PrismaUserRepository, InMemoryUserRepository } from "./user.repository";
+import type { IOtpRepository } from "./otp.repository";
+import { PrismaOtpRepository, InMemoryOtpRepository } from "./otp.repository";
 
 // Service
 import { UserService } from "./user.service";
@@ -19,7 +21,7 @@ export * from "./user.schema";
 
 export { User, UserProps };
 export type { CreateUserInputDTO, CreateUserOutputDTO };
-export type { IUserRepository };
-export { PrismaUserRepository, InMemoryUserRepository };
+export type { IUserRepository, IOtpRepository };
+export { PrismaUserRepository, InMemoryUserRepository, PrismaOtpRepository, InMemoryOtpRepository };
 export { UserService };
 export { UserController };

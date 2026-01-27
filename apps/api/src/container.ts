@@ -1,23 +1,21 @@
-import { prisma } from "./lib";
 import {
   UserService,
   UserController,
-  PrismaUserRepository,
   InMemoryUserRepository,
   ExamService,
   ExamController,
-  PrismaExamRepository,
   InMemoryExamRepository,
+  InMemoryOtpRepository,
 } from "./features";
-import { env } from "./config";
 
 // Repositories - swap between Prisma and InMemory based on environment
-const userRepository = env.isTest ? new InMemoryUserRepository() : new PrismaUserRepository(prisma);
-
-const examRepository = env.isTest ? new InMemoryExamRepository() : new PrismaExamRepository(prisma);
+// For now, defaulting to InMemory to avoid DB connection issues as requested
+const userRepository = new InMemoryUserRepository();
+const otpRepository = new InMemoryOtpRepository();
+const examRepository = new InMemoryExamRepository();
 
 // Services
-const userService = new UserService(userRepository);
+const userService = new UserService(userRepository, otpRepository);
 const examService = new ExamService(examRepository, userRepository);
 
 // Controllers
@@ -30,6 +28,7 @@ export {
   // Export for testing
   userRepository,
   examRepository,
+  otpRepository,
   userService,
   examService,
 };

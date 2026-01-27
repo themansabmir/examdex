@@ -1,4 +1,8 @@
 import { PrismaClient } from "@prisma/client";
+import dotenv from "dotenv";
+import { logger } from "../utils/logger";
+
+dotenv.config();
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -17,14 +21,12 @@ if (process.env.NODE_ENV !== "production") {
 export async function connectDatabase(): Promise<void> {
   try {
     await prisma.$connect();
-    console.log("✅ Database connected successfully");
   } catch (error) {
-    console.error("❌ Database connection failed:", error);
+    logger.error("❌ Database connection failed:", error as Error);
     process.exit(1);
   }
 }
 
 export async function disconnectDatabase(): Promise<void> {
   await prisma.$disconnect();
-  console.log("🔌 Database disconnected");
 }

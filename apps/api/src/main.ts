@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import { env, validateEnv } from "./config";
-import { connectDatabase, disconnectDatabase } from "./lib";
+import { disconnectDatabase } from "./lib";
 import { router } from "./routes";
 import { errorHandler, notFoundHandler, requestLogger } from "./middleware";
 import { logger } from "./utils";
@@ -57,7 +57,9 @@ process.on("uncaughtException", (error: Error) => {
 // Start server
 async function bootstrap(): Promise<void> {
   try {
-    await connectDatabase();
+    // if (!env.isTest) {
+    //   await connectDatabase();
+    // }
 
     app.listen(env.PORT, () => {
       logger.info(`🚀 Server running on http://localhost:${env.PORT}`);

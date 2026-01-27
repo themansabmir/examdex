@@ -1,0 +1,5 @@
+﻿
+> api@0.0.0 typecheck
+> tsc --noEmit
+
+src/features/user/user.service.ts(5,20): error TS2307: Cannot find module 'twilio' or its corresponding type declarations.

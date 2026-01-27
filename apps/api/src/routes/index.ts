@@ -1,7 +1,12 @@
 import { Router } from "express";
 import { userController, examController } from "../container";
 import { validateBody, validateParams } from "../middleware";
-import { createUserSchema, userIdParamSchema } from "../features/user/user.schema";
+import {
+  createUserSchema,
+  userIdParamSchema,
+  sendOtpSchema,
+  verifyOtpSchema,
+} from "../features/user/user.schema";
 import {
   createExamSchema,
   examIdParamSchema,
@@ -14,6 +19,14 @@ const router = Router();
 // User routes
 router.post("/users", validateBody(createUserSchema), (req, res, next) => {
   userController.create(req, res).catch(next);
+});
+
+router.post("/users/send-otp", validateBody(sendOtpSchema), (req, res, next) => {
+  userController.sendOtp(req, res).catch(next);
+});
+
+router.post("/users/verify-otp", validateBody(verifyOtpSchema), (req, res, next) => {
+  userController.verifyOtp(req, res).catch(next);
 });
 
 router.get("/users", (req, res, next) => {
