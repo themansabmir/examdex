@@ -5,17 +5,17 @@ import {
   ExamService,
   ExamController,
   InMemoryExamRepository,
-  InMemoryOtpRepository,
 } from "./features";
+import { OtpService } from "./otp/otp.service";
+import { prisma } from "./lib/prisma";
 
-// Repositories - swap between Prisma and InMemory based on environment
-// For now, defaulting to InMemory to avoid DB connection issues as requested
+// Repositories
 const userRepository = new InMemoryUserRepository();
-const otpRepository = new InMemoryOtpRepository();
 const examRepository = new InMemoryExamRepository();
 
 // Services
-const userService = new UserService(userRepository, otpRepository);
+const otpService = new OtpService(prisma);
+const userService = new UserService(userRepository, otpService);
 const examService = new ExamService(examRepository, userRepository);
 
 // Controllers
@@ -28,7 +28,7 @@ export {
   // Export for testing
   userRepository,
   examRepository,
-  otpRepository,
   userService,
   examService,
+  otpService,
 };
