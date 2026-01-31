@@ -1,18 +1,12 @@
 import { Router } from "express";
-import { userController, examController } from "../container";
-import { validateBody, validateParams } from "../middleware";
-import { createUserSchema, userIdParamSchema } from "../features/user/user.schema";
-import {
-  createExamSchema,
-  examIdParamSchema,
-  publishExamSchema,
-  userExamsParamSchema,
-} from "../features/exam/exam.schema";
+import { userController } from "../container";
+import examRoutes from "../features/admin/routes/exam.routes";
+import subjectRoutes from "../features/admin/routes/subject.routes";
 
 const router = Router();
 
 // User routes
-router.post("/users", validateBody(createUserSchema), (req, res, next) => {
+router.post("/users", (req, res, next) => {
   userController.create(req, res).catch(next);
 });
 
@@ -20,35 +14,13 @@ router.get("/users", (req, res, next) => {
   userController.getAll(req, res).catch(next);
 });
 
-router.get("/users/:id", validateParams(userIdParamSchema), (req, res, next) => {
+router.get("/users/:id", (req, res, next) => {
   userController.getById(req, res).catch(next);
 });
 
-// Exam routes
-router.post("/exams", validateBody(createExamSchema), (req, res, next) => {
-  examController.create(req, res).catch(next);
-});
-
-router.get("/exams", (req, res, next) => {
-  examController.getAll(req, res).catch(next);
-});
-
-router.get("/exams/:id", validateParams(examIdParamSchema), (req, res, next) => {
-  examController.getById(req, res).catch(next);
-});
-
-router.get("/users/:userId/exams", validateParams(userExamsParamSchema), (req, res, next) => {
-  examController.getByUserId(req, res).catch(next);
-});
-
-router.patch(
-  "/exams/:id/publish",
-  validateParams(examIdParamSchema),
-  validateBody(publishExamSchema),
-  (req, res, next) => {
-    examController.publish(req, res).catch(next);
-  }
-);
+// Feature routes
+router.use(examRoutes);
+router.use(subjectRoutes);
 
 // Health check
 router.get("/health", (_req, res) => {

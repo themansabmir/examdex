@@ -3,10 +3,8 @@ export interface CreateUserInputDTO {
   name?: string;
 }
 
-export interface CreateUserOutputDTO {
+export interface UserOutputDTO {
   id: string;
   email: string;
   name: string | null;
-  createdAt: Date;
-  updatedAt: Date;
 }

@@ -8,5 +8,5 @@
     "esModuleInterop": true,
     "allowImportingTsExtensions": false
   },
-  "include": ["src"]
+  "include": ["src", "routes/ExamApi.js"]
 }

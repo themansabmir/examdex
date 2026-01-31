@@ -1,5 +1,11 @@
 // User Feature
-export * from "./user";
+// export * from "./admin/user.routes.js";
 
 // Exam Feature
-export * from "./exam";
+export * from "./admin/exam";
+
+// Subject Feature
+export * from "./admin/subject";
+
+// User Feature
+export * from "./admin/user";
