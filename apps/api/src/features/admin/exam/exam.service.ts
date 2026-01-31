@@ -2,13 +2,8 @@ import { CreateExamInputDTO, ExamOutputDTO, UpdateExamInputDTO } from "./exam.dt
 import { Exam } from "./exam.entity";
 import { IExamRepository } from "./exam.repository";
 
-import { IUserRepository } from "../user/user.repository";
-
 export class ExamService {
-  constructor(
-    private readonly examRepository: IExamRepository,
-    private readonly userRepository: IUserRepository
-  ) {}
+  constructor(private readonly examRepository: IExamRepository) {}
 
   async createExam(input: CreateExamInputDTO): Promise<ExamOutputDTO> {
     const existing = await this.examRepository.findByCode(input.code);

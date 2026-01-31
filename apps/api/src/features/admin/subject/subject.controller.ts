@@ -15,6 +15,7 @@ export class SubjectController {
 
   async getAll(_: Request, res: Response) {
     const subjects = await this.subjectService.getAllSubjects();
+    //Searching , Pagination , Sorting
     res.json(subjects);
   }
 

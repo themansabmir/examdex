@@ -15,7 +15,7 @@ export class ExamController {
 
   async getAll(_: Request, res: Response) {
     const exams = await this.examService.getAllExams();
-    //Searching , Pagination , Sorting , linting issues , handleError (do not use any)
+    //Searching , Pagination , Sorting
     res.json(exams);
   }
 
@@ -33,7 +33,7 @@ export class ExamController {
       const exam = await this.examService.updateExam(req.params.id, req.body);
       res.json(exam);
     } catch (e: unknown) {
-      this.handleError(e as Error, res); // bad way
+      this.handleError(e as Error, res);
     }
   }
 
