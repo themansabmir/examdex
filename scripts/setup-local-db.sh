@@ -17,9 +17,12 @@ if ! command -v psql &> /dev/null; then
     exit 1
 fi
 
-# Create User
+# Create User with CREATEDB privilege (required for Prisma shadow database)
 echo "creating user..."
-psql -d postgres -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASS';" 2>/dev/null || echo "⚠️  User '$DB_USER' might already exist"
+psql -d postgres -c "CREATE USER $DB_USER WITH PASSWORD '$DB_PASS' CREATEDB;" 2>/dev/null || echo "⚠️  User '$DB_USER' might already exist"
+
+# Grant CREATEDB to existing user if it already exists
+psql -d postgres -c "ALTER USER $DB_USER CREATEDB;" 2>/dev/null
 
 # Create Database
 echo "creating database..."

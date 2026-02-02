@@ -33,7 +33,11 @@ pnpm install
 
 ## Database Setup
 
-This project is configured to use a **Containerized Database** for development infrastructure, while the Application runs locally.
+This project uses **Prisma ORM** with **PostgreSQL** for database management. You can run the database either with Docker or natively on your machine.
+
+---
+
+## Option 1: Using Docker (Recommended)
 
 ### 1. Start Infrastructure (Postgres + Redis)
 
@@ -51,27 +55,26 @@ Ensure your `apps/api/.env` file points to this local database container:
 DATABASE_URL="postgresql://examdex:examdex_dev_password@localhost:5432/examdex?schema=public"
 ```
 
-### 3. Initialize Database
+### 3. Run Migrations
 
 ```bash
-# Push schema changes to the running DB container
-pnpm --filter api db:push
+cd apps/api
+npx prisma migrate dev
 ```
 
+This will:
+
+- Create a shadow database for validation
+- Apply all pending migrations
+- Generate Prisma Client
+
 ---
 
-### ⚠️ IMPORTANT: Production & Data Persistence
+## Option 2: Native PostgreSQL (Without Docker)
 
-- **Development**: Data is stored in the Docker Volume `postgres_data`. If you delete the volume (`docker-compose down -v`), data is lost.
-- **Production**: Use a Managed Database (AWS RDS, Supabase, etc).
+If you prefer running PostgreSQL natively on your Mac:
 
----
-
-## Alternative: Run Without Docker
-
-If you find Docker heavy or hectic, you can run everything natively on your Mac.
-
-### 1. Install Prerequisites (Mac)
+### 1. Install Prerequisites
 
 ```bash
 # Install PostgreSQL and Redis via Homebrew
@@ -82,30 +85,187 @@ brew services start postgresql
 brew services start redis
 ```
 
-### 2. Configure Local Database
+### 2. Setup Database User & Permissions
 
-Run our setup script to create the expected user and database in your local Postgres:
+Run our setup script to create the database user with proper permissions:
 
 ```bash
-./scripts/setup-local-db.sh
+bash scripts/setup-local-db.sh
 ```
 
-### 3. Verify `.env` matches
+**What this script does:**
 
-Ensure your `apps/api/.env` uses `localhost` (this is the default):
+- Creates `examdex` user with password `examdex_dev_password`
+- Grants `CREATEDB` privilege (required for Prisma shadow database)
+- Creates `examdex` database
+- Grants all privileges to the user
 
-```bash
+### 3. Verify Environment Variables
+
+Ensure your `apps/api/.env` uses `localhost`:
+
+````bash
 DATABASE_URL="postgresql://examdex:examdex_dev_password@localhost:5432/examdex?schema=public"
-# If you don't use Redis yet, you can ignore it or set:
 REDIS_URL="redis://localhost:6379"
-```
+k```
 
-### 4. Start App
+### 4. Run Migrations
 
 ```bash
-pnpm --filter api db:push  # Sync schema
-pnpm dev                   # Start app
+cd apps/api
+npx prisma migrate dev
+````
+
+---
+
+## 🔄 For New Developers (After Pulling Latest Code)
+
+When you pull the latest code and there are new database migrations:
+
+### 1. Pull Latest Code
+
+```bash
+git pull origin main
 ```
+
+### 2. Install Dependencies
+
+```bash
+pnpm install
+```
+
+### 3. Apply New Migrations
+
+```bash
+cd apps/api
+npx prisma migrate dev
+```
+
+This command will:
+
+- Detect new migration files in `prisma/migrations/`
+- Apply them to your local database
+- Regenerate Prisma Client with updated types
+
+### 4. Verify Migration Status
+
+```bash
+npx prisma migrate status
+```
+
+---
+
+## 🛠️ Common Prisma Commands
+
+### Generate Prisma Client
+
+After schema changes, regenerate the client:
+
+```bash
+cd apps/api
+npx prisma generate
+```
+
+### View Database in Prisma Studio
+
+```bash
+cd apps/api
+npx prisma studio
+```
+
+Opens a GUI at `http://localhost:5555` to browse and edit data.
+
+### Reset Database (⚠️ Deletes All Data)
+
+```bash
+cd apps/api
+npx prisma migrate reset
+```
+
+This will:
+
+- Drop the database
+- Recreate it
+- Apply all migrations from scratch
+- Run seed scripts (if configured)
+
+### Create a New Migration
+
+After modifying `schema.prisma`:
+
+```bash
+cd apps/api
+npx prisma migrate dev --name your_migration_name
+```
+
+---
+
+## 🐛 Troubleshooting
+
+### Error: "Permission denied to create database"
+
+**Solution:** The database user needs `CREATEDB` privilege for Prisma's shadow database.
+
+```bash
+# Re-run the setup script to grant permissions
+bash scripts/setup-local-db.sh
+```
+
+Or manually grant the privilege:
+
+```bash
+psql -d postgres -c "ALTER USER examdex CREATEDB;"
+```
+
+### Error: "Database schema is not in sync"
+
+**Solution:** Reset and reapply migrations:
+
+```bash
+cd apps/api
+npx prisma migrate reset
+npx prisma migrate dev
+```
+
+### Error: "Shadow database already exists"
+
+**Solution:** Prisma couldn't clean up the shadow database. Drop it manually:
+
+```bash
+psql -d postgres -c "DROP DATABASE IF EXISTS examdex_shadow;"
+```
+
+Then retry the migration:
+
+```bash
+npx prisma migrate dev
+```
+
+---
+
+## 📊 Database Schema Overview
+
+The database includes 27 tables organized into:
+
+- **RBAC System**: `roles`, `permissions`, `role_permissions`
+- **Auth & Identity**: `users`, `otp_requests`, `admin_team_invites`
+- **Student Profiles**: `students`, `student_profiles`
+- **Exam & Curriculum**: `exams`, `subjects`, `topics`, `exam_subjects`
+- **Knowledge Base**: `knowledge_sources`, `knowledge_index_jobs`, `ai_models`, `prompt_templates`, `ai_usage_logs`
+- **Questions & Tests**: `questions`, `tests`, `test_questions`, `student_answers`
+- **Analytics & Economy**: `test_results`, `rankings`, `credit_wallets`, `credit_transactions`, `packages`, `purchases`, `audit_logs`
+
+View the complete schema: `apps/api/prisma/schema.prisma`
+
+---
+
+## ⚠️ IMPORTANT: Production & Data Persistence
+
+- **Development**:
+  - Docker: Data stored in `postgres_data` volume. Use `docker-compose down -v` to delete.
+  - Native: Data stored in PostgreSQL data directory.
+- **Production**: Use a managed database service (AWS RDS, Supabase, Neon, etc).
+- **Never run `prisma migrate reset` in production** - it will delete all data!
 
 ## Development
 

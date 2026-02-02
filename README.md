@@ -31,6 +31,7 @@ examdex/
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Framework:** React 18
 - **Build Tool:** Vite
 - **Styling:** TailwindCSS
@@ -39,6 +40,7 @@ examdex/
 - **Type Safety:** TypeScript
 
 ### Backend
+
 - **Runtime:** Node.js 18+
 - **Framework:** Express.js
 - **Language:** TypeScript
@@ -46,6 +48,7 @@ examdex/
 - **CORS:** Enabled
 
 ### DevOps
+
 - **Monorepo:** Turborepo
 - **Package Manager:** pnpm
 - **CI/CD:** GitHub Actions
@@ -80,6 +83,7 @@ pnpm dev
 ```
 
 The application will be available at:
+
 - Frontend: http://localhost:5173
 - Backend API: http://localhost:3001
 
@@ -176,10 +180,31 @@ See [DEPLOYMENT.md](DEPLOYMENT.md) for detailed deployment instructions.
 
 ## 📚 Documentation
 
-- [Setup Guide](SETUP.md) - Detailed setup instructions
+- [Setup Guide](docs/SETUP.md) - Detailed setup instructions
+- [Database Guide](DATABASE.md) - Database migrations & Prisma commands
 - [Deployment Guide](DEPLOYMENT.md) - Production deployment
 - [Contributing](CONTRIBUTING.md) - Contribution guidelines
 - [Code of Conduct](CODE_OF_CONDUCT.md) - Community standards
+
+## 🗄️ Database Quick Reference
+
+```bash
+# For new developers - apply all migrations
+cd apps/api
+npx prisma migrate dev
+
+# After pulling new code with migrations
+cd apps/api
+npx prisma migrate dev
+
+# View database in GUI
+npx prisma studio
+
+# Check migration status
+npx prisma migrate status
+```
+
+See [DATABASE.md](DATABASE.md) for complete migration guide.
 
 ## 🔐 Environment Variables
 
@@ -216,7 +241,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Team
 
-- **Your Name** - *Initial work* - [@yourusername](https://github.com/yourusername)
+- **Your Name** - _Initial work_ - [@yourusername](https://github.com/yourusername)
 
 ## 🙏 Acknowledgments
 
