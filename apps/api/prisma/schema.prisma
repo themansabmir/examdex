@@ -129,73 +129,110 @@ model Exam {
   examFullName String?  @map("exam_full_name") @db.Text
   examBoard    String?  @map("exam_board") @db.VarChar(100)
   isActive     Boolean  @default(true) @map("is_active")
+  isPopular    Boolean  @default(false) @map("is_popular")
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
   updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
 
   // Relations
-  subjects            Subject[]
+  examSubjects        ExamSubject[]
   userExamPreferences UserExamPreference[]
   generatedPapers     GeneratedPaper[]
-  aiPromptTemplates   AiPromptTemplate[]
   uploadedContent     UploadedContent[]
 
   @@index([examCode])
+  @@index([isPopular, isActive])
   @@map("exams")
 }
 
+// Base subject catalog (shared across exams)
 model Subject {
+  id          String  @id @default(uuid()) @db.Uuid
+  subjectCode String  @unique @map("subject_code") @db.VarChar(50)
+  subjectName String  @map("subject_name") @db.VarChar(255)
+  isActive    Boolean @default(true) @map("is_active")
+
+  // Relations
+  examSubjects    ExamSubject[]
+  chapters        Chapter[]
+  uploadedContent UploadedContent[]
+
+  @@index([subjectCode])
+  @@map("subjects")
+}
+
+// Many-to-many: Which subjects belong to which exams
+model ExamSubject {
   id           String  @id @default(uuid()) @db.Uuid
   examId       String  @map("exam_id") @db.Uuid
-  subjectCode  String  @map("subject_code") @db.VarChar(50)
-  subjectName  String  @map("subject_name") @db.VarChar(255)
+  subjectId    String  @map("subject_id") @db.Uuid
   displayOrder Int?    @map("display_order")
   isActive     Boolean @default(true) @map("is_active")
 
   // Relations
   exam              Exam               @relation(fields: [examId], references: [id], onDelete: Cascade)
-  chapters          Chapter[]
+  subject           Subject            @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  subjectChapters   SubjectChapter[]
   generatedPapers   GeneratedPaper[]
   aiPromptTemplates AiPromptTemplate[]
-  uploadedContent   UploadedContent[]
 
-  @@unique([examId, subjectCode])
-  @@index([examId, id])
-  @@map("subjects")
+  @@unique([examId, subjectId])
+  @@index([examId])
+  @@index([subjectId])
+  @@map("exam_subjects")
 }
 
+// Base chapter catalog (shared across subjects)
 model Chapter {
+  id          String  @id @default(uuid()) @db.Uuid
+  subjectId   String  @map("subject_id") @db.Uuid
+  chapterCode String  @map("chapter_code") @db.VarChar(50)
+  chapterName String  @map("chapter_name") @db.VarChar(500)
+  classId     String? @map("class_id") @db.Uuid
+  isActive    Boolean @default(true) @map("is_active")
+
+  // Relations
+  subject         Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  class           Class?            @relation(fields: [classId], references: [id])
+  subjectChapters SubjectChapter[]
+  uploadedContent UploadedContent[]
+
+  @@unique([subjectId, chapterCode])
+  @@index([subjectId])
+  @@index([classId])
+  @@map("chapters")
+}
+
+// Exam-specific chapter configuration (weightage varies by exam)
+model SubjectChapter {
   id                  String  @id @default(uuid()) @db.Uuid
-  subjectId           String  @map("subject_id") @db.Uuid
-  chapterCode         String  @map("chapter_code") @db.VarChar(50)
-  chapterName         String  @map("chapter_name") @db.VarChar(500)
+  examSubjectId       String  @map("exam_subject_id") @db.Uuid
+  chapterId           String  @map("chapter_id") @db.Uuid
   chapterNumber       Int?    @map("chapter_number")
   weightagePercentage Decimal @default(0.00) @map("weightage_percentage") @db.Decimal(5, 2)
   isActive            Boolean @default(true) @map("is_active")
 
   // Relations
-  subject         Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  topics          Topic[]
-  uploadedContent UploadedContent[]
+  examSubject ExamSubject @relation(fields: [examSubjectId], references: [id], onDelete: Cascade)
+  chapter     Chapter     @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
-  @@unique([subjectId, chapterCode])
-  @@index([subjectId, id])
-  @@map("chapters")
+  @@unique([examSubjectId, chapterId])
+  @@index([examSubjectId])
+  @@index([chapterId])
+  @@map("subject_chapters")
 }
 
-model Topic {
-  id              String  @id @default(uuid()) @db.Uuid
-  chapterId       String  @map("chapter_id") @db.Uuid
-  topicCode       String  @map("topic_code") @db.VarChar(50)
-  topicName       String  @map("topic_name") @db.VarChar(500)
-  difficultyLevel String? @map("difficulty_level") @db.VarChar(20)
-  isActive        Boolean @default(true) @map("is_active")
+// Optional: Educational class/grade level (e.g., Class 11, Class 12)
+model Class {
+  id        String  @id @default(uuid()) @db.Uuid
+  classCode String  @unique @map("class_code") @db.VarChar(20)
+  className String  @map("class_name") @db.VarChar(100)
+  isActive  Boolean @default(true) @map("is_active")
 
   // Relations
-  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapters        Chapter[]
+  uploadedContent UploadedContent[]
 
-  @@unique([chapterId, topicCode])
-  @@index([chapterId, id])
-  @@map("topics")
+  @@map("classes")
 }
 
 // ============================================
@@ -203,10 +240,10 @@ model Topic {
 // ============================================
 
 model GeneratedPaper {
-  id        String @id @default(uuid()) @db.Uuid
-  userId    String @map("user_id") @db.Uuid
-  examId    String @map("exam_id") @db.Uuid
-  subjectId String @map("subject_id") @db.Uuid
+  id            String @id @default(uuid()) @db.Uuid
+  userId        String @map("user_id") @db.Uuid
+  examId        String @map("exam_id") @db.Uuid
+  examSubjectId String @map("exam_subject_id") @db.Uuid
 
   paperTitle String? @map("paper_title") @db.VarChar(500)
 
@@ -237,12 +274,12 @@ model GeneratedPaper {
   // Relations
   user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
   exam             Exam              @relation(fields: [examId], references: [id])
-  subject          Subject           @relation(fields: [subjectId], references: [id])
+  examSubject      ExamSubject       @relation(fields: [examSubjectId], references: [id])
   aiPromptTemplate AiPromptTemplate? @relation(fields: [aiPromptTemplateId], references: [id])
   paperAttempts    PaperAttempt[]
 
   @@index([userId, createdAt(sort: Desc)])
-  @@index([examId, subjectId])
+  @@index([examId, examSubjectId])
   @@index([userId, isBookmarked])
   @@map("generated_papers")
 }
@@ -353,10 +390,9 @@ model AiPromptTemplate {
   id           String @id @default(uuid()) @db.Uuid
   templateName String @map("template_name") @db.VarChar(255)
 
-  // Scope: per subject
-  scopeLevel String  @map("scope_level") @db.VarChar(20)
-  examId     String? @map("exam_id") @db.Uuid
-  subjectId  String? @map("subject_id") @db.Uuid
+  // Scope: per exam-subject combination
+  scopeLevel    String  @map("scope_level") @db.VarChar(20)
+  examSubjectId String? @map("exam_subject_id") @db.Uuid
 
   systemPrompt       String @map("system_prompt") @db.Text
   generationRules    Json   @map("generation_rules") @db.JsonB
@@ -376,11 +412,10 @@ model AiPromptTemplate {
 
   // Relations
   createdBy       User             @relation(fields: [createdById], references: [id])
-  exam            Exam?            @relation(fields: [examId], references: [id])
-  subject         Subject?         @relation(fields: [subjectId], references: [id])
+  examSubject     ExamSubject?     @relation(fields: [examSubjectId], references: [id])
   generatedPapers GeneratedPaper[]
 
-  @@index([scopeLevel, examId, subjectId])
+  @@index([scopeLevel, examSubjectId])
   @@index([isActive, scopeLevel])
   @@map("ai_prompt_templates")
 }
@@ -408,6 +443,7 @@ model UploadedContent {
   examId    String? @map("exam_id") @db.Uuid
   subjectId String? @map("subject_id") @db.Uuid
   chapterId String? @map("chapter_id") @db.Uuid
+  classId   String? @map("class_id") @db.Uuid
 
   fileName      String  @map("file_name") @db.VarChar(500)
   fileType      String? @map("file_type") @db.VarChar(50)
@@ -428,10 +464,12 @@ model UploadedContent {
   exam       Exam?    @relation(fields: [examId], references: [id])
   subject    Subject? @relation(fields: [subjectId], references: [id])
   chapter    Chapter? @relation(fields: [chapterId], references: [id])
+  class      Class?   @relation(fields: [classId], references: [id])
   uploadedBy User     @relation(fields: [uploadedById], references: [id])
 
   @@index([vectorizationStatus])
   @@index([chapterId])
+  @@index([classId])
   @@map("uploaded_content")
 }
 
