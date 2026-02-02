@@ -3,7 +3,7 @@ import type { UserService } from "./user.service";
 import { NotFoundError, HttpStatus } from "../../utils";
 
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: UserService) { }
 
   async create(req: Request, res: Response): Promise<void> {
     const { mobileNumber, name } = req.body;
@@ -15,25 +15,7 @@ export class UserController {
     });
   }
 
-  async sendOtp(req: Request, res: Response): Promise<void> {
-    const { mobileNumber } = req.body;
-    const result = await this.userService.sendOtp(mobileNumber);
 
-    res.json({
-      success: true,
-      data: result,
-    });
-  }
-
-  async verifyOtp(req: Request, res: Response): Promise<void> {
-    const { mobileNumber, code } = req.body;
-    const result = await this.userService.verifyOtp(mobileNumber, code);
-
-    res.json({
-      success: true,
-      data: result,
-    });
-  }
 
   async getById(req: Request, res: Response): Promise<void> {
     const { id } = req.params;

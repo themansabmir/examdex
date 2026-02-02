@@ -2,61 +2,13 @@ import type { IUserRepository } from "./user.repository";
 import { User } from "./user.entity";
 import type { CreateUserInputDTO, CreateUserOutputDTO } from "./user.dto";
 import { ConflictError } from "../../utils";
-import jwt from "jsonwebtoken";
-import { env } from "../../config";
-import { OtpService } from "../../otp/otp.service";
 
 export class UserService {
   constructor(
-    private readonly userRepository: IUserRepository,
-    private readonly otpService: OtpService
-  ) {}
+    private readonly userRepository: IUserRepository
+  ) { }
 
-  async sendOtp(mobileNumber: string) {
-    // Check if user exists, if not create one (auto-signup)
-    let user = await this.userRepository.findByMobileNumber(mobileNumber);
 
-    if (!user) {
-      user = new User({
-        mobileNumber,
-        role: "student",
-      });
-      await this.userRepository.save(user);
-    }
-
-    // Delegate OTP sending to OtpService
-    return await this.otpService.sendOtp(mobileNumber);
-  }
-
-  async verifyOtp(mobileNumber: string, code: string) {
-    const isValid = await this.otpService.verifyOtp(mobileNumber, code);
-
-    if (!isValid) {
-      throw new Error("Invalid or expired OTP");
-    }
-
-    const user = await this.userRepository.findByMobileNumber(mobileNumber);
-    if (!user) {
-      throw new Error("User not found");
-    }
-
-    const token = jwt.sign(
-      { id: user.id, mobileNumber: user.mobileNumber!, role: user.role },
-      env.JWT_SECRET,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { expiresIn: env.JWT_EXPIRES_IN as any }
-    );
-
-    return {
-      token,
-      user: {
-        id: user.id,
-        mobileNumber: user.mobileNumber,
-        name: user.name,
-        role: user.role,
-      },
-    };
-  }
 
   async createUser(input: CreateUserInputDTO): Promise<CreateUserOutputDTO> {
     if (input.mobileNumber) {
