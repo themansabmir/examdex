@@ -1,55 +1,118 @@
-import type { IUserRepository } from "./user.repository";
+import { IUserRepository } from "./user.repository";
+import { CreateUserInputDTO, UpdateUserInputDTO, UserOutputDTO } from "./user.dto";
+import { ConflictError, NotFoundError } from "../../utils/app-error";
 import { User } from "./user.entity";
-import type { CreateUserInputDTO, CreateUserOutputDTO } from "./user.dto";
-import { ConflictError } from "../../utils";
 
-export class UserService {
+export interface IUserService {
+  createUser(input: CreateUserInputDTO): Promise<UserOutputDTO>;
+  getUserById(id: string): Promise<UserOutputDTO>;
+  getAllUsers(options?: { userType?: string; onlyActive?: boolean }): Promise<UserOutputDTO[]>;
+  updateUser(id: string, input: UpdateUserInputDTO): Promise<UserOutputDTO>;
+  deleteUser(id: string): Promise<void>;
+}
+
+export class UserService implements IUserService {
   constructor(private readonly userRepository: IUserRepository) {}
 
-  async createUser(input: CreateUserInputDTO): Promise<CreateUserOutputDTO> {
-    const existingUser = await this.userRepository.findByEmail(input.email);
-    if (existingUser) {
-      throw new ConflictError("User with this email already exists", "USER_EXISTS");
+  async createUser(input: CreateUserInputDTO): Promise<UserOutputDTO> {
+    if (!input.email && !input.phone) {
+      throw new ConflictError("At least one contact method (email or phone) is required");
     }
 
-    const user = new User({
-      email: input.email,
-      name: input.name,
+    if (input.email) {
+      const existingUser = await this.userRepository.findByEmail(input.email);
+      if (existingUser) {
+        throw new ConflictError("User with this email already exists");
+      }
+    }
+
+    if (input.phone) {
+      const existingUser = await this.userRepository.findByPhone(input.phone);
+      if (existingUser) {
+        throw new ConflictError("User with this phone number already exists");
+      }
+    }
+
+    const user = await this.userRepository.save({
+      email: input.email || null,
+      phoneNumber: input.phone || null,
+      fullName: input.fullName,
+      password: input.password,
+      userType: input.userType,
+      isActive: input.isActive ?? true,
     });
 
-    const savedUser = await this.userRepository.save(user);
-
-    return {
-      id: savedUser.id,
-      email: savedUser.email,
-      name: savedUser.name,
-      createdAt: savedUser.createdAt,
-      updatedAt: savedUser.updatedAt,
-    };
+    return this.toOutputDTO(user);
   }
 
-  async getUserById(id: string): Promise<CreateUserOutputDTO | null> {
+  async getUserById(id: string): Promise<UserOutputDTO> {
     const user = await this.userRepository.findById(id);
-    if (!user) return null;
 
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    return this.toOutputDTO(user);
+  }
+
+  async getAllUsers(options?: {
+    userType?: string;
+    onlyActive?: boolean;
+  }): Promise<UserOutputDTO[]> {
+    const users = await this.userRepository.findAll(options);
+    return users.map((user) => this.toOutputDTO(user));
+  }
+
+  async updateUser(id: string, input: UpdateUserInputDTO): Promise<UserOutputDTO> {
+    const existingUser = await this.userRepository.findById(id);
+
+    if (!existingUser) {
+      throw new NotFoundError("User not found");
+    }
+
+    if (input.email !== undefined && input.email !== existingUser.email) {
+      if (input.email !== null) {
+        const userWithEmail = await this.userRepository.findByEmail(input.email);
+        if (userWithEmail && userWithEmail.id !== id) {
+          throw new ConflictError("User with this email already exists");
+        }
+      }
+    }
+
+    if (input.phone !== undefined && input.phone !== existingUser.phoneNumber) {
+      if (input.phone !== null) {
+        const userWithPhone = await this.userRepository.findByPhone(input.phone);
+        if (userWithPhone && userWithPhone.id !== id) {
+          throw new ConflictError("User with this phone number already exists");
+        }
+      }
+    }
+
+    const user = await this.userRepository.update(id, input);
+    return this.toOutputDTO(user);
+  }
+
+  async deleteUser(id: string): Promise<void> {
+    const user = await this.userRepository.findById(id);
+
+    if (!user) {
+      throw new NotFoundError("User not found");
+    }
+
+    await this.userRepository.delete(id);
+  }
+
+  private toOutputDTO(user: User): UserOutputDTO {
     return {
       id: user.id,
       email: user.email,
-      name: user.name,
+      phone: user.phoneNumber,
+      fullName: user.fullName,
+      userType: user.userType,
+      roles: [],
+      isActive: user.isActive,
+      lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
     };
-  }
-
-  async getAllUsers(): Promise<CreateUserOutputDTO[]> {
-    const users = await this.userRepository.findAll();
-
-    return users.map((user) => ({
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    }));
   }
 }

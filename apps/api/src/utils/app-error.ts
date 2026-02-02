@@ -10,6 +10,7 @@ export enum HttpStatus {
   TOO_MANY_REQUESTS = 429,
   INTERNAL_SERVER_ERROR = 500,
   SERVICE_UNAVAILABLE = 503,
+  NO_CONTENT = 204,
 }
 
 export abstract class AppError extends Error {

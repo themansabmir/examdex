@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 import { env, validateEnv } from "./config";
 import { connectDatabase, disconnectDatabase } from "./lib";
 import { router } from "./routes";
@@ -14,11 +15,14 @@ const app = express();
 
 // Security middleware
 app.use(helmet());
-app.use(cors({ origin: env.CORS_ORIGIN }));
+app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 
 // Body parsing
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
+
+// Cookie parsing
+app.use(cookieParser());
 
 // Request logging
 app.use(requestLogger);

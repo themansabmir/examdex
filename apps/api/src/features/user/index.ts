@@ -1,25 +1,8 @@
-import { User } from "./user.entity";
-import type { UserProps } from "./user.entity";
-
-// DTOs
-import type { CreateUserInputDTO, CreateUserOutputDTO } from "./user.dto";
-
-// Repository
-import type { IUserRepository } from "./user.repository";
-import { PrismaUserRepository, InMemoryUserRepository } from "./user.repository";
-
-// Service
-import { UserService } from "./user.service";
-
-// Controller
-import { UserController } from "./user.controller";
-
-// Schemas
+export { User } from "./user.entity";
+export type { IUserRepository } from "./user.repository";
+export { PrismaUserRepository } from "./user.repository";
+export type { IUserService } from "./user.service";
+export { UserService } from "./user.service";
+export { UserController } from "./user.controller";
+export * from "./user.dto";
 export * from "./user.schema";
-
-export { User, UserProps };
-export type { CreateUserInputDTO, CreateUserOutputDTO };
-export type { IUserRepository };
-export { PrismaUserRepository, InMemoryUserRepository };
-export { UserService };
-export { UserController };

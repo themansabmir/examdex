@@ -1,40 +1,60 @@
-import type { Request, Response } from "express";
-import type { UserService } from "./user.service";
-import { NotFoundError, HttpStatus } from "../../utils";
+import { Request, Response } from "express";
+import { IUserService } from "./user.service";
+import { CreateUserInputDTO, UpdateUserInputDTO } from "./user.dto";
+import { HttpStatus } from "../../utils/app-error";
 
 export class UserController {
-  constructor(private readonly userService: UserService) {}
+  constructor(private readonly userService: IUserService) {}
 
-  async create(req: Request, res: Response): Promise<void> {
-    const { email, name } = req.body;
-    const user = await this.userService.createUser({ email, name });
+  createUser = async (req: Request, res: Response): Promise<void> => {
+    const input: CreateUserInputDTO = req.body;
+    const result = await this.userService.createUser(input);
 
     res.status(HttpStatus.CREATED).json({
       success: true,
-      data: user,
+      data: result,
     });
-  }
+  };
 
-  async getById(req: Request, res: Response): Promise<void> {
+  getUserById = async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
-    const user = await this.userService.getUserById(id);
+    const result = await this.userService.getUserById(id);
 
-    if (!user) {
-      throw new NotFoundError("User not found", "USER_NOT_FOUND");
-    }
-
-    res.json({
+    res.status(HttpStatus.OK).json({
       success: true,
-      data: user,
+      data: result,
     });
-  }
+  };
 
-  async getAll(_req: Request, res: Response): Promise<void> {
-    const users = await this.userService.getAllUsers();
+  getAllUsers = async (req: Request, res: Response): Promise<void> => {
+    const { userType, onlyActive } = req.query;
 
-    res.json({
+    const result = await this.userService.getAllUsers({
+      userType: userType as string | undefined,
+      onlyActive: onlyActive === "true",
+    });
+
+    res.status(HttpStatus.OK).json({
       success: true,
-      data: users,
+      data: result,
     });
-  }
+  };
+
+  updateUser = async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    const input: UpdateUserInputDTO = req.body;
+    const result = await this.userService.updateUser(id, input);
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      data: result,
+    });
+  };
+
+  deleteUser = async (req: Request, res: Response): Promise<void> => {
+    const { id } = req.params;
+    await this.userService.deleteUser(id);
+
+    res.status(HttpStatus.NO_CONTENT).send();
+  };
 }

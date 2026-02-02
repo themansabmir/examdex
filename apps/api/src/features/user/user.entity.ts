@@ -1,23 +1,66 @@
 export interface UserProps {
-  id?: string;
-  email: string;
-  name?: string | null;
-  createdAt?: Date;
-  updatedAt?: Date;
+  id: string;
+  email: string | null;
+  phoneNumber: string | null;
+  fullName: string;
+  passwordHash: string | null;
+  userType: string;
+  creditBalance: number;
+  totalCreditsPurchased: number;
+  isActive: boolean;
+  deviceFingerprint: string | null;
+  lastLoginAt: Date | null;
+  createdAt: Date;
 }
 
 export class User {
-  public readonly id: string;
-  public readonly email: string;
-  public readonly name: string | null;
-  public readonly createdAt: Date;
-  public readonly updatedAt: Date;
+  constructor(private readonly props: UserProps) {}
 
-  constructor(props: UserProps) {
-    this.id = props.id ?? crypto.randomUUID();
-    this.email = props.email;
-    this.name = props.name ?? null;
-    this.createdAt = props.createdAt ?? new Date();
-    this.updatedAt = props.updatedAt ?? new Date();
+  get id(): string {
+    return this.props.id;
+  }
+
+  get email(): string | null {
+    return this.props.email;
+  }
+
+  get phoneNumber(): string | null {
+    return this.props.phoneNumber;
+  }
+
+  get fullName(): string {
+    return this.props.fullName;
+  }
+
+  get passwordHash(): string | null {
+    return this.props.passwordHash;
+  }
+
+  get userType(): string {
+    return this.props.userType;
+  }
+
+  get creditBalance(): number {
+    return this.props.creditBalance;
+  }
+
+  get totalCreditsPurchased(): number {
+    return this.props.totalCreditsPurchased;
+  }
+
+  get isActive(): boolean {
+    return this.props.isActive;
+  }
+
+  get deviceFingerprint(): string | null {
+    return this.props.deviceFingerprint;
+  }
+
+  get lastLoginAt(): Date | null {
+    return this.props.lastLoginAt;
+  }
+
+  get createdAt(): Date {
+    return this.props.createdAt;
   }
 }
