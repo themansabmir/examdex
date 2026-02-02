@@ -6,428 +6,541 @@ datasource db {
   provider = "postgresql"
 }
 
-// ==========================================
-// RBAC SYSTEM (Configurable via Dashboard)
-// ==========================================
+// ============================================
+// RBAC SYSTEM
+// ============================================
 
 model Role {
-  id          String   @id @default(uuid())
-  name        String
-  description String?
-  createdAt   DateTime @default(now()) @map("created_at")
+  id          String   @id @default(uuid()) @db.Uuid
+  roleName    String   @unique @map("role_name") @db.VarChar(50)
+  description String?  @db.Text
+  isActive    Boolean  @default(true) @map("is_active")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(6)
 
+  userRoles       UserRole[]
   rolePermissions RolePermission[]
-  users           User[]
 
   @@map("roles")
 }
 
 model Permission {
-  id          String  @id @default(uuid())
-  slug        String  @unique
-  description String?
+  id             String  @id @default(uuid()) @db.Uuid
+  permissionName String  @unique @map("permission_name") @db.VarChar(100)
+  resource       String  @db.VarChar(50)
+  action         String  @db.VarChar(50)
+  description    String? @db.Text
 
   rolePermissions RolePermission[]
 
+  @@unique([resource, action])
   @@map("permissions")
 }
 
 model RolePermission {
-  id           String @id @default(uuid())
-  roleId       String @map("role_id")
-  permissionId String @map("permission_id")
+  id           String @id @default(uuid()) @db.Uuid
+  roleId       String @map("role_id") @db.Uuid
+  permissionId String @map("permission_id") @db.Uuid
 
   role       Role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
   permission Permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
 
+  @@unique([roleId, permissionId])
   @@map("role_permissions")
 }
 
-// ==========================================
-// CORE AUTH & IDENTITY (PHASE 0)
-// ==========================================
+// ============================================
+// USER MANAGEMENT
+// ============================================
 
 model User {
-  id           String   @id @default(uuid())
-  email        String   @unique
-  phone        String?  @unique
-  passwordHash String?  @map("password_hash")
-  roleId       String   @map("role")
-  status       String
-  createdAt    DateTime @default(now()) @map("created_at")
-  updatedAt    DateTime @updatedAt @map("updated_at")
+  id           String   @id @default(uuid()) @db.Uuid
+  phoneNumber  String?  @unique @map("phone_number") @db.VarChar(15)
+  email        String?  @unique @db.VarChar(255)
+  passwordHash String?  @map("password_hash") @db.VarChar(255)
+  fullName     String   @map("full_name") @db.VarChar(255)
+  userType     UserType @default(student) @map("user_type")
 
-  role                Role                  @relation(fields: [roleId], references: [id])
-  otpRequests         OtpRequest[]
-  student             Student?
-  knowledgeSources    KnowledgeSource[]
-  aiUsageLogs         AiUsageLog[]
-  auditLogs           AuditLog[]
+  // Student-specific fields (nullable for non-students)
+  creditBalance         Int     @default(0) @map("credit_balance")
+  totalCreditsPurchased Int     @default(0) @map("total_credits_purchased")
+  deviceFingerprint     String? @map("device_fingerprint") @db.VarChar(255)
 
+  isActive    Boolean   @default(true) @map("is_active")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
+  lastLoginAt DateTime? @map("last_login_at") @db.Timestamp(6)
+
+  // Relations
+  userRoles           UserRole[]
+  examPreferences     UserExamPreference[]
+  generatedPapers     GeneratedPaper[]
+  paperAttempts       PaperAttempt[]
+  creditTransactions  CreditTransaction[]
+  uploadedContent     UploadedContent[]
+  aiPromptTemplates   AiPromptTemplate[]
+  systemConfigUpdates SystemConfig[]
+
+  @@index([phoneNumber])
+  @@index([email])
+  @@index([id, creditBalance])
   @@map("users")
 }
 
-model OtpRequest {
-  id         String    @id @default(uuid())
-  userId     String    @map("user_id")
-  otpCode    String    @map("otp_code")
-  channel    String
-  expiresAt  DateTime  @map("expires_at")
-  verifiedAt DateTime? @map("verified_at")
-  createdAt  DateTime  @default(now()) @map("created_at")
+model UserRole {
+  id        String   @id @default(uuid()) @db.Uuid
+  userId    String   @map("user_id") @db.Uuid
+  roleId    String   @map("role_id") @db.Uuid
+  grantedAt DateTime @default(now()) @map("granted_at") @db.Timestamp(6)
+  grantedBy String?  @map("granted_by") @db.Uuid
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role Role @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
-  @@map("otp_requests")
+  @@unique([userId, roleId])
+  @@index([userId])
+  @@map("user_roles")
 }
 
-model AdminTeamInvite {
-  id         String    @id @default(uuid())
-  email      String
-  role       String
-  token      String
-  expiresAt  DateTime  @map("expires_at")
-  acceptedAt DateTime? @map("accepted_at")
-  createdAt  DateTime  @default(now()) @map("created_at")
+model UserExamPreference {
+  id             String    @id @default(uuid()) @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  examId         String    @map("exam_id") @db.Uuid
+  isPrimary      Boolean   @default(false) @map("is_primary")
+  targetExamDate DateTime? @map("target_exam_date") @db.Date
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
 
-  @@map("admin_team_invites")
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam Exam @relation(fields: [examId], references: [id])
+
+  @@unique([userId, examId])
+  @@index([userId, examId])
+  @@map("user_exam_preferences")
 }
 
-// ==========================================
-// STUDENT PROFILES (PHASE 3)
-// ==========================================
-
-model Student {
-  id                   String   @id @default(uuid())
-  userId               String   @unique @map("user_id")
-  targetExamId         String   @map("target_exam_id")
-  onboardingCompleted  Boolean  @map("onboarding_completed")
-  createdAt            DateTime @default(now()) @map("created_at")
-
-  user            User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  targetExam      Exam              @relation(fields: [targetExamId], references: [id])
-  profile         StudentProfile?
-  tests           Test[]
-  studentAnswers  StudentAnswer[]
-  rankings        Ranking[]
-  creditWallet    CreditWallet?
-  purchases       Purchase[]
-
-  @@map("students")
-}
-
-model StudentProfile {
-  id        String   @id @default(uuid())
-  studentId String   @unique @map("student_id")
-  examYear  Int      @map("exam_year")
-  goalScore Int      @map("goal_score")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-
-  @@map("student_profiles")
-}
-
-// ==========================================
-// EXAM & CURRICULUM (PHASE 0)
-// ==========================================
+// ============================================
+// EXAM STRUCTURE
+// ============================================
 
 model Exam {
-  id        String   @id @default(uuid())
-  name      String
-  status    String
-  createdAt DateTime @default(now()) @map("created_at")
+  id           String   @id @default(uuid()) @db.Uuid
+  examCode     String   @unique @map("exam_code") @db.VarChar(50)
+  examName     String   @map("exam_name") @db.VarChar(255)
+  examFullName String?  @map("exam_full_name") @db.Text
+  examBoard    String?  @map("exam_board") @db.VarChar(100)
+  isActive     Boolean  @default(true) @map("is_active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt    DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
 
-  examSubjects ExamSubject[]
-  students     Student[]
-  tests        Test[]
-  rankings     Ranking[]
+  // Relations
+  subjects            Subject[]
+  userExamPreferences UserExamPreference[]
+  generatedPapers     GeneratedPaper[]
+  aiPromptTemplates   AiPromptTemplate[]
+  uploadedContent     UploadedContent[]
 
+  @@index([examCode])
   @@map("exams")
 }
 
 model Subject {
-  id        String   @id @default(uuid())
-  name      String
-  createdAt DateTime @default(now()) @map("created_at")
+  id           String  @id @default(uuid()) @db.Uuid
+  examId       String  @map("exam_id") @db.Uuid
+  subjectCode  String  @map("subject_code") @db.VarChar(50)
+  subjectName  String  @map("subject_name") @db.VarChar(255)
+  displayOrder Int?    @map("display_order")
+  isActive     Boolean @default(true) @map("is_active")
 
-  topics           Topic[]
-  examSubjects     ExamSubject[]
-  knowledgeSources KnowledgeSource[]
-  promptTemplates  PromptTemplate[]
-  questions        Question[]
-  rankings         Ranking[]
+  // Relations
+  exam              Exam               @relation(fields: [examId], references: [id], onDelete: Cascade)
+  chapters          Chapter[]
+  generatedPapers   GeneratedPaper[]
+  aiPromptTemplates AiPromptTemplate[]
+  uploadedContent   UploadedContent[]
 
+  @@unique([examId, subjectCode])
+  @@index([examId, id])
   @@map("subjects")
 }
 
+model Chapter {
+  id                  String  @id @default(uuid()) @db.Uuid
+  subjectId           String  @map("subject_id") @db.Uuid
+  chapterCode         String  @map("chapter_code") @db.VarChar(50)
+  chapterName         String  @map("chapter_name") @db.VarChar(500)
+  chapterNumber       Int?    @map("chapter_number")
+  weightagePercentage Decimal @default(0.00) @map("weightage_percentage") @db.Decimal(5, 2)
+  isActive            Boolean @default(true) @map("is_active")
+
+  // Relations
+  subject         Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  topics          Topic[]
+  uploadedContent UploadedContent[]
+
+  @@unique([subjectId, chapterCode])
+  @@index([subjectId, id])
+  @@map("chapters")
+}
+
 model Topic {
-  id        String   @id @default(uuid())
-  subjectId String   @map("subject_id")
-  name      String
-  createdAt DateTime @default(now()) @map("created_at")
+  id              String  @id @default(uuid()) @db.Uuid
+  chapterId       String  @map("chapter_id") @db.Uuid
+  topicCode       String  @map("topic_code") @db.VarChar(50)
+  topicName       String  @map("topic_name") @db.VarChar(500)
+  difficultyLevel String? @map("difficulty_level") @db.VarChar(20)
+  isActive        Boolean @default(true) @map("is_active")
 
-  subject   Subject    @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  questions Question[]
+  // Relations
+  chapter Chapter @relation(fields: [chapterId], references: [id], onDelete: Cascade)
 
+  @@unique([chapterId, topicCode])
+  @@index([chapterId, id])
   @@map("topics")
 }
 
-model ExamSubject {
-  id        String @id @default(uuid())
-  examId    String @map("exam_id")
-  subjectId String @map("subject_id")
+// ============================================
+// GENERATED PAPERS
+// ============================================
 
-  exam    Exam    @relation(fields: [examId], references: [id], onDelete: Cascade)
-  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+model GeneratedPaper {
+  id        String @id @default(uuid()) @db.Uuid
+  userId    String @map("user_id") @db.Uuid
+  examId    String @map("exam_id") @db.Uuid
+  subjectId String @map("subject_id") @db.Uuid
 
-  @@map("exam_subjects")
+  paperTitle String? @map("paper_title") @db.VarChar(500)
+
+  // Store ENTIRE AI-generated paper as JSON
+  questionsData Json @map("questions_data") @db.JsonB
+  // Format: [{ questionNumber, topicId, topicName, difficulty, questionType, questionText, options, correctAnswer, solution, marks, negativeMarks, estimatedTimeSeconds }]
+
+  // Generation metadata
+  selectedTopics         String[] @map("selected_topics") @db.Uuid
+  difficultyDistribution Json     @map("difficulty_distribution") @db.JsonB
+  totalQuestions         Int      @map("total_questions")
+  maxMarks               Int      @map("max_marks")
+  timeLimitMinutes       Int      @map("time_limit_minutes")
+
+  // AI generation tracking
+  aiPromptTemplateId  String? @map("ai_prompt_template_id") @db.Uuid
+  aiPromptVersion     String? @map("ai_prompt_version") @db.VarChar(20)
+  generationLatencyMs Int?    @map("generation_latency_ms")
+  generationStatus    String  @map("generation_status") @db.VarChar(20)
+
+  // Quality metrics
+  studentRating Int?    @map("student_rating")
+  isBookmarked  Boolean @default(false) @map("is_bookmarked")
+  attemptCount  Int     @default(0) @map("attempt_count")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  // Relations
+  user             User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  exam             Exam              @relation(fields: [examId], references: [id])
+  subject          Subject           @relation(fields: [subjectId], references: [id])
+  aiPromptTemplate AiPromptTemplate? @relation(fields: [aiPromptTemplateId], references: [id])
+  paperAttempts    PaperAttempt[]
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([examId, subjectId])
+  @@index([userId, isBookmarked])
+  @@map("generated_papers")
 }
 
-// ==========================================
-// KNOWLEDGE BASE & AI CONFIG (PHASE 1)
-// ==========================================
+// ============================================
+// PAPER ATTEMPTS (Simplified with JSON)
+// ============================================
 
-model KnowledgeSource {
-  id           String   @id @default(uuid())
-  subjectId    String   @map("subject_id")
-  title        String
-  description  String?
-  sourceType   String   @map("source_type")
-  s3Bucket     String   @map("s3_bucket")
-  s3Key        String   @map("s3_key")
-  fileChecksum String   @map("file_checksum")
-  version      Int
-  status       String
-  createdBy    String   @map("created_by")
-  createdAt    DateTime @default(now()) @map("created_at")
+model PaperAttempt {
+  id      String @id @default(uuid()) @db.Uuid
+  paperId String @map("paper_id") @db.Uuid
+  userId  String @map("user_id") @db.Uuid
 
-  subject            Subject               @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  creator            User                  @relation(fields: [createdBy], references: [id])
-  knowledgeIndexJobs KnowledgeIndexJob[]
+  attemptNumber Int @map("attempt_number")
 
-  @@map("knowledge_sources")
+  startedAt        DateTime  @default(now()) @map("started_at") @db.Timestamp(6)
+  submittedAt      DateTime? @map("submitted_at") @db.Timestamp(6)
+  timeTakenSeconds Int?      @map("time_taken_seconds")
+
+  // Store ALL student answers as JSON
+  answersData Json @map("answers_data") @db.JsonB
+  // Format: [{ questionNumber, studentAnswer, isCorrect, timeSpent, marksAwarded }]
+
+  // Calculated scores
+  totalScore       Decimal? @map("total_score") @db.Decimal(6, 2)
+  percentage       Decimal? @db.Decimal(5, 2)
+  correctAnswers   Int?     @map("correct_answers")
+  incorrectAnswers Int?     @map("incorrect_answers")
+  unattempted      Int?
+
+  // Rankings
+  allTimeRank Int? @map("all_time_rank")
+  cohortRank  Int? @map("cohort_rank")
+  weeklyRank  Int? @map("weekly_rank")
+
+  isCompleted Boolean @default(false) @map("is_completed")
+
+  // Relations
+  paper GeneratedPaper @relation(fields: [paperId], references: [id], onDelete: Cascade)
+  user  User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, submittedAt(sort: Desc)])
+  @@index([paperId, attemptNumber])
+  @@index([userId, isCompleted])
+  @@map("paper_attempts")
 }
 
-model KnowledgeIndexJob {
-  id                  String    @id @default(uuid())
-  knowledgeSourceId   String    @map("knowledge_source_id")
-  vectorDb            String    @map("vector_db")
-  embeddingModel      String    @map("embedding_model")
-  chunkSize           Int       @map("chunk_size")
-  overlap             Int
-  status              String
-  startedAt           DateTime? @map("started_at")
-  completedAt         DateTime? @map("completed_at")
-
-  knowledgeSource KnowledgeSource @relation(fields: [knowledgeSourceId], references: [id], onDelete: Cascade)
-
-  @@map("knowledge_index_jobs")
-}
-
-model AiModel {
-  id        String   @id @default(uuid())
-  provider  String
-  modelName String   @map("model_name")
-  maxTokens Int      @map("max_tokens")
-  createdAt DateTime @default(now()) @map("created_at")
-
-  aiUsageLogs AiUsageLog[]
-
-  @@map("ai_models")
-}
-
-model PromptTemplate {
-  id           String   @id @default(uuid())
-  subjectId    String   @map("subject_id")
-  difficulty   String
-  questionType String   @map("question_type")
-  template     String
-  version      Int
-  isActive     Boolean  @map("is_active")
-  createdAt    DateTime @default(now()) @map("created_at")
-
-  subject Subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-
-  @@map("prompt_templates")
-}
-
-model AiUsageLog {
-  id          String   @id @default(uuid())
-  userId      String   @map("user_id")
-  modelId     String   @map("model_id")
-  tokensUsed  Int      @map("tokens_used")
-  purpose     String
-  referenceId String   @map("reference_id")
-  createdAt   DateTime @default(now()) @map("created_at")
-
-  user  User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  model AiModel @relation(fields: [modelId], references: [id])
-
-  @@map("ai_usage_logs")
-}
-
-// ==========================================
-// QUESTIONS & TESTS (PHASE 1 & 3)
-// ==========================================
-
-model Question {
-  id             String   @id @default(uuid())
-  subjectId      String   @map("subject_id")
-  topicId        String   @map("topic_id")
-  difficulty     String
-  questionText   String   @map("question_text")
-  options        Json
-  correctAnswer  String   @map("correct_answer")
-  explanation    String?
-  source         String
-  createdAt      DateTime @default(now()) @map("created_at")
-
-  subject       Subject        @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  topic         Topic          @relation(fields: [topicId], references: [id], onDelete: Cascade)
-  testQuestions TestQuestion[]
-
-  @@map("questions")
-}
-
-model Test {
-  id         String   @id @default(uuid())
-  studentId  String   @map("student_id")
-  examId     String   @map("exam_id")
-  difficulty String
-  status     String
-  createdAt  DateTime @default(now()) @map("created_at")
-
-  student       Student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  exam          Exam           @relation(fields: [examId], references: [id])
-  testQuestions TestQuestion[]
-  testResult    TestResult?
-
-  @@map("tests")
-}
-
-model TestQuestion {
-  id         String @id @default(uuid())
-  testId     String @map("test_id")
-  questionId String @map("question_id")
-  sequence   Int
-
-  test           Test            @relation(fields: [testId], references: [id], onDelete: Cascade)
-  question       Question        @relation(fields: [questionId], references: [id])
-  studentAnswers StudentAnswer[]
-
-  @@map("test_questions")
-}
-
-model StudentAnswer {
-  id               String   @id @default(uuid())
-  testQuestionId   String   @map("test_question_id")
-  studentId        String   @map("student_id")
-  selectedAnswer   String   @map("selected_answer")
-  isCorrect        Boolean  @map("is_correct")
-  timeSpentSeconds Int      @map("time_spent_seconds")
-  createdAt        DateTime @default(now()) @map("created_at")
-
-  testQuestion TestQuestion @relation(fields: [testQuestionId], references: [id], onDelete: Cascade)
-  student      Student      @relation(fields: [studentId], references: [id], onDelete: Cascade)
-
-  @@map("student_answers")
-}
-
-// ==========================================
-// ANALYTICS & ECONOMY (PHASE 2 & 3)
-// ==========================================
-
-model TestResult {
-  id              String   @id @default(uuid())
-  testId          String   @unique @map("test_id")
-  totalQuestions  Int      @map("total_questions")
-  correctAnswers  Int      @map("correct_answers")
-  score           Int
-  percentile      Float
-  createdAt       DateTime @default(now()) @map("created_at")
-
-  test Test @relation(fields: [testId], references: [id], onDelete: Cascade)
-
-  @@map("test_results")
-}
-
-model Ranking {
-  id           String   @id @default(uuid())
-  examId       String   @map("exam_id")
-  subjectId    String   @map("subject_id")
-  studentId    String   @map("student_id")
-  rank         Int
-  score        Int
-  calculatedAt DateTime @map("calculated_at")
-
-  exam    Exam    @relation(fields: [examId], references: [id])
-  subject Subject @relation(fields: [subjectId], references: [id])
-  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-
-  @@map("rankings")
-}
-
-model CreditWallet {
-  id        String   @id @default(uuid())
-  studentId String   @unique @map("student_id")
-  balance   Int
-  updatedAt DateTime @updatedAt @map("updated_at")
-
-  student             Student              @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  creditTransactions  CreditTransaction[]
-
-  @@map("credit_wallets")
-}
+// ============================================
+// CREDITS & TRANSACTIONS
+// ============================================
 
 model CreditTransaction {
-  id        String   @id @default(uuid())
-  walletId  String   @map("wallet_id")
-  change    Int
-  reason    String
-  createdAt DateTime @default(now()) @map("created_at")
+  id     String @id @default(uuid()) @db.Uuid
+  userId String @map("user_id") @db.Uuid
 
-  wallet CreditWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  transactionType String @map("transaction_type") @db.VarChar(50)
+  creditsChange   Int    @map("credits_change")
+  balanceAfter    Int    @map("balance_after")
 
+  // Payment details
+  paymentGatewayId  String?  @map("payment_gateway_id") @db.VarChar(255)
+  paymentAmountInr  Decimal? @map("payment_amount_inr") @db.Decimal(10, 2)
+  paymentStatus     String?  @map("payment_status") @db.VarChar(50)
+  razorpayPaymentId String?  @map("razorpay_payment_id") @db.VarChar(255)
+
+  // Context
+  relatedPaperId String? @map("related_paper_id") @db.Uuid
+
+  notes     String?  @db.Text
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([paymentGatewayId])
+  @@index([relatedPaperId])
   @@map("credit_transactions")
 }
 
-model Package {
-  id       String  @id @default(uuid())
-  name     String
-  credits  Int
-  price    Decimal
-  currency String
-  isActive Boolean @map("is_active")
+// ============================================
+// PRICING CONFIGURATION
+// ============================================
 
-  purchases Purchase[]
+model PricingTier {
+  id       String @id @default(uuid()) @db.Uuid
+  tierName String @map("tier_name") @db.VarChar(50)
+  tierCode String @unique @map("tier_code") @db.VarChar(20)
 
-  @@map("packages")
+  priceInr     Decimal @map("price_inr") @db.Decimal(10, 2)
+  credits      Int
+  bonusCredits Int     @default(0) @map("bonus_credits")
+
+  displayOrder Int?    @map("display_order")
+  isActive     Boolean @default(true) @map("is_active")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+
+  @@map("pricing_tiers")
 }
 
-model Purchase {
-  id        String   @id @default(uuid())
-  studentId String   @map("student_id")
-  packageId String   @map("package_id")
-  amount    Decimal
-  status    String
-  createdAt DateTime @default(now()) @map("created_at")
+// ============================================
+// AI CONFIGURATION
+// ============================================
 
-  student Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  package Package @relation(fields: [packageId], references: [id])
+model AiPromptTemplate {
+  id           String @id @default(uuid()) @db.Uuid
+  templateName String @map("template_name") @db.VarChar(255)
 
-  @@map("purchases")
+  // Scope: per subject
+  scopeLevel String  @map("scope_level") @db.VarChar(20)
+  examId     String? @map("exam_id") @db.Uuid
+  subjectId  String? @map("subject_id") @db.Uuid
+
+  systemPrompt       String @map("system_prompt") @db.Text
+  generationRules    Json   @map("generation_rules") @db.JsonB
+  sampleOutputFormat Json?  @map("sample_output_format") @db.JsonB
+
+  // A/B testing
+  isActive Boolean @default(false) @map("is_active")
+  version  Int     @default(1)
+
+  // Performance metrics
+  avgGenerationTimeMs Int?     @map("avg_generation_time_ms")
+  avgStudentRating    Decimal? @map("avg_student_rating") @db.Decimal(3, 2)
+  successRate         Decimal? @map("success_rate") @db.Decimal(5, 2)
+
+  createdById String   @map("created_by") @db.Uuid
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  // Relations
+  createdBy       User             @relation(fields: [createdById], references: [id])
+  exam            Exam?            @relation(fields: [examId], references: [id])
+  subject         Subject?         @relation(fields: [subjectId], references: [id])
+  generatedPapers GeneratedPaper[]
+
+  @@index([scopeLevel, examId, subjectId])
+  @@index([isActive, scopeLevel])
+  @@map("ai_prompt_templates")
 }
 
-model AuditLog {
-  id          String   @id @default(uuid())
-  actorUserId String   @map("actor_user_id")
-  action      String
-  entity      String
-  entityId    String   @map("entity_id")
-  createdAt   DateTime @default(now()) @map("created_at")
+model SystemConfig {
+  id          String   @id @default(uuid()) @db.Uuid
+  configKey   String   @unique @map("config_key") @db.VarChar(255)
+  configValue Json     @map("config_value") @db.JsonB
+  description String?  @db.Text
+  updatedById String?  @map("updated_by") @db.Uuid
+  updatedAt   DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
 
-  actor User @relation(fields: [actorUserId], references: [id])
+  // Relations
+  updatedBy User? @relation(fields: [updatedById], references: [id])
 
-  @@map("audit_logs")
+  @@map("system_config")
+}
+
+// ============================================
+// CONTENT MANAGEMENT
+// ============================================
+
+model UploadedContent {
+  id        String  @id @default(uuid()) @db.Uuid
+  examId    String? @map("exam_id") @db.Uuid
+  subjectId String? @map("subject_id") @db.Uuid
+  chapterId String? @map("chapter_id") @db.Uuid
+
+  fileName      String  @map("file_name") @db.VarChar(500)
+  fileType      String? @map("file_type") @db.VarChar(50)
+  s3Bucket      String? @map("s3_bucket") @db.VarChar(255)
+  s3Key         String? @map("s3_key") @db.VarChar(500)
+  fileSizeBytes BigInt? @map("file_size_bytes")
+
+  // Vectorization status
+  vectorizationStatus      String    @map("vectorization_status") @db.VarChar(50)
+  vectorizationStartedAt   DateTime? @map("vectorization_started_at") @db.Timestamp(6)
+  vectorizationCompletedAt DateTime? @map("vectorization_completed_at") @db.Timestamp(6)
+  questionsExtracted       Int       @default(0) @map("questions_extracted")
+
+  uploadedById String   @map("uploaded_by") @db.Uuid
+  uploadedAt   DateTime @default(now()) @map("uploaded_at") @db.Timestamp(6)
+
+  // Relations
+  exam       Exam?    @relation(fields: [examId], references: [id])
+  subject    Subject? @relation(fields: [subjectId], references: [id])
+  chapter    Chapter? @relation(fields: [chapterId], references: [id])
+  uploadedBy User     @relation(fields: [uploadedById], references: [id])
+
+  @@index([vectorizationStatus])
+  @@index([chapterId])
+  @@map("uploaded_content")
+}
+
+// ============================================
+// ANALYTICS & METRICS
+// ============================================
+
+model DailyMetric {
+  id         String   @id @default(uuid()) @db.Uuid
+  metricDate DateTime @unique @map("metric_date") @db.Date
+
+  // User metrics
+  newSignups  Int @default(0) @map("new_signups")
+  activeUsers Int @default(0) @map("active_users")
+
+  // Paper metrics
+  papersGenerated         Int  @default(0) @map("papers_generated")
+  papersAttempted         Int  @default(0) @map("papers_attempted")
+  paperGenerationFailures Int  @default(0) @map("paper_generation_failures")
+  avgGenerationTimeMs     Int? @map("avg_generation_time_ms")
+
+  // Credit metrics
+  creditsPurchased Int     @default(0) @map("credits_purchased")
+  creditsConsumed  Int     @default(0) @map("credits_consumed")
+  totalRevenueInr  Decimal @default(0) @map("total_revenue_inr") @db.Decimal(12, 2)
+
+  // AI metrics
+  avgPaperRating       Decimal? @map("avg_paper_rating") @db.Decimal(3, 2)
+  questionErrorReports Int      @default(0) @map("question_error_reports")
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  @@index([metricDate(sort: Desc)])
+  @@map("daily_metrics")
+}
+
+// ============================================
+// ENUMS (for validation reference)
+// ============================================
+
+enum QuestionType {
+  MCQ_single
+  MCQ_multiple
+  Numerical
+  Assertion_Reason
+}
+
+enum Difficulty {
+  easy
+  medium
+  hard
+}
+
+enum StrengthRating {
+  weak
+  moderate
+  strong
+}
+
+enum TransactionType {
+  purchase
+  referral_earned
+  referral_bonus
+  admin_grant
+  paper_generation
+  refund
+}
+
+enum ErrorType {
+  incorrect_answer
+  unclear_question
+  wrong_solution
+  formatting_issue
+}
+
+enum ReportStatus {
+  pending
+  reviewed
+  fixed
+  rejected
+}
+
+enum GenerationStatus {
+  success
+  failed
+  partial
+}
+
+enum VectorizationStatus {
+  pending
+  processing
+  completed
+  failed
+}
+
+enum AdminRole {
+  super_admin
+  content_manager
+  support
+}
+
+enum ScopeLevel {
+  exam
+  subject
+  global
+}
+
+enum UserType {
+  student
+  admin
+  content_manager
+  support
 }
