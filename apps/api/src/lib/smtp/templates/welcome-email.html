@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+      body { 
+        font-family: Arial, sans-serif; 
+        line-height: 1.6; 
+        color: #333; 
+        margin: 0;
+        padding: 0;
+      }
+      .container { 
+        max-width: 600px; 
+        margin: 0 auto; 
+        padding: 20px; 
+      }
+      .header { 
+        background: #2563eb; 
+        color: white; 
+        padding: 20px; 
+        text-align: center; 
+        border-radius: 8px 8px 0 0; 
+      }
+      .content { 
+        background: #f9fafb; 
+        padding: 30px; 
+        border-radius: 0 0 8px 8px; 
+      }
+      .button { 
+        display: inline-block; 
+        padding: 12px 24px; 
+        background: #2563eb; 
+        color: white; 
+        text-decoration: none; 
+        border-radius: 6px; 
+        margin: 20px 0; 
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Welcome to ExamDex!</h1>
+      </div>
+      <div class="content">
+        <p>Hi {{USER_NAME}},</p>
+        <p>Welcome to ExamDex! We're excited to have you on board.</p>
+        <p>You can now start generating practice papers and tracking your performance.</p>
+        <a href="{{APP_URL}}" class="button">Get Started</a>
+        <p>If you have any questions, feel free to reach out to our support team.</p>
+        <p>Best regards,<br>The ExamDex Team</p>
+      </div>
+    </div>
+  </body>
+</html>
