@@ -1,7 +1,7 @@
 import { useMutation } from "@tanstack/react-query";
 import { authApi } from "../infrastructure/auth.api";
 import type { LoginInput } from "../domain/Login";
-import { toast } from "@repo/ui";
+import { toast } from "sonner";
 
 export function useLogin() {
   return useMutation({

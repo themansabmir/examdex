@@ -1,9 +1,9 @@
 "use client";
 
 import * as React from "react";
-import { cn } from "@repo/ui/lib/utils";
-import { ScrollArea } from "@repo/ui";
-import { Separator } from "@repo/ui";
+import { cn } from "@/shared/lib/utils";
+import { ScrollArea } from "@/shared/ui/scroll-area";
+import { Separator } from "@/shared/ui/separator";
 import {
   LayoutDashboard,
   BarChart3,
@@ -14,7 +14,7 @@ import {
   ChevronDown,
   BookOpen,
   GraduationCap,
-} from "@repo/ui";
+} from "lucide-react";
 
 interface SidebarProps extends React.HTMLAttributes<HTMLDivElement> {}
 

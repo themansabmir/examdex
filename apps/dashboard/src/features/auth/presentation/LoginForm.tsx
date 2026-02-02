@@ -1,19 +1,11 @@
 import { useState } from "react";
-import {
-  Button,
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  Input,
-  Label,
-  Eye,
-  EyeOff,
-  Lock,
-  Mail,
-  zodResolver,
-  useForm,
-} from "@repo/ui";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { Button } from "@/shared/ui/button";
+import { Card, CardHeader, CardTitle, CardContent } from "@/shared/ui/card";
+import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
+import { Eye, EyeOff, Lock, Mail } from "lucide-react";
 import { LoginSchema, type LoginInput } from "../domain/Login";
 import { useLogin } from "../application/useLogin";
 

@@ -16,9 +16,6 @@
   "dependencies": {
     "@prisma/adapter-pg": "^7.2.0",
     "@prisma/client": "^7.2.0",
-    "@repo/config": "workspace:^",
-    "@repo/infra": "workspace:^",
-    "@repo/shared": "workspace:*",
     "bcryptjs": "^3.0.3",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

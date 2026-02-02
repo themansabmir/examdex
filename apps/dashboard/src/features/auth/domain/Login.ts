@@ -1,4 +1,4 @@
-import { z } from "@repo/ui";
+import { z } from "zod";
 
 export const LoginSchema = z.object({
   email: z.string().email("Invalid email address"),

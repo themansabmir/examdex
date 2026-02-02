@@ -1,4 +1,5 @@
-import { Card, CardContent, CardHeader, CardTitle, Button } from "@repo/ui";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Button } from "@/shared/ui/button";
 import type { UseCategoryList } from "../domain/contracts";
 
 interface Props {

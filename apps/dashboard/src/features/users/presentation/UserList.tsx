@@ -1,12 +1,5 @@
-import {
-  Card,
-  CardHeader,
-  CardTitle,
-  CardContent,
-  Mail,
-  Building2,
-  User as UserIcon,
-} from "@repo/ui";
+import { Card, CardHeader, CardTitle, CardContent } from "@/shared/ui/card";
+import { Mail, Building2, User as UserIcon } from "lucide-react";
 import { useUsers } from "../application/useUsers";
 
 export function UserList() {

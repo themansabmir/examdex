@@ -4,9 +4,15 @@ import { UserList } from "./features/users/presentation/UserList";
 import { LoginForm } from "./features/auth/presentation/LoginForm";
 import { Sidebar } from "./components/Sidebar";
 import { MobileNav } from "./components/MobileNav";
-import { APP_CONFIG } from "@repo/config";
-import { Button, LogOut } from "@repo/ui";
+import { Button } from "@/shared/ui/button";
+import { LogOut } from "lucide-react";
 import "./index.css";
+
+const APP_CONFIG = {
+  EXAMS: {
+    MIN_PASSING_SCORE: 40,
+  },
+};
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { Toaster } from "@repo/ui";
+import { Toaster } from "@/shared/ui/sonner";
 import type { ReactNode } from "react";
 
 const queryClient = new QueryClient({
