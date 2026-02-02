@@ -12,9 +12,9 @@
        Change these values to switch themes
        ======================================== */
     
-    /* Primary - Electric Violet (Change this for different themes) */
-    --primary: 220.9 39.3% 11%;
-    --primary-foreground: 210 20% 98%;
+    /* Primary - Vibrant Orange */
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
     
     /* Neutral Base - Zinc (Professional, Clean) */
     --background: 0 0% 100%;
@@ -88,9 +88,9 @@
   }
 
   .dark {
-    /* Primary - Electric Violet (Same in dark mode) */
-    --primary: 210 20% 98%;
-    --primary-foreground: 220.9 39.3% 11%;
+    /* Primary - Vibrant Orange (Same in dark mode) */
+    --primary: 24 95% 53%;
+    --primary-foreground: 0 0% 100%;
     
     /* Neutral Base - Deep Zinc */
     --background: 224 71.4% 4.1%;
@@ -152,6 +152,7 @@
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
+
 }
 
 @layer base {
