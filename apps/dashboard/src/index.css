@@ -2,67 +2,419 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Import Inter Font for Premium Typography */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 224 71.4% 4.1%;
+    /* ========================================
+       PRIMARY THEME - Electric Violet
+       Change these values to switch themes
+       ======================================== */
+    
+    /* Primary - Electric Violet (Change this for different themes) */
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Neutral Base - Zinc (Professional, Clean) */
+    --background: 0 0% 98%;
+    --foreground: 240 10% 3.9%;
+    
+    /* Card & Surface */
     --card: 0 0% 100%;
-    --card-foreground: 224 71.4% 4.1%;
+    --card-foreground: 240 10% 3.9%;
+    
+    /* Popover */
     --popover: 0 0% 100%;
-    --popover-foreground: 224 71.4% 4.1%;
-    --primary: 220 70% 50%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 14.3% 95.9%;
-    --secondary-foreground: 220.9 39.3% 11%;
-    --muted: 220 14.3% 95.9%;
-    --muted-foreground: 220 8.9% 46.1%;
-    --accent: 220 14.3% 95.9%;
-    --accent-foreground: 220.9 39.3% 11%;
+    --popover-foreground: 240 10% 3.9%;
+    
+    /* Secondary */
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    
+    /* Muted Elements */
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    
+    /* Accent */
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    
+    /* Destructive */
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 224 71.4% 4.1%;
+    --destructive-foreground: 0 0% 98%;
+    
+    /* Success */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 98%;
+    
+    /* Warning */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 98%;
+    
+    /* Info */
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 98%;
+    
+    /* Borders & Inputs */
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    
+    /* Ring (Focus) */
+    --ring: 262.1 83.3% 57.8%;
+    
+    /* Radius */
     --radius: 0.75rem;
+    
+    /* Shadows */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
   }
 
   .dark {
-    --background: 224 71.4% 4.1%;
-    --foreground: 210 20% 98%;
-    --card: 224 71.4% 4.1%;
-    --card-foreground: 210 20% 98%;
-    --popover: 224 71.4% 4.1%;
-    --popover-foreground: 210 20% 98%;
-    --primary: 210 20% 98%;
-    --primary-foreground: 220.9 39.3% 11%;
-    --secondary: 215 27.9% 16.9%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 215 27.9% 16.9%;
-    --muted-foreground: 217.9 10.6% 64.9%;
-    --accent: 215 27.9% 16.9%;
-    --accent-foreground: 210 20% 98%;
+    /* Primary - Electric Violet (Same in dark mode) */
+    --primary: 262.1 83.3% 57.8%;
+    --primary-foreground: 0 0% 100%;
+    
+    /* Neutral Base - Deep Zinc */
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    
+    /* Card & Surface */
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    
+    /* Popover */
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    
+    /* Secondary */
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    
+    /* Muted Elements */
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    
+    /* Accent */
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    
+    /* Destructive */
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 215 27.9% 16.9%;
-    --input: 215 27.9% 16.9%;
-    --ring: 216 12.2% 83.9%;
+    --destructive-foreground: 0 0% 98%;
+    
+    /* Success */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 98%;
+    
+    /* Warning */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 98%;
+    
+    /* Info */
+    --info: 199 89% 48%;
+    --info-foreground: 0 0% 98%;
+    
+    /* Borders & Inputs */
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    
+    /* Ring (Focus) */
+    --ring: 262.1 83.3% 57.8%;
   }
 }
 
 @layer base {
   * {
-    border-color: hsl(var(--border));
+    @apply border-border;
   }
+  
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    font-feature-settings: 'cv11', 'ss01', 'rlig' 1, 'calt' 1;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
+  }
+  
+  h1 {
+    @apply text-4xl md:text-5xl;
+  }
+  
+  h2 {
+    @apply text-3xl md:text-4xl;
+  }
+  
+  h3 {
+    @apply text-2xl md:text-3xl;
+  }
+  
+  h4 {
+    @apply text-xl md:text-2xl;
+  }
+  
+  h5 {
+    @apply text-lg md:text-xl;
+  }
+  
+  h6 {
+    @apply text-base md:text-lg;
   }
 }
 
-.glass {
-  @apply bg-white/70 backdrop-blur-md border border-white/20;
+/* ========================================
+   UTILITY CLASSES - Theme-Aware
+   ======================================== */
+
+@layer components {
+  /* Glass Effect - Light Mode */
+  .glass {
+    @apply bg-white/70 backdrop-blur-md border border-white/20;
+  }
+  
+  /* Glass Effect - Dark Mode */
+  .dark .glass {
+    @apply bg-black/70 backdrop-blur-md border border-white/10;
+  }
+  
+  /* Glass Card - Enhanced */
+  .glass-card {
+    @apply bg-card/80 backdrop-blur-md border border-border/60 shadow-lg;
+  }
+  
+  /* Gradient Background - Primary */
+  .gradient-primary {
+    @apply bg-gradient-to-br from-primary/10 via-transparent to-primary/5;
+  }
+  
+  /* Gradient Background - Accent */
+  .gradient-accent {
+    @apply bg-gradient-to-br from-accent via-background to-muted;
+  }
+  
+  /* Hover Lift Effect */
+  .hover-lift {
+    @apply transition-all duration-300 hover:-translate-y-1 hover:shadow-xl;
+  }
+  
+  /* Focus Ring - Primary */
+  .focus-ring {
+    @apply focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 focus:ring-offset-background;
+  }
+  
+  /* Input Base Styles */
+  .input-base {
+    @apply h-12 bg-muted/50 border-border focus:ring-2 focus:ring-ring/20 transition-all;
+  }
+  
+  /* Button Base Styles */
+  .btn-base {
+    @apply h-12 px-6 font-semibold rounded-lg transition-all duration-200 active:scale-[0.98];
+  }
+  
+  /* Button Primary */
+  .btn-primary {
+    @apply btn-base bg-primary text-primary-foreground hover:bg-primary/90 shadow-lg;
+  }
+  
+  /* Button Secondary */
+  .btn-secondary {
+    @apply btn-base bg-secondary text-secondary-foreground hover:bg-secondary/80;
+  }
+  
+  /* Button Ghost */
+  .btn-ghost {
+    @apply btn-base bg-transparent hover:bg-accent hover:text-accent-foreground;
+  }
+  
+  /* Card Hover Effect */
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-xl hover:border-primary/20;
+  }
+  
+  /* Icon Container - Primary */
+  .icon-container-primary {
+    @apply h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary;
+  }
+  
+  /* Icon Container - Muted */
+  .icon-container-muted {
+    @apply h-10 w-10 rounded-full bg-muted flex items-center justify-center text-muted-foreground;
+  }
+  
+  /* Badge Base */
+  .badge-base {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium;
+  }
+  
+  /* Badge Primary */
+  .badge-primary {
+    @apply badge-base bg-primary/10 text-primary border border-primary/20;
+  }
+  
+  /* Badge Secondary */
+  .badge-secondary {
+    @apply badge-base bg-secondary text-secondary-foreground border border-border;
+  }
+  
+  /* Badge Success */
+  .badge-success {
+    @apply badge-base bg-success/10 text-success border border-success/20;
+  }
+  
+  /* Badge Warning */
+  .badge-warning {
+    @apply badge-base bg-warning/10 text-warning border border-warning/20;
+  }
+  
+  /* Badge Destructive */
+  .badge-destructive {
+    @apply badge-base bg-destructive/10 text-destructive border border-destructive/20;
+  }
+  
+  /* Gradient Text */
+  .gradient-text {
+    @apply bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent;
+  }
+  
+  /* Animated Gradient Background */
+  .animated-gradient {
+    @apply bg-gradient-to-r from-primary/20 via-primary/10 to-primary/20 bg-[length:200%_100%] animate-gradient;
+  }
+  
+  /* Radial Gradient Blur (for backgrounds) */
+  .radial-blur {
+    @apply absolute w-[40%] h-[40%] bg-primary/5 blur-[120px] rounded-full pointer-events-none;
+  }
+  
+  /* Loading Spinner */
+  .spinner {
+    @apply h-4 w-4 border-2 border-current border-t-transparent rounded-full animate-spin;
+  }
+  
+  /* Skeleton Loader */
+  .skeleton {
+    @apply animate-pulse bg-muted rounded;
+  }
 }
 
-.dark .glass {
-  @apply bg-black/70 backdrop-blur-md border border-white/10;
+/* ========================================
+   ANIMATIONS
+   ======================================== */
+
+@layer utilities {
+  @keyframes gradient {
+    0%, 100% {
+      background-position: 0% 50%;
+    }
+    50% {
+      background-position: 100% 50%;
+    }
+  }
+  
+  .animate-gradient {
+    animation: gradient 3s ease infinite;
+  }
+  
+  /* Fade In */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-out;
+  }
+  
+  /* Slide In From Right */
+  @keyframes slideInRight {
+    from {
+      opacity: 0;
+      transform: translateX(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+    }
+  }
+  
+  .animate-slide-in-right {
+    animation: slideInRight 0.3s ease-out;
+  }
 }
+
+/* ========================================
+   SCROLLBAR STYLING
+   ======================================== */
+
+@layer utilities {
+  /* Custom Scrollbar */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    @apply bg-border rounded-full;
+  }
+  
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    @apply bg-muted-foreground/50;
+  }
+}
+
+/* ========================================
+   THEME SWITCHING GUIDE
+   ======================================== */
+
+/*
+  TO CHANGE THEME COLORS:
+  
+  1. Update --primary in :root and .dark
+     Example for Deep Emerald:
+     --primary: 160 84% 39%;
+     
+  2. Update --primary in :root and .dark
+     Example for Modern Blue:
+     --primary: 221.2 83.2% 53.3%;
+     
+  3. All components will automatically adapt!
+  
+  AVAILABLE THEME PRESETS:
+  
+  Electric Violet (Current):
+  --primary: 262.1 83.3% 57.8%;
+  
+  Deep Emerald:
+  --primary: 160 84% 39%;
+  
+  Modern Blue:
+  --primary: 221.2 83.2% 53.3%;
+  
+  Sunset Orange:
+  --primary: 24 95% 53%;
+  
+  Rose Pink:
+  --primary: 346 77% 50%;
+  
+  Teal:
+  --primary: 173 80% 40%;
+*/
