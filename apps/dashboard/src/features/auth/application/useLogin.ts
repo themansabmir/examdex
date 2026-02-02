@@ -6,17 +6,24 @@ import { toast } from "@repo/ui";
 export function useLogin() {
   return useMutation({
     mutationFn: (credentials: LoginInput) => authApi.login(credentials),
-    onSuccess: (data) => {
-      // Store tokens
-      localStorage.setItem("accessToken", data.accessToken);
-      localStorage.setItem("refreshToken", data.refreshToken);
-      localStorage.setItem("user", JSON.stringify(data.user));
+    onSuccess: (response) => {
+      // Backend returns { success: true, data: { accessToken, user } }
+      const { accessToken, user } = response.data;
 
-      toast.success(`Welcome back, ${data.user.fullName}!`);
+      // Store token and user info
+      localStorage.setItem("accessToken", accessToken);
+      localStorage.setItem("user", JSON.stringify(user));
+
+      toast.success(`Welcome back, ${user.fullName}!`);
+
+      // Reload to trigger App re-render with new auth state
+      window.location.reload();
     },
     onError: (error: any) => {
       const message =
-        error.response?.data?.message || "Login failed. Please check your credentials.";
+        error.response?.data?.error?.message ||
+        error.response?.data?.message ||
+        "Login failed. Please check your credentials.";
       toast.error(message);
     },
   });

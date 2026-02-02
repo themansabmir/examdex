@@ -15,8 +15,12 @@ export interface AuthUser {
   roles: string[];
 }
 
-export interface AuthResponse {
+export interface AuthResponseData {
   accessToken: string;
-  refreshToken: string;
   user: AuthUser;
+}
+
+export interface AuthResponse {
+  success: boolean;
+  data: AuthResponseData;
 }

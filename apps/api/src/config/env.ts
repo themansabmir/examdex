@@ -8,7 +8,7 @@ export const env = {
   DATABASE_URL: process.env.DATABASE_URL || "",
 
   // CORS
-  CORS_ORIGIN: process.env.CORS_ORIGIN || "*",
+  CORS_ORIGIN: process.env.CORS_ORIGIN || "http://localhost:5173",
 
   // JWT
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || "your-access-secret-key",

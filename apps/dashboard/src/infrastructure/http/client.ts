@@ -6,6 +6,7 @@ export const httpClient = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Enable cookies for auth
 });
 
 // Response interceptor for error handling
