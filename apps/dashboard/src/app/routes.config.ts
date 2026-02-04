@@ -1,5 +1,4 @@
-// Centralized route configuration - single source of truth for all routes
-// This ensures no discrepancy between router URLs and href URLs
+import { BookOpen, Bot, GalleryVerticalEnd, Settings2, SquareTerminal } from "lucide-react";
 
 export const ROUTES = {
   // Auth
@@ -15,6 +14,7 @@ export const ROUTES = {
     ADMINS: "/users/admins",
     STUDENTS: "/users/students",
   },
+  MASTER: {},
 
   // Exams
   EXAMS: {
@@ -59,3 +59,87 @@ export const ROUTES = {
 export function isActiveRoute(currentPath: string, routePath: string): boolean {
   return currentPath === routePath || currentPath.startsWith(routePath + "/");
 }
+
+export const SidebarRoutes = {
+  user: {
+    name: "Examdex",
+    email: "m@example.com",
+    avatar: "/avatars/shadcn.jpg",
+  },
+  teams: [
+    {
+      name: "Examdex",
+      logo: GalleryVerticalEnd,
+      plan: "Enterprise",
+    },
+  ],
+  navMain: [
+    {
+      title: "Dashboard",
+      url: ROUTES.DASHBOARD,
+      icon: SquareTerminal,
+      isActive: true,
+    },
+    {
+      title: "Users",
+      url: ROUTES.USERS.LIST,
+      icon: Bot,
+    },
+    {
+      title: "Master Data",
+      url: ROUTES.EXAMS.LIST,
+      icon: BookOpen,
+      items: [
+        {
+          title: "All Exams",
+          url: ROUTES.EXAMS.LIST,
+        },
+        {
+          title: "Create Exam",
+          url: ROUTES.EXAMS.LIST + "/create",
+        },
+        {
+          title: "Exam Results",
+          url: ROUTES.EXAMS.LIST + "/results",
+        },
+      ],
+    },
+    {
+      title: "Students",
+      url: ROUTES.USERS.STUDENTS,
+      icon: Settings2,
+      items: [
+        {
+          title: "All Students",
+          url: ROUTES.USERS.STUDENTS,
+        },
+        {
+          title: "Add Student",
+          url: ROUTES.USERS.STUDENTS + "/add",
+        },
+        {
+          title: "Student Progress",
+          url: ROUTES.USERS.STUDENTS + "/progress",
+        },
+      ],
+    },
+  ],
+  projects: undefined,
+  // projects: [
+  //   {
+  //     name: "Analytics",
+  //     url: ROUTES.ANALYTICS.DASHBOARD,
+  //     icon: Frame,
+  //   },
+  //   {
+  //     name: "Reports",
+  //     url: ROUTES.REPORTS.LIST,
+  //     icon: PieChart,
+  //   },
+  //   {
+  //     name: "Settings",
+  //     url: ROUTES.SETTINGS.PREFERENCES,
+  //     icon: Map,
+  //   },
+  // ],
+};
