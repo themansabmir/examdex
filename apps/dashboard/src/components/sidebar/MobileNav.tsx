@@ -4,7 +4,7 @@ import * as React from "react";
 import { Menu } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "@/shared/ui/sheet";
-import { Sidebar } from "./Sidebar";
+import Sidebar from ".";
 
 export function MobileNav() {
   const [open, setOpen] = React.useState(false);
