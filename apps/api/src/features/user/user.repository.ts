@@ -7,6 +7,7 @@ export interface UpdateUserData {
   email?: string | null;
   phoneNumber?: string | null;
   isActive?: boolean;
+  isOnboarded?: boolean;
   lastLoginAt?: Date;
 }
 
@@ -25,6 +26,7 @@ export interface IUserRepository {
   findAll(options?: { userType?: string; onlyActive?: boolean }): Promise<User[]>;
   update(id: string, data: UpdateUserData): Promise<User>;
   delete(id: string): Promise<void>;
+  upsertExamPreference(userId: string, examId: string): Promise<void>;
 }
 
 export class PrismaUserRepository implements IUserRepository {
@@ -61,6 +63,7 @@ export class PrismaUserRepository implements IUserRepository {
       creditBalance: user.creditBalance,
       totalCreditsPurchased: user.totalCreditsPurchased,
       isActive: user.isActive,
+      isOnboarded: user.isOnboarded,
       deviceFingerprint: user.deviceFingerprint,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
@@ -86,6 +89,7 @@ export class PrismaUserRepository implements IUserRepository {
       creditBalance: user.creditBalance,
       totalCreditsPurchased: user.totalCreditsPurchased,
       isActive: user.isActive,
+      isOnboarded: user.isOnboarded,
       deviceFingerprint: user.deviceFingerprint,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
@@ -111,6 +115,7 @@ export class PrismaUserRepository implements IUserRepository {
       creditBalance: user.creditBalance,
       totalCreditsPurchased: user.totalCreditsPurchased,
       isActive: user.isActive,
+      isOnboarded: user.isOnboarded,
       deviceFingerprint: user.deviceFingerprint,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
@@ -136,6 +141,7 @@ export class PrismaUserRepository implements IUserRepository {
       creditBalance: user.creditBalance,
       totalCreditsPurchased: user.totalCreditsPurchased,
       isActive: user.isActive,
+      isOnboarded: user.isOnboarded,
       deviceFingerprint: user.deviceFingerprint,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
@@ -163,6 +169,7 @@ export class PrismaUserRepository implements IUserRepository {
           creditBalance: user.creditBalance,
           totalCreditsPurchased: user.totalCreditsPurchased,
           isActive: user.isActive,
+          isOnboarded: user.isOnboarded,
           deviceFingerprint: user.deviceFingerprint,
           lastLoginAt: user.lastLoginAt,
           createdAt: user.createdAt,
@@ -188,6 +195,9 @@ export class PrismaUserRepository implements IUserRepository {
     if (data.lastLoginAt !== undefined) {
       updateData.lastLoginAt = data.lastLoginAt;
     }
+    if (data.isOnboarded !== undefined) {
+      updateData.isOnboarded = data.isOnboarded;
+    }
 
     const user = await this.prisma.user.update({
       where: { id },
@@ -204,6 +214,7 @@ export class PrismaUserRepository implements IUserRepository {
       creditBalance: user.creditBalance,
       totalCreditsPurchased: user.totalCreditsPurchased,
       isActive: user.isActive,
+      isOnboarded: user.isOnboarded,
       deviceFingerprint: user.deviceFingerprint,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
@@ -213,6 +224,58 @@ export class PrismaUserRepository implements IUserRepository {
   async delete(id: string): Promise<void> {
     await this.prisma.user.delete({
       where: { id },
+    });
+  }
+
+  async upsertExamPreference(userId: string, examId: string): Promise<void> {
+    // Check if the exam preference exists
+    const existingPreference = await this.prisma.userExamPreference.findUnique({
+      where: {
+        userId_examId: {
+          userId,
+          examId,
+        },
+      },
+    });
+
+    if (existingPreference) {
+      await this.prisma.userExamPreference.update({
+        where: {
+          id: existingPreference.id,
+        },
+        data: {
+          isPrimary: true,
+        },
+      });
+    } else {
+      // Create new preference
+      const examSubject = await this.prisma.examSubject.findFirst({
+        where: { examId },
+      });
+
+      if (!examSubject) {
+        throw new Error("Exam has no subjects configured");
+      }
+
+      await this.prisma.userExamPreference.create({
+        data: {
+          userId,
+          examId,
+          subjectId: examSubject.subjectId,
+          isPrimary: true,
+        },
+      });
+    }
+
+    // Unset other primary preferences for this user
+    await this.prisma.userExamPreference.updateMany({
+      where: {
+        userId,
+        examId: { not: examId },
+      },
+      data: {
+        isPrimary: false,
+      },
     });
   }
 }

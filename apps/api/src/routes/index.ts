@@ -8,7 +8,11 @@ import {
   devController,
 } from "../container";
 import { validateBody, validateParams } from "../middleware";
-import { createUserSchema, userIdParamSchema } from "../features/user/user.schema";
+import {
+  createUserSchema,
+  updateUserSchema,
+  userIdParamSchema,
+} from "../features/user/user.schema";
 import { createExamSchema, examIdParamSchema } from "../features/exam/exam.schema";
 import { adminLoginSchema, studentAuthSchema, verifyOtpSchema } from "../features/auth/auth.schema";
 import {
@@ -58,9 +62,19 @@ router.get("/users", (req, res, next) => {
   userController.getAllUsers(req, res).catch(next);
 });
 
+// ... existing code ...
 router.get("/users/:id", validateParams(userIdParamSchema), (req, res, next) => {
   userController.getUserById(req, res).catch(next);
 });
+
+router.patch(
+  "/users/:id",
+  validateParams(userIdParamSchema),
+  validateBody(updateUserSchema),
+  (req, res, next) => {
+    userController.updateUser(req, res).catch(next);
+  }
+);
 
 // ============================================
 // Exam routes
