@@ -8,6 +8,7 @@ export interface UserProps {
   creditBalance: number;
   totalCreditsPurchased: number;
   isActive: boolean;
+  isOnboarded: boolean;
   deviceFingerprint: string | null;
   lastLoginAt: Date | null;
   createdAt: Date;
@@ -50,6 +51,10 @@ export class User {
 
   get isActive(): boolean {
     return this.props.isActive;
+  }
+
+  get isOnboarded(): boolean {
+    return this.props.isOnboarded;
   }
 
   get deviceFingerprint(): string | null {

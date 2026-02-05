@@ -17,6 +17,8 @@ export const updateUserSchema = z.object({
   email: z.string().email().optional(),
   phone: z.string().min(10).optional(),
   isActive: z.boolean().optional(),
+  examId: z.string().uuid().optional(),
+  isOnboarded: z.boolean().optional(),
 });
 
 export const userIdParamSchema = z.object({

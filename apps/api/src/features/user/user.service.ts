@@ -88,6 +88,10 @@ export class UserService implements IUserService {
       }
     }
 
+    if (input.examId) {
+      await this.userRepository.upsertExamPreference(id, input.examId);
+    }
+
     const user = await this.userRepository.update(id, input);
     return this.toOutputDTO(user);
   }
@@ -111,6 +115,7 @@ export class UserService implements IUserService {
       userType: user.userType,
       roles: [],
       isActive: user.isActive,
+      isOnboarded: user.isOnboarded,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
     };

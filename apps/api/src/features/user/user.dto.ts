@@ -14,6 +14,8 @@ export interface UpdateUserInputDTO {
   phone?: string | null;
   isActive?: boolean;
   roles?: string[];
+  examId?: string;
+  isOnboarded?: boolean;
 }
 
 export interface UserOutputDTO {
@@ -24,6 +26,7 @@ export interface UserOutputDTO {
   userType: string;
   roles: string[];
   isActive: boolean;
+  isOnboarded: boolean;
   lastLoginAt: Date | null;
   createdAt: Date;
 }
