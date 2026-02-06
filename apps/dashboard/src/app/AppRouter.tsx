@@ -4,6 +4,7 @@ import { ProtectedRoute } from "./ProtectedRoute";
 import { DashboardLayout } from "./layout";
 import { LoginForm } from "@/features/auth/presentation/LoginForm";
 import { UserList } from "@/features/users/presentation/UserList";
+import { BulkUpload } from "@/shared/components/BulkUpload";
 
 // Page components (will create placeholders)
 function DashboardPage() {
@@ -71,7 +72,48 @@ function ExamsPage() {
         description: "View and manage all exams",
       }}
     >
-      <div className="p-8 text-center text-muted-foreground">Exams List Coming Soon</div>
+      <div className="container mx-auto py-6 space-y-6">
+        <BulkUpload moduleName="Exam" />
+        <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
+          Exams List Coming Soon
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
+
+function SubjectsPage() {
+  return (
+    <DashboardLayout
+      header={{
+        title: "Subjects",
+        description: "View and manage all subjects",
+      }}
+    >
+      <div className="container mx-auto py-6 space-y-6">
+        <BulkUpload moduleName="Subject" />
+        <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
+          Subjects List Coming Soon
+        </div>
+      </div>
+    </DashboardLayout>
+  );
+}
+
+function ChaptersPage() {
+  return (
+    <DashboardLayout
+      header={{
+        title: "Chapters",
+        description: "View and manage all chapters",
+      }}
+    >
+      <div className="container mx-auto py-6 space-y-6">
+        <BulkUpload moduleName="Chapter" />
+        <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
+          Chapters List Coming Soon
+        </div>
+      </div>
     </DashboardLayout>
   );
 }
@@ -242,6 +284,8 @@ const router = createBrowserRouter([
       { path: ROUTES.USERS.ADMINS, element: <AdminsPage /> },
       { path: ROUTES.USERS.STUDENTS, element: <StudentsPage /> },
       { path: ROUTES.EXAMS.LIST, element: <ExamsPage /> },
+      { path: ROUTES.MASTER.SUBJECTS, element: <SubjectsPage /> },
+      { path: ROUTES.MASTER.CHAPTERS, element: <ChaptersPage /> },
       { path: ROUTES.EXAMS.CREATE, element: <CreateExamPage /> },
       { path: ROUTES.EXAMS.RESULTS, element: <ExamResultsPage /> },
       { path: ROUTES.STUDENTS.LIST, element: <StudentsListPage /> },

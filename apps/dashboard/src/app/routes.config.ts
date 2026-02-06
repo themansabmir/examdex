@@ -14,7 +14,11 @@ export const ROUTES = {
     ADMINS: "/users/admins",
     STUDENTS: "/users/students",
   },
-  MASTER: {},
+  MASTER: {
+    ROOT: "/master",
+    SUBJECTS: "/master/subjects",
+    CHAPTERS: "/master/chapters",
+  },
 
   // Exams
   EXAMS: {
@@ -91,16 +95,16 @@ export const SidebarRoutes = {
       icon: BookOpen,
       items: [
         {
-          title: "All Exams",
+          title: "Exams",
           url: ROUTES.EXAMS.LIST,
         },
         {
-          title: "Create Exam",
-          url: ROUTES.EXAMS.LIST + "/create",
+          title: "Subjects",
+          url: ROUTES.MASTER.SUBJECTS,
         },
         {
-          title: "Exam Results",
-          url: ROUTES.EXAMS.LIST + "/results",
+          title: "Chapters",
+          url: ROUTES.MASTER.CHAPTERS,
         },
       ],
     },

@@ -56,6 +56,21 @@ export class SubjectService {
     await this.subjectRepository.delete(id);
   }
 
+  async bulkCreateSubjects(inputs: CreateSubjectInputDTO[]): Promise<{ count: number }> {
+    const subjects = inputs.map(
+      (input) =>
+        new Subject({
+          id: randomUUID(),
+          subjectCode: input.subjectCode,
+          subjectName: input.subjectName,
+          isActive: true,
+        })
+    );
+
+    await this.subjectRepository.saveMany(subjects);
+    return { count: subjects.length };
+  }
+
   private toOutputDTO(subject: Subject): SubjectOutputDTO {
     return {
       id: subject.id,
