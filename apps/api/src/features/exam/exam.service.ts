@@ -64,6 +64,26 @@ export class ExamService {
     await this.examRepository.delete(id);
   }
 
+  async bulkCreateExams(inputs: CreateExamInputDTO[]): Promise<{ count: number }> {
+    const exams = inputs.map(
+      (input) =>
+        new Exam({
+          id: randomUUID(),
+          examCode: input.examCode,
+          examName: input.examName,
+          examFullName: input.examFullName ?? null,
+          examBoard: input.examBoard ?? null,
+          isActive: true,
+          isPopular: input.isPopular ?? false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+    );
+
+    await this.examRepository.saveMany(exams);
+    return { count: exams.length };
+  }
+
   private toOutputDTO(exam: Exam): ExamOutputDTO {
     return {
       id: exam.id,

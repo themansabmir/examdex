@@ -5,6 +5,8 @@ import { examRoutes } from "./exam.route";
 import { subjectRoutes } from "./subject.route";
 import { chapterRoutes } from "./chapter.route";
 import { devRoutes } from "./dev.route";
+import { excelRoutes } from "./excel.route";
+import { protect } from "../middleware";
 
 const router = Router();
 
@@ -12,11 +14,14 @@ const router = Router();
 // Module Routes
 // ============================================
 router.use("/auth", authRoutes);
-router.use("/users", userRoutes);
-router.use("/exams", examRoutes);
-router.use("/subjects", subjectRoutes);
-router.use("/chapters", chapterRoutes);
-router.use("/dev", devRoutes);
+
+// Protected routes
+router.use("/users", protect, userRoutes);
+router.use("/exams", protect, examRoutes);
+router.use("/subjects", protect, subjectRoutes);
+router.use("/chapters", protect, chapterRoutes);
+router.use("/dev", protect, devRoutes);
+router.use("/excel", excelRoutes);
 
 // ============================================
 // Health check

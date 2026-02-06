@@ -8,6 +8,7 @@ export interface ISubjectRepository {
   findAll(options?: { onlyActive?: boolean }): Promise<Subject[]>;
   update(id: string, data: Partial<Subject>): Promise<Subject>;
   delete(id: string): Promise<void>;
+  saveMany(subjects: Subject[]): Promise<void>;
 }
 
 export class PrismaSubjectRepository implements ISubjectRepository {
@@ -100,6 +101,18 @@ export class PrismaSubjectRepository implements ISubjectRepository {
   async delete(id: string): Promise<void> {
     await this.prisma.subject.delete({
       where: { id },
+    });
+  }
+
+  async saveMany(subjects: Subject[]): Promise<void> {
+    await this.prisma.subject.createMany({
+      data: subjects.map((subject) => ({
+        id: subject.id,
+        subjectCode: subject.subjectCode,
+        subjectName: subject.subjectName,
+        isActive: subject.isActive,
+      })),
+      skipDuplicates: true,
     });
   }
 }

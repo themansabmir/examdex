@@ -68,6 +68,23 @@ export class ChapterService {
     await this.chapterRepository.delete(id);
   }
 
+  async bulkCreateChapters(inputs: CreateChapterInputDTO[]): Promise<{ count: number }> {
+    const chapters = inputs.map(
+      (input) =>
+        new Chapter({
+          id: randomUUID(),
+          subjectId: input.subjectId,
+          chapterCode: input.chapterCode,
+          chapterName: input.chapterName,
+          classId: input.classId ?? null,
+          isActive: true,
+        })
+    );
+
+    await this.chapterRepository.saveMany(chapters);
+    return { count: chapters.length };
+  }
+
   private toOutputDTO(chapter: Chapter): ChapterOutputDTO {
     return {
       id: chapter.id,
