@@ -1,4 +1,11 @@
-import { createBrowserRouter, Navigate, Outlet, RouterProvider, useNavigate, useParams } from "react-router-dom";
+import {
+  createBrowserRouter,
+  Navigate,
+  Outlet,
+  RouterProvider,
+  useNavigate,
+  useParams,
+} from "react-router-dom";
 import { ROUTES } from "./routes.config";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DashboardLayout } from "./layout";
@@ -91,9 +98,7 @@ function ExamsPage() {
     >
       <div className="container mx-auto py-6 space-y-6">
         <BulkUpload moduleName="Exam" />
-        <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-          Exams List Coming Soon
-        </div>
+        <ExamList />
       </div>
     </DashboardLayout>
   );
@@ -109,29 +114,29 @@ function SubjectsPage() {
     >
       <div className="container mx-auto py-6 space-y-6">
         <BulkUpload moduleName="Subject" />
-        <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-          Subjects List Coming Soon
-        </div>
+        <SubjectList />
       </div>
     </DashboardLayout>
   );
 }
 
 function ChaptersPage() {
+  const navigate = useNavigate();
   return (
     <DashboardLayout
       header={{
         title: "Chapters",
         description: "View and manage all chapters",
+        action: {
+          label: "Create Chapter",
+          onClick: () => navigate(ROUTES.MASTER.CHAPTERS.CREATE),
+        },
       }}
     >
       <div className="container mx-auto py-6 space-y-6">
         <BulkUpload moduleName="Chapter" />
-        <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-lg">
-          Chapters List Coming Soon
-        </div>
+        <ChapterList />
       </div>
-      <ExamList />
     </DashboardLayout>
   );
 }
@@ -165,24 +170,6 @@ function EditExamPage() {
   );
 }
 
-function SubjectsPage() {
-  const navigate = useNavigate();
-  return (
-    <DashboardLayout
-      header={{
-        title: "Subjects",
-        description: "View and manage all subjects",
-        action: {
-          label: "Create Subject",
-          onClick: () => navigate(ROUTES.MASTER.SUBJECTS.CREATE),
-        },
-      }}
-    >
-      <SubjectList />
-    </DashboardLayout>
-  );
-}
-
 function CreateSubjectPage() {
   return (
     <DashboardLayout
@@ -208,24 +195,6 @@ function EditSubjectPage() {
       }}
     >
       {isLoading ? <div>Loading...</div> : <SubjectForm initialData={subject} />}
-    </DashboardLayout>
-  );
-}
-
-function ChaptersPage() {
-  const navigate = useNavigate();
-  return (
-    <DashboardLayout
-      header={{
-        title: "Chapters",
-        description: "View and manage all chapters",
-        action: {
-          label: "Create Chapter",
-          onClick: () => navigate(ROUTES.MASTER.CHAPTERS.CREATE),
-        },
-      }}
-    >
-      <ChapterList />
     </DashboardLayout>
   );
 }
@@ -426,8 +395,6 @@ const router = createBrowserRouter([
       { path: ROUTES.MASTER.CHAPTERS.EDIT, element: <EditChapterPage /> },
 
       { path: ROUTES.EXAMS.LIST, element: <ExamsPage /> },
-      { path: ROUTES.MASTER.SUBJECTS, element: <SubjectsPage /> },
-      { path: ROUTES.MASTER.CHAPTERS, element: <ChaptersPage /> },
       { path: ROUTES.EXAMS.CREATE, element: <CreateExamPage /> },
       { path: ROUTES.EXAMS.RESULTS, element: <ExamResultsPage /> },
       { path: ROUTES.STUDENTS.LIST, element: <StudentsListPage /> },
