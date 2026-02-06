@@ -14,10 +14,25 @@ export const ROUTES = {
     ADMINS: "/users/admins",
     STUDENTS: "/users/students",
   },
+
+  // Master
   MASTER: {
     ROOT: "/master",
-    SUBJECTS: "/master/subjects",
-    CHAPTERS: "/master/chapters",
+    EXAMS: {
+      LIST: "/master/exams",
+      CREATE: "/master/exams/create",
+      EDIT: "/master/exams/edit/:id",
+    },
+    SUBJECTS: {
+      LIST: "/master/subjects",
+      CREATE: "/master/subjects/create",
+      EDIT: "/master/subjects/edit/:id",
+    },
+    CHAPTERS: {
+      LIST: "/master/chapters",
+      CREATE: "/master/chapters/create",
+      EDIT: "/master/chapters/edit/:id",
+    },
   },
 
   // Exams
@@ -90,21 +105,21 @@ export const SidebarRoutes = {
       icon: Bot,
     },
     {
-      title: "Master Data",
-      url: ROUTES.EXAMS.LIST,
+      title: "Master",
+      url: "#",
       icon: BookOpen,
       items: [
         {
           title: "Exams",
-          url: ROUTES.EXAMS.LIST,
+          url: ROUTES.MASTER.EXAMS.LIST,
         },
         {
           title: "Subjects",
-          url: ROUTES.MASTER.SUBJECTS,
+          url: ROUTES.MASTER.SUBJECTS.LIST,
         },
         {
           title: "Chapters",
-          url: ROUTES.MASTER.CHAPTERS,
+          url: ROUTES.MASTER.CHAPTERS.LIST,
         },
       ],
     },
