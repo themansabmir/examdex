@@ -118,23 +118,15 @@ export class ChapterService {
       );
     }
 
-    // 3. Validation: Check for duplicates within input
+    // Check for duplicates within input
     const uniqueKeys = new Set(chaptersToCreate.map(c => `${c.subjectId}:${c.chapterCode}`));
     if (uniqueKeys.size !== chaptersToCreate.length) {
       throw new ConflictError("Duplicate chapter codes for same subject in input", "DUPLICATE_INPUT_CHAPTERS");
     }
 
-    // 4. Validation: Check against DB
-    // Optimization: Instead of checking one by one, we could fetch all chapters for involved subjects
-    // For now, simpler to just let unique constraint throw or check carefully if performance is key.
-    // Given the previous requirement for "Reliability", let's check.
+    // Check against DB
     const involvedSubjectIds = new Set(chaptersToCreate.map(c => c.subjectId));
-    const allExistingChapters = await this.chapterRepository.findAll(); // This might be heavy if many chapters.
-    // Better: We rely on the repository to handle bulk insert or we check carefully.
-    // Since we don't have a `findBySubjectIds` method, let's use the error handling provided by DB or naive check if list is small.
-    // Let's rely on Unique Constraint for DB side, but since we want "All or Nothing" and clean error:
-
-    // Let's filter existing by the subjectIds we care about (in memory filtering of findAll result)
+    const allExistingChapters = await this.chapterRepository.findAll();
     const existingSet = new Set(
       allExistingChapters
         .filter(c => involvedSubjectIds.has(c.subjectId))
