@@ -3,6 +3,7 @@ import { ExamSubject } from "./exam-subject.entity";
 
 export interface IExamSubjectRepository {
   save(examSubject: ExamSubject): Promise<ExamSubject>;
+  saveMany(examSubjects: ExamSubject[]): Promise<void>;
   findById(id: string): Promise<ExamSubject | null>;
   findByExamAndSubject(examId: string, subjectId: string): Promise<ExamSubject | null>;
   findByExamId(examId: string, options?: { onlyActive?: boolean }): Promise<ExamSubject[]>;
@@ -13,7 +14,7 @@ export interface IExamSubjectRepository {
 }
 
 export class PrismaExamSubjectRepository implements IExamSubjectRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) { }
 
   async save(examSubject: ExamSubject): Promise<ExamSubject> {
     const saved = await this.prisma.examSubject.create({
@@ -34,6 +35,18 @@ export class PrismaExamSubjectRepository implements IExamSubjectRepository {
       isActive: saved.isActive,
       createdAt: new Date(),
       updatedAt: new Date(),
+    });
+  }
+
+  async saveMany(examSubjects: ExamSubject[]): Promise<void> {
+    await this.prisma.examSubject.createMany({
+      data: examSubjects.map((es) => ({
+        id: es.id,
+        examId: es.examId,
+        subjectId: es.subjectId,
+        displayOrder: es.displayOrder,
+        isActive: es.isActive,
+      })),
     });
   }
 

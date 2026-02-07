@@ -3,6 +3,7 @@ import { SubjectChapter } from "./subject-chapter.entity";
 
 export interface ISubjectChapterRepository {
   save(subjectChapter: SubjectChapter): Promise<SubjectChapter>;
+  saveMany(subjectChapters: SubjectChapter[]): Promise<void>;
   findById(id: string): Promise<SubjectChapter | null>;
   findByExamSubjectAndChapter(
     examSubjectId: string,
@@ -22,7 +23,7 @@ export interface ISubjectChapterRepository {
 }
 
 export class PrismaSubjectChapterRepository implements ISubjectChapterRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) { }
 
   async save(subjectChapter: SubjectChapter): Promise<SubjectChapter> {
     const saved = await this.prisma.subjectChapter.create({
@@ -45,6 +46,19 @@ export class PrismaSubjectChapterRepository implements ISubjectChapterRepository
       isActive: saved.isActive,
       createdAt: new Date(),
       updatedAt: new Date(),
+    });
+  }
+
+  async saveMany(subjectChapters: SubjectChapter[]): Promise<void> {
+    await this.prisma.subjectChapter.createMany({
+      data: subjectChapters.map((sc) => ({
+        id: sc.id,
+        examSubjectId: sc.examSubjectId,
+        chapterId: sc.chapterId,
+        chapterNumber: sc.chapterNumber,
+        weightagePercentage: sc.weightagePercentage,
+        isActive: sc.isActive,
+      })),
     });
   }
 
