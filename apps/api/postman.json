@@ -2,13 +2,12 @@
   "info": {
     "_postman_id": "038ddf31-8c44-4860-955c-6de0c3ec7812",
     "name": "ExamDex API",
-    "description": "# ExamDex API Documentation\n\nWelcome to the ExamDex API collection. This collection provides a comprehensive set of endpoints to manage the ExamDex platform.\n\n## Getting Started\n\n1.  **Environment**: Ensure you have the `baseUrl` variable set (default: `http://localhost:3001/api/v1`).\n2.  **Authentication**: Most endpoints require a Bearer Token. Log in as an Admin (`Auth > Admin Login`) to retrieve your `accessToken`.\n3.  **Authorization**: Include the token in the `Authorization` header as `Bearer <token>` for protected routes.\n\n## Modules\n\n-   **Auth**: Authentication for Admins and Students (OTP).\n-   **Users**: User management.\n-   **Classes**: Academic class management (e.g., Class 11, Class 12).\n-   **Exams**: Competitive exam management (e.g., JEE, NEET).\n-   **Subjects**: Subject catalog.\n-   **Chapters**: Chapter catalog linked to subjects.\n-   **Mappings**: Link Exams to Subjects and Subjects to Chapters with specific contexts.\n-   **Pricing**: Manage subscription tiers and credits.\n-   **Bulk Upload**: Excel-based bulk data ingestion.\n\n## Status Codes\n\n-   `200 OK`: Request successful.\n-   `201 Created`: Resource successfully created.\n-   `400 Bad Request`: Invalid input or validation failure.\n-   `401 Unauthorized`: Missing or invalid authentication token.\n-   `403 Forbidden`: Insufficient permissions.\n-   `404 Not Found`: Resource not found.\n-   `500 Internal Server Error`: Server-side issue.",
+    "description": "API Collection for ExamDex application including Auth, Users, Exams, Subjects, Chapters, Classes, Pricing, Mappings, and Excel modules.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "item": [
     {
       "name": "Auth",
-      "description": "Authentication endpoints for Admins and Students.",
       "item": [
         {
           "name": "Admin Login",
@@ -28,8 +27,7 @@
               "raw": "{{baseUrl}}/auth/admin/login",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "admin", "login"]
-            },
-            "description": "Authenticate as an Administrator to receive an access token."
+            }
           },
           "response": []
         },
@@ -51,8 +49,7 @@
               "raw": "{{baseUrl}}/auth/student",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "student"]
-            },
-            "description": "Initiate student login/signup by sending an OTP to the provided phone number or email."
+            }
           },
           "response": []
         },
@@ -74,8 +71,7 @@
               "raw": "{{baseUrl}}/auth/verify-otp",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "verify-otp"]
-            },
-            "description": "Verify the OTP sent to the student. Returns an access token upon success."
+            }
           },
           "response": []
         },
@@ -88,8 +84,7 @@
               "raw": "{{baseUrl}}/auth/refresh",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "refresh"]
-            },
-            "description": "Refresh the access token using the HttpOnly cookie."
+            }
           },
           "response": []
         },
@@ -102,8 +97,7 @@
               "raw": "{{baseUrl}}/auth/logout",
               "host": ["{{baseUrl}}"],
               "path": ["auth", "logout"]
-            },
-            "description": "Invalidate the current session and clear auth cookies."
+            }
           },
           "response": []
         }
@@ -111,7 +105,6 @@
     },
     {
       "name": "Users",
-      "description": "Management of user accounts (Students, Admins, etc.).",
       "item": [
         {
           "name": "Create User",
@@ -120,7 +113,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"email\": \"student@example.com\",\n    \"fullName\": \"John Doe\",\n    \"password\": \"password123\",\n    \"userType\": \"student\",\n    \"phoneNumber\": \"9876543210\"\n}",
+              "raw": "{\n \"fullName\": \"John Doe\",\n \"email\": \"john@example.com\",\n \"phone\": \"9876543211\",\n \"userType\": \"STUDENT\",\n \"password\": \"password123\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -131,8 +124,7 @@
               "raw": "{{baseUrl}}/users",
               "host": ["{{baseUrl}}"],
               "path": ["users"]
-            },
-            "description": "Create a new user account manually (Admin only)."
+            }
           },
           "response": []
         },
@@ -145,8 +137,7 @@
               "raw": "{{baseUrl}}/users",
               "host": ["{{baseUrl}}"],
               "path": ["users"]
-            },
-            "description": "Retrieve a list of all registered users."
+            }
           },
           "response": []
         },
@@ -160,13 +151,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["users", ":id"],
               "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
+                { "key": "id", "value": "" }
               ]
-            },
-            "description": "Retrieve detailed information for a specific user by their UUID."
+            }
           },
           "response": []
         },
@@ -189,13 +176,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["users", ":id"],
               "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
+                { "key": "id", "value": "" }
               ]
-            },
-            "description": "Update specific fields of a user's profile."
+            }
           },
           "response": []
         }
@@ -203,7 +186,6 @@
     },
     {
       "name": "Classes",
-      "description": "Management of educational classes (e.g., Grade levels).",
       "item": [
         {
           "name": "Create Class",
@@ -213,18 +195,13 @@
             "body": {
               "mode": "raw",
               "raw": "{\n    \"classCode\": \"CLASS_11\",\n    \"className\": \"Class 11\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/classes",
               "host": ["{{baseUrl}}"],
               "path": ["classes"]
-            },
-            "description": "Create a new educational class."
+            }
           },
           "response": []
         },
@@ -237,8 +214,7 @@
               "raw": "{{baseUrl}}/classes",
               "host": ["{{baseUrl}}"],
               "path": ["classes"]
-            },
-            "description": "Retrieve all configured classes."
+            }
           },
           "response": []
         },
@@ -251,14 +227,8 @@
               "raw": "{{baseUrl}}/classes/code/:classCode",
               "host": ["{{baseUrl}}"],
               "path": ["classes", "code", ":classCode"],
-              "variable": [
-                {
-                  "key": "classCode",
-                  "value": "CLASS_11"
-                }
-              ]
-            },
-            "description": "Retrieve class details using its unique Class Code."
+              "variable": [{ "key": "classCode", "value": "CLASS_11" }]
+            }
           },
           "response": []
         },
@@ -271,14 +241,8 @@
               "raw": "{{baseUrl}}/classes/:id",
               "host": ["{{baseUrl}}"],
               "path": ["classes", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Retrieve class details by UUID."
+              "variable": [{ "key": "id", "value": "" }]
+            }
           },
           "response": []
         },
@@ -290,24 +254,14 @@
             "body": {
               "mode": "raw",
               "raw": "{\n    \"className\": \"Class 11 (Science)\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/classes/:id",
               "host": ["{{baseUrl}}"],
               "path": ["classes", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Update class information."
+              "variable": [{ "key": "id", "value": "" }]
+            }
           },
           "response": []
         },
@@ -320,14 +274,8 @@
               "raw": "{{baseUrl}}/classes/:id",
               "host": ["{{baseUrl}}"],
               "path": ["classes", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Soft-delete a class."
+              "variable": [{ "key": "id", "value": "" }]
+            }
           },
           "response": []
         }
@@ -335,7 +283,6 @@
     },
     {
       "name": "Exams",
-      "description": "Management of competitive exams (e.g., JEE, NEET).",
       "item": [
         {
           "name": "Create Exam",
@@ -344,7 +291,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n    \"examCode\": \"NEET_2024\",\n    \"examName\": \"NEET 2024\",\n    \"examFullName\": \"National Eligibility cum Entrance Test\",\n    \"examBoard\": \"NTA\",\n    \"isPopular\": true\n}",
+              "raw": "{\n    \"examCode\": \"JEE_MAIN_2024\",\n    \"examName\": \"JEE Main 2024\",\n    \"examFullName\": \"Joint Entrance Examination Main 2024\",\n    \"examBoard\": \"NTA\",\n    \"isPopular\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -355,8 +302,7 @@
               "raw": "{{baseUrl}}/exams",
               "host": ["{{baseUrl}}"],
               "path": ["exams"]
-            },
-            "description": "Register a new exam in the system."
+            }
           },
           "response": []
         },
@@ -369,8 +315,7 @@
               "raw": "{{baseUrl}}/exams",
               "host": ["{{baseUrl}}"],
               "path": ["exams"]
-            },
-            "description": "Retrieve a list of all exams. Supports filtering via query params (e.g., `?active=true`)."
+            }
           },
           "response": []
         },
@@ -384,13 +329,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["exams", ":id"],
               "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
+                { "key": "id", "value": "" }
               ]
-            },
-            "description": "Retrieve details of a specific exam by UUID."
+            }
           },
           "response": []
         },
@@ -413,13 +354,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["exams", ":id"],
               "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
+                { "key": "id", "value": "" }
               ]
-            },
-            "description": "Update details of an existing exam."
+            }
           },
           "response": []
         },
@@ -433,13 +370,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["exams", ":id"],
               "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
+                { "key": "id", "value": "" }
               ]
-            },
-            "description": "Soft-delete an exam."
+            }
           },
           "response": []
         }
@@ -447,7 +380,6 @@
     },
     {
       "name": "Subjects",
-      "description": "Management of the central subject catalog.",
       "item": [
         {
           "name": "Create Subject",
@@ -467,8 +399,7 @@
               "raw": "{{baseUrl}}/subjects",
               "host": ["{{baseUrl}}"],
               "path": ["subjects"]
-            },
-            "description": "Add a new subject to the global catalog."
+            }
           },
           "response": []
         },
@@ -481,8 +412,7 @@
               "raw": "{{baseUrl}}/subjects",
               "host": ["{{baseUrl}}"],
               "path": ["subjects"]
-            },
-            "description": "Retrieve all available subjects."
+            }
           },
           "response": []
         },
@@ -496,13 +426,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["subjects", ":id"],
               "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
+                { "key": "id", "value": "" }
               ]
-            },
-            "description": "Retrieve a specific subject by UUID."
+            }
           },
           "response": []
         },
@@ -525,13 +451,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["subjects", ":id"],
               "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
+                { "key": "id", "value": "" }
               ]
-            },
-            "description": "Update details of a subject."
+            }
           },
           "response": []
         },
@@ -545,13 +467,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["subjects", ":id"],
               "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
+                { "key": "id", "value": "" }
               ]
-            },
-            "description": "Soft-delete a subject."
+            }
           },
           "response": []
         }
@@ -559,7 +477,6 @@
     },
     {
       "name": "Chapters",
-      "description": "Management of chapters within subjects.",
       "item": [
         {
           "name": "Create Chapter",
@@ -579,8 +496,7 @@
               "raw": "{{baseUrl}}/chapters",
               "host": ["{{baseUrl}}"],
               "path": ["chapters"]
-            },
-            "description": "Create a new chapter linked to a Subject. Requires a valid Subject ID."
+            }
           },
           "response": []
         },
@@ -593,8 +509,7 @@
               "raw": "{{baseUrl}}/chapters",
               "host": ["{{baseUrl}}"],
               "path": ["chapters"]
-            },
-            "description": "Retrieve all chapters."
+            }
           },
           "response": []
         },
@@ -608,13 +523,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["chapters", ":id"],
               "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
+                { "key": "id", "value": "" }
               ]
-            },
-            "description": "Retrieve a specific chapter by UUID."
+            }
           },
           "response": []
         },
@@ -637,13 +548,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["chapters", ":id"],
               "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
+                { "key": "id", "value": "" }
               ]
-            },
-            "description": "Update chapter details."
+            }
           },
           "response": []
         },
@@ -657,13 +564,9 @@
               "host": ["{{baseUrl}}"],
               "path": ["chapters", ":id"],
               "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
+                { "key": "id", "value": "" }
               ]
-            },
-            "description": "Soft-delete a chapter."
+            }
           },
           "response": []
         }
@@ -671,7 +574,6 @@
     },
     {
       "name": "Pricing Tiers",
-      "description": "Management of subscription plans and credit bundles.",
       "item": [
         {
           "name": "Create Pricing Tier",
@@ -681,18 +583,13 @@
             "body": {
               "mode": "raw",
               "raw": "{\n    \"tierName\": \"Platinum\",\n    \"tierCode\": \"PLATINUM_2025\",\n    \"priceInr\": 4999,\n    \"credits\": 2000,\n    \"bonusCredits\": 200\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/pricing-tiers",
               "host": ["{{baseUrl}}"],
               "path": ["pricing-tiers"]
-            },
-            "description": "Create a new pricing tier."
+            }
           },
           "response": []
         },
@@ -705,8 +602,7 @@
               "raw": "{{baseUrl}}/pricing-tiers",
               "host": ["{{baseUrl}}"],
               "path": ["pricing-tiers"]
-            },
-            "description": "Retrieve all available pricing tiers."
+            }
           },
           "response": []
         },
@@ -719,14 +615,8 @@
               "raw": "{{baseUrl}}/pricing-tiers/:id",
               "host": ["{{baseUrl}}"],
               "path": ["pricing-tiers", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Retrieve pricing tier by UUID."
+              "variable": [{ "key": "id", "value": "" }]
+            }
           },
           "response": []
         },
@@ -738,24 +628,14 @@
             "body": {
               "mode": "raw",
               "raw": "{\n    \"priceInr\": 5999\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/pricing-tiers/:id",
               "host": ["{{baseUrl}}"],
               "path": ["pricing-tiers", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Update pricing tier details."
+              "variable": [{ "key": "id", "value": "" }]
+            }
           },
           "response": []
         },
@@ -768,14 +648,8 @@
               "raw": "{{baseUrl}}/pricing-tiers/:id",
               "host": ["{{baseUrl}}"],
               "path": ["pricing-tiers", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Soft-delete a pricing tier."
+              "variable": [{ "key": "id", "value": "" }]
+            }
           },
           "response": []
         }
@@ -783,7 +657,6 @@
     },
     {
       "name": "Exam-Subject Mapping",
-      "description": "Link specific Subjects to an Exam (e.g., Physics for JEE).",
       "item": [
         {
           "name": "Create Mapping",
@@ -793,18 +666,13 @@
             "body": {
               "mode": "raw",
               "raw": "{\n    \"examId\": \"<EXAM_UUID>\",\n    \"subjectId\": \"<SUBJECT_UUID>\",\n    \"displayOrder\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/exam-subject",
               "host": ["{{baseUrl}}"],
               "path": ["exam-subject"]
-            },
-            "description": "Associate a Subject with an Exam."
+            }
           },
           "response": []
         },
@@ -817,8 +685,7 @@
               "raw": "{{baseUrl}}/exam-subject",
               "host": ["{{baseUrl}}"],
               "path": ["exam-subject"]
-            },
-            "description": "Retrieve all Exam-Subject associations."
+            }
           },
           "response": []
         },
@@ -831,14 +698,8 @@
               "raw": "{{baseUrl}}/exam-subject/by-exam/:examId",
               "host": ["{{baseUrl}}"],
               "path": ["exam-subject", "by-exam", ":examId"],
-              "variable": [
-                {
-                  "key": "examId",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Retrieve all subjects linked to a specific exam."
+              "variable": [{ "key": "examId", "value": "" }]
+            }
           },
           "response": []
         },
@@ -851,63 +712,8 @@
               "raw": "{{baseUrl}}/exam-subject/by-subject/:subjectId",
               "host": ["{{baseUrl}}"],
               "path": ["exam-subject", "by-subject", ":subjectId"],
-              "variable": [
-                {
-                  "key": "subjectId",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Retrieve all exams that include a specific subject."
-          },
-          "response": []
-        },
-        {
-          "name": "Get Mapping by ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/exam-subject/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["exam-subject", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Retrieve a specific mapping by UUID."
-          },
-          "response": []
-        },
-        {
-          "name": "Update Mapping",
-          "request": {
-            "method": "PATCH",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"displayOrder\": 2,\n    \"isActive\": false\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/exam-subject/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["exam-subject", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Update mapping details (e.g., display order or status)."
+              "variable": [{ "key": "subjectId", "value": "" }]
+            }
           },
           "response": []
         },
@@ -920,14 +726,8 @@
               "raw": "{{baseUrl}}/exam-subject/:id",
               "host": ["{{baseUrl}}"],
               "path": ["exam-subject", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Remove an association between an Exam and a Subject."
+              "variable": [{ "key": "id", "value": "" }]
+            }
           },
           "response": []
         }
@@ -935,28 +735,22 @@
     },
     {
       "name": "Subject-Chapter Mapping",
-      "description": "Configure Chapters within the context of an Exam-Subject (e.g., Weightage for Physics in JEE).",
       "item": [
         {
-          "name": "Create Mapping (Set Weightage)",
+          "name": "Create Mapping",
           "request": {
             "method": "POST",
             "header": [],
             "body": {
               "mode": "raw",
               "raw": "{\n    \"examSubjectId\": \"<EXAM_SUBJECT_MAPPING_UUID>\",\n    \"chapterId\": \"<CHAPTER_UUID>\",\n    \"weightagePercentage\": 10.5,\n    \"chapterNumber\": 1\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
+              "options": { "raw": { "language": "json" } }
             },
             "url": {
               "raw": "{{baseUrl}}/subject-chapter",
               "host": ["{{baseUrl}}"],
               "path": ["subject-chapter"]
-            },
-            "description": "Link a Chapter to an Exam-Subject context, defining its weightage."
+            }
           },
           "response": []
         },
@@ -969,8 +763,7 @@
               "raw": "{{baseUrl}}/subject-chapter",
               "host": ["{{baseUrl}}"],
               "path": ["subject-chapter"]
-            },
-            "description": "Retrieve all Subject-Chapter associations."
+            }
           },
           "response": []
         },
@@ -983,103 +776,8 @@
               "raw": "{{baseUrl}}/subject-chapter/by-exam-subject/:examSubjectId",
               "host": ["{{baseUrl}}"],
               "path": ["subject-chapter", "by-exam-subject", ":examSubjectId"],
-              "variable": [
-                {
-                  "key": "examSubjectId",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Retrieve all chapters linked to an exam-subject context."
-          },
-          "response": []
-        },
-        {
-          "name": "Get Total Weightage",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/subject-chapter/weightage/:examSubjectId",
-              "host": ["{{baseUrl}}"],
-              "path": ["subject-chapter", "weightage", ":examSubjectId"],
-              "variable": [
-                {
-                  "key": "examSubjectId",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Get total weightage of chapters for an exam-subject."
-          },
-          "response": []
-        },
-        {
-          "name": "Get Exam-Subjects by Chapter",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/subject-chapter/by-chapter/:chapterId",
-              "host": ["{{baseUrl}}"],
-              "path": ["subject-chapter", "by-chapter", ":chapterId"],
-              "variable": [
-                {
-                  "key": "chapterId",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "See where a specific chapter is used across different exams."
-          },
-          "response": []
-        },
-        {
-          "name": "Get Mapping by ID",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/subject-chapter/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["subject-chapter", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Retrieve a specific mapping by UUID."
-          },
-          "response": []
-        },
-        {
-          "name": "Update Mapping",
-          "request": {
-            "method": "PATCH",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"weightagePercentage\": 15.0\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/subject-chapter/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["subject-chapter", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Update weightage or other details."
+              "variable": [{ "key": "examSubjectId", "value": "" }]
+            }
           },
           "response": []
         },
@@ -1092,14 +790,8 @@
               "raw": "{{baseUrl}}/subject-chapter/:id",
               "host": ["{{baseUrl}}"],
               "path": ["subject-chapter", ":id"],
-              "variable": [
-                {
-                  "key": "id",
-                  "value": ""
-                }
-              ]
-            },
-            "description": "Remove the chapter from this Exam context."
+              "variable": [{ "key": "id", "value": "" }]
+            }
           },
           "response": []
         }
@@ -1107,7 +799,6 @@
     },
     {
       "name": "Bulk Upload (Excel)",
-      "description": "Endpoints to bulk import data using .xlsx files.",
       "item": [
         {
           "name": "Bulk Import Exam",
@@ -1117,19 +808,14 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                {
-                  "key": "file",
-                  "type": "file",
-                  "src": []
-                }
+                { "key": "file", "type": "file", "src": [] }
               ]
             },
             "url": {
               "raw": "{{baseUrl}}/excel/exam",
               "host": ["{{baseUrl}}"],
               "path": ["excel", "exam"]
-            },
-            "description": "Bulk create Exams from an Excel file."
+            }
           },
           "response": []
         },
@@ -1141,19 +827,14 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                {
-                  "key": "file",
-                  "type": "file",
-                  "src": []
-                }
+                { "key": "file", "type": "file", "src": [] }
               ]
             },
             "url": {
               "raw": "{{baseUrl}}/excel/subject",
               "host": ["{{baseUrl}}"],
               "path": ["excel", "subject"]
-            },
-            "description": "Bulk create Subjects from an Excel file."
+            }
           },
           "response": []
         },
@@ -1165,19 +846,14 @@
             "body": {
               "mode": "formdata",
               "formdata": [
-                {
-                  "key": "file",
-                  "type": "file",
-                  "src": []
-                }
+                { "key": "file", "type": "file", "src": [] }
               ]
             },
             "url": {
               "raw": "{{baseUrl}}/excel/chapter",
               "host": ["{{baseUrl}}"],
               "path": ["excel", "chapter"]
-            },
-            "description": "Bulk create Chapters from an Excel file. Uses `SubjectCode` column to link."
+            }
           },
           "response": []
         }
@@ -1185,7 +861,6 @@
     },
     {
       "name": "Dev",
-      "description": "Development utilities.",
       "item": [
         {
           "name": "Seed Admin",
@@ -1196,8 +871,25 @@
               "raw": "{{baseUrl}}/dev/seed-admin",
               "host": ["{{baseUrl}}"],
               "path": ["dev", "seed-admin"]
-            },
-            "description": "Seeds the database with an initial Admin user (`admin@examdex.com` / `password123`)."
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
           },
           "response": []
         }
