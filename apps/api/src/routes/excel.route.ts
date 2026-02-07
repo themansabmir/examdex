@@ -1,7 +1,11 @@
 import { Router } from "express";
 import multer from "multer";
 import { ExcelService } from "../lib";
-import { examService, subjectService, chapterService } from "../container";
+import {
+  examService,
+  subjectService,
+  chapterService,
+} from "../container";
 import { BadRequestError, logger } from "../utils";
 import { protect } from "../middleware";
 
@@ -29,8 +33,10 @@ router.post("/:moduleName", protect, upload.single("file"), async (req, res, nex
         ExcelService.validateHeaders(data, ["subjectCode", "subjectName"]);
         result = await subjectService.bulkCreateSubjects(data);
         break;
+
       case "chapter":
-        ExcelService.validateHeaders(data, ["subjectId", "chapterCode", "chapterName"]);
+        // Validate required headers
+        ExcelService.validateHeaders(data, ["subjectCode", "chapterCode", "chapterName"]);
         result = await chapterService.bulkCreateChapters(data);
         break;
       default:
