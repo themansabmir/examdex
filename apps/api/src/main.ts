@@ -5,7 +5,7 @@ import cookieParser from "cookie-parser";
 import { env, validateEnv } from "./config";
 import { connectDatabase, disconnectDatabase } from "./lib";
 import { router } from "./routes";
-import { errorHandler, notFoundHandler, requestLogger, examContextMiddleware } from "./middleware";
+import { errorHandler, notFoundHandler, requestLogger } from "./middleware";
 import { logger } from "./utils";
 
 // Validate environment variables
@@ -26,9 +26,6 @@ app.use(cookieParser());
 
 // Request logging
 app.use(requestLogger);
-
-// Exam Context Middleware
-app.use(examContextMiddleware);
 
 // Routes
 

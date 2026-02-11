@@ -7,7 +7,8 @@ import {
   chapterController,
   devController,
 } from "../container";
-import { validateBody, validateParams } from "../middleware";
+import { validateBody, validateParams, examContextMiddleware } from "../middleware";
+
 import {
   createUserSchema,
   updateUserSchema,
@@ -27,6 +28,12 @@ import {
 } from "../features/chapter/chapter.schema";
 
 const router = Router();
+
+// ============================================
+// Auth routes
+// ============================================
+// Apply Exam Context Middleware to all routes
+router.use(examContextMiddleware);
 
 // ============================================
 // Auth routes
