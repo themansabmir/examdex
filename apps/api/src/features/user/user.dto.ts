@@ -6,6 +6,7 @@ export interface CreateUserInputDTO {
   userType: string;
   roles?: string[];
   isActive?: boolean;
+  examId?: string;
 }
 
 export interface UpdateUserInputDTO {

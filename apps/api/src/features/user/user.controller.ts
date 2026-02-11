@@ -7,7 +7,10 @@ export class UserController {
   constructor(private readonly userService: IUserService) {}
 
   createUser = async (req: Request, res: Response): Promise<void> => {
-    const input: CreateUserInputDTO = req.body;
+    const input: CreateUserInputDTO = {
+      ...req.body,
+      examId: req.exam?.id,
+    };
     const result = await this.userService.createUser(input);
 
     res.status(HttpStatus.CREATED).json({
