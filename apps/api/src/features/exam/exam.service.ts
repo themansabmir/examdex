@@ -7,6 +7,11 @@ import { randomUUID } from "crypto";
 export class ExamService {
   constructor(private readonly examRepository: IExamRepository) {}
 
+  async getStudentExams(userId: string): Promise<ExamOutputDTO[]> {
+    const exams = await this.examRepository.findByUserId(userId);
+    return exams.map((exam) => this.toOutputDTO(exam));
+  }
+
   async createExam(input: CreateExamInputDTO): Promise<ExamOutputDTO> {
     const existingExam = await this.examRepository.findByCode(input.examCode);
     if (existingExam) {

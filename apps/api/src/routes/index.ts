@@ -62,6 +62,10 @@ router.post("/users", validateBody(createUserSchema), (req, res, next) => {
   userController.createUser(req, res).catch(next);
 });
 
+router.get("/users/:id/exams", validateParams(userIdParamSchema), (req, res, next) => {
+  examController.getStudentExams(req, res).catch(next);
+});
+
 router.get("/users", (req, res, next) => {
   userController.getAllUsers(req, res).catch(next);
 });
