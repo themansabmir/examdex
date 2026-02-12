@@ -11,6 +11,7 @@ import { subjectChapterRoutes } from "./subject-chapter.route";
 import { devRoutes } from "./dev.route";
 import { excelRoutes } from "./excel.route";
 import { protect } from "../middleware";
+import { questionPaperApiRoutes } from "./question-paper.route";
 
 const router = Router();
 
@@ -30,6 +31,7 @@ router.use("/exam-subject", protect, examSubjectRoutes);
 router.use("/subject-chapter", protect, subjectChapterRoutes);
 router.use("/dev", protect, devRoutes);
 router.use("/excel", excelRoutes);
+router.use("/", protect, questionPaperApiRoutes);
 
 // ============================================
 // Health check
