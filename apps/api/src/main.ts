@@ -74,8 +74,6 @@ async function bootstrap(): Promise<void> {
   }
 }
 
-if (require.main === module) {
-  bootstrap();
-}
+bootstrap();
 
 export { app };
