@@ -1,0 +1,906 @@
+{
+  "info": {
+    "_postman_id": "038ddf31-8c44-4860-955c-6de0c3ec7812",
+    "name": "ExamDex API",
+    "description": "API Collection for ExamDex application including Auth, Users, Exams, Subjects, Chapters, Classes, Pricing, Mappings, and Excel modules.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Admin Login",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@examdex.com\",\n    \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/admin/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "admin", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Student Auth (Send OTP)",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phoneOrEmail\": \"9876543210\",\n    \"countryCode\": \"+91\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/student",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "student"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Verify OTP",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"phoneOrEmail\": \"9876543210\",\n    \"otp\": \"123456\",\n    \"countryCode\": \"+91\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/auth/verify-otp",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "verify-otp"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/refresh",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "refresh"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/auth/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["auth", "logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Create User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n \"fullName\": \"John Doe\",\n \"email\": \"john@example.com\",\n \"phone\": \"9876543211\",\n \"userType\": \"STUDENT\",\n \"password\": \"password123\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": ["{{baseUrl}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get User by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                { "key": "id", "value": "" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"fullName\": \"John Updated\",\n    \"isActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", ":id"],
+              "variable": [
+                { "key": "id", "value": "" }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Classes",
+      "item": [
+        {
+          "name": "Create Class",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"classCode\": \"CLASS_11\",\n    \"className\": \"Class 11\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/classes",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Classes",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/classes",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Class by Code",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/classes/code/:classCode",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes", "code", ":classCode"],
+              "variable": [{ "key": "classCode", "value": "CLASS_11" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Class by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/classes/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Class",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"className\": \"Class 11 (Science)\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/classes/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Class",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/classes/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["classes", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Exams",
+      "item": [
+        {
+          "name": "Create Exam",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"examCode\": \"JEE_MAIN_2024\",\n    \"examName\": \"JEE Main 2024\",\n    \"examFullName\": \"Joint Entrance Examination Main 2024\",\n    \"examBoard\": \"NTA\",\n    \"isPopular\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exams",
+              "host": ["{{baseUrl}}"],
+              "path": ["exams"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Exams",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/exams",
+              "host": ["{{baseUrl}}"],
+              "path": ["exams"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Exam by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/exams/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["exams", ":id"],
+              "variable": [
+                { "key": "id", "value": "" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Exam",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"isPopular\": false,\n    \"examName\": \"NEET Updated\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exams/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["exams", ":id"],
+              "variable": [
+                { "key": "id", "value": "" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Exam",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/exams/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["exams", ":id"],
+              "variable": [
+                { "key": "id", "value": "" }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Subjects",
+      "item": [
+        {
+          "name": "Create Subject",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"subjectCode\": \"PHYSICS_01\",\n    \"subjectName\": \"Physics\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subjects",
+              "host": ["{{baseUrl}}"],
+              "path": ["subjects"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Subjects",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subjects",
+              "host": ["{{baseUrl}}"],
+              "path": ["subjects"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Subject by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subjects/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["subjects", ":id"],
+              "variable": [
+                { "key": "id", "value": "" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Subject",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"subjectName\": \"Advanced Physics\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subjects/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["subjects", ":id"],
+              "variable": [
+                { "key": "id", "value": "" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Subject",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subjects/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["subjects", ":id"],
+              "variable": [
+                { "key": "id", "value": "" }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Chapters",
+      "item": [
+        {
+          "name": "Create Chapter",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"subjectId\": \"<SUBJECT_UUID>\",\n    \"chapterCode\": \"KINEMATICS_01\",\n    \"chapterName\": \"Kinematics\",\n    \"classId\": \"<OPTIONAL_CLASS_UUID>\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chapters",
+              "host": ["{{baseUrl}}"],
+              "path": ["chapters"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Chapters",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/chapters",
+              "host": ["{{baseUrl}}"],
+              "path": ["chapters"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Chapter by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/chapters/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["chapters", ":id"],
+              "variable": [
+                { "key": "id", "value": "" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Chapter",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"chapterName\": \"Kinematics & Dynamics\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chapters/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["chapters", ":id"],
+              "variable": [
+                { "key": "id", "value": "" }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Chapter",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/chapters/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["chapters", ":id"],
+              "variable": [
+                { "key": "id", "value": "" }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Pricing Tiers",
+      "item": [
+        {
+          "name": "Create Pricing Tier",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"tierName\": \"Platinum\",\n    \"tierCode\": \"PLATINUM_2025\",\n    \"priceInr\": 4999,\n    \"credits\": 2000,\n    \"bonusCredits\": 200\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pricing-tiers",
+              "host": ["{{baseUrl}}"],
+              "path": ["pricing-tiers"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Tiers",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pricing-tiers",
+              "host": ["{{baseUrl}}"],
+              "path": ["pricing-tiers"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Tier by ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pricing-tiers/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["pricing-tiers", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Tier",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"priceInr\": 5999\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/pricing-tiers/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["pricing-tiers", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Tier",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/pricing-tiers/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["pricing-tiers", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Exam-Subject Mapping",
+      "item": [
+        {
+          "name": "Create Mapping",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"examId\": \"<EXAM_UUID>\",\n    \"subjectId\": \"<SUBJECT_UUID>\",\n    \"displayOrder\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exam-subject",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-subject"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Mappings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/exam-subject",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-subject"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Subjects by Exam",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/exam-subject/by-exam/:examId",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-subject", "by-exam", ":examId"],
+              "variable": [{ "key": "examId", "value": "" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Exams by Subject",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/exam-subject/by-subject/:subjectId",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-subject", "by-subject", ":subjectId"],
+              "variable": [{ "key": "subjectId", "value": "" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Mapping",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/exam-subject/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-subject", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Subject-Chapter Mapping",
+      "item": [
+        {
+          "name": "Create Mapping",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"examSubjectId\": \"<EXAM_SUBJECT_MAPPING_UUID>\",\n    \"chapterId\": \"<CHAPTER_UUID>\",\n    \"weightagePercentage\": 10.5,\n    \"chapterNumber\": 1\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/subject-chapter",
+              "host": ["{{baseUrl}}"],
+              "path": ["subject-chapter"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get All Mappings",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subject-chapter",
+              "host": ["{{baseUrl}}"],
+              "path": ["subject-chapter"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Chapters by Exam-Subject",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subject-chapter/by-exam-subject/:examSubjectId",
+              "host": ["{{baseUrl}}"],
+              "path": ["subject-chapter", "by-exam-subject", ":examSubjectId"],
+              "variable": [{ "key": "examSubjectId", "value": "" }]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Mapping",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/subject-chapter/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["subject-chapter", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Bulk Upload (Excel)",
+      "item": [
+        {
+          "name": "Bulk Import Exam",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/excel/exam",
+              "host": ["{{baseUrl}}"],
+              "path": ["excel", "exam"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Import Subject",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/excel/subject",
+              "host": ["{{baseUrl}}"],
+              "path": ["excel", "subject"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Bulk Import Chapter",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": [] }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/excel/chapter",
+              "host": ["{{baseUrl}}"],
+              "path": ["excel", "chapter"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Dev",
+      "item": [
+        {
+          "name": "Seed Admin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/dev/seed-admin",
+              "host": ["{{baseUrl}}"],
+              "path": ["dev", "seed-admin"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001/api/v1",
+      "type": "string"
+    }
+  ]
+}
