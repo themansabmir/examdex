@@ -160,6 +160,7 @@ export class PrismaExamRepository implements IExamRepository {
           updatedAt: exam.updatedAt,
         })
     );
+  }
 
   async saveMany(exams: Exam[]): Promise<void> {
     await this.prisma.exam.createMany({
