@@ -73,6 +73,12 @@ export class PrismaUserRepository implements IUserRepository {
   async findById(id: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: { id },
+      include: {
+        examPreferences: {
+          where: { isPrimary: true },
+          include: { exam: true },
+        },
+      },
     });
 
     if (!user) {
@@ -93,12 +99,24 @@ export class PrismaUserRepository implements IUserRepository {
       deviceFingerprint: user.deviceFingerprint,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
+      currentExam: user.examPreferences[0]
+        ? {
+            id: user.examPreferences[0].exam.id,
+            name: user.examPreferences[0].exam.examName,
+          }
+        : undefined,
     });
   }
 
   async findByEmail(email: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: { email },
+      include: {
+        examPreferences: {
+          where: { isPrimary: true },
+          include: { exam: true },
+        },
+      },
     });
 
     if (!user) {
@@ -119,12 +137,24 @@ export class PrismaUserRepository implements IUserRepository {
       deviceFingerprint: user.deviceFingerprint,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
+      currentExam: user.examPreferences[0]
+        ? {
+            id: user.examPreferences[0].exam.id,
+            name: user.examPreferences[0].exam.examName,
+          }
+        : undefined,
     });
   }
 
   async findByPhone(phone: string): Promise<User | null> {
     const user = await this.prisma.user.findUnique({
       where: { phoneNumber: phone },
+      include: {
+        examPreferences: {
+          where: { isPrimary: true },
+          include: { exam: true },
+        },
+      },
     });
 
     if (!user) {
@@ -145,6 +175,12 @@ export class PrismaUserRepository implements IUserRepository {
       deviceFingerprint: user.deviceFingerprint,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
+      currentExam: user.examPreferences[0]
+        ? {
+            id: user.examPreferences[0].exam.id,
+            name: user.examPreferences[0].exam.examName,
+          }
+        : undefined,
     });
   }
 

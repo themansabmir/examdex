@@ -28,6 +28,7 @@ app.use(cookieParser());
 app.use(requestLogger);
 
 // Routes
+
 app.use(router);
 
 // 404 handler
@@ -73,6 +74,8 @@ async function bootstrap(): Promise<void> {
   }
 }
 
-bootstrap();
+if (require.main === module) {
+  bootstrap();
+}
 
 export { app };

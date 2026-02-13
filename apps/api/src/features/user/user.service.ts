@@ -42,6 +42,10 @@ export class UserService implements IUserService {
       isActive: input.isActive ?? true,
     });
 
+    if (input.examId) {
+      await this.userRepository.upsertExamPreference(user.id, input.examId);
+    }
+
     return this.toOutputDTO(user);
   }
 
