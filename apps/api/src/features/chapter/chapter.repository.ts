@@ -12,6 +12,7 @@ export interface IChapterRepository {
   }): Promise<Chapter[]>;
   update(id: string, data: Partial<Chapter>): Promise<Chapter>;
   delete(id: string): Promise<void>;
+  saveMany(chapters: Chapter[]): Promise<void>;
 }
 
 export class PrismaChapterRepository implements IChapterRepository {
@@ -128,6 +129,20 @@ export class PrismaChapterRepository implements IChapterRepository {
   async delete(id: string): Promise<void> {
     await this.prisma.chapter.delete({
       where: { id },
+    });
+  }
+
+  async saveMany(chapters: Chapter[]): Promise<void> {
+    await this.prisma.chapter.createMany({
+      data: chapters.map((chapter) => ({
+        id: chapter.id,
+        subjectId: chapter.subjectId,
+        chapterCode: chapter.chapterCode,
+        chapterName: chapter.chapterName,
+        classId: chapter.classId,
+        isActive: chapter.isActive,
+      })),
+      skipDuplicates: true,
     });
   }
 }

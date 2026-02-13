@@ -5,7 +5,7 @@ import { ConflictError } from "../../utils";
 import { randomUUID } from "crypto";
 
 export class ExamService {
-  constructor(private readonly examRepository: IExamRepository) {}
+  constructor(private readonly examRepository: IExamRepository) { }
 
   async getStudentExams(userId: string): Promise<ExamOutputDTO[]> {
     const exams = await this.examRepository.findByUserId(userId);
@@ -67,6 +67,50 @@ export class ExamService {
     }
 
     await this.examRepository.delete(id);
+  }
+
+  async bulkCreateExams(inputs: CreateExamInputDTO[]): Promise<{ count: number }> {
+    // 1. Validate for duplicates within the input array
+    const codes = inputs.map((i) => i.examCode);
+    const uniqueCodes = new Set(codes);
+    if (uniqueCodes.size !== codes.length) {
+      throw new ConflictError(
+        "Duplicate exam codes found in input",
+        "DUPLICATE_INPUT_CODES"
+      );
+    }
+
+    // 2. Check for existing exams in DB
+    const existingExams = await this.examRepository.findAll();
+    const existingCodes = new Set(existingExams.map((e) => e.examCode));
+
+    const duplicates = codes.filter((code) => existingCodes.has(code));
+    if (duplicates.length > 0) {
+      throw new ConflictError(
+        `Exams with these codes already exist: ${duplicates.join(", ")}`,
+        "EXAM_CODE_EXISTS"
+      );
+    }
+
+    // 3. Prepare data
+    const exams = inputs.map(
+      (input) =>
+        new Exam({
+          id: randomUUID(),
+          examCode: input.examCode,
+          examName: input.examName,
+          examFullName: input.examFullName ?? null,
+          examBoard: input.examBoard ?? null,
+          isActive: true,
+          isPopular: input.isPopular ?? false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        })
+    );
+
+    // 4. Transactional Bulk Insert
+    await this.examRepository.saveMany(exams);
+    return { count: exams.length };
   }
 
   private toOutputDTO(exam: Exam): ExamOutputDTO {

@@ -9,6 +9,7 @@ export interface IExamRepository {
   findByUserId(userId: string): Promise<Exam[]>;
   update(id: string, data: Partial<Exam>): Promise<Exam>;
   delete(id: string): Promise<void>;
+  saveMany(exams: Exam[]): Promise<void>;
 }
 
 export class PrismaExamRepository implements IExamRepository {
@@ -159,5 +160,21 @@ export class PrismaExamRepository implements IExamRepository {
           updatedAt: exam.updatedAt,
         })
     );
+
+  async saveMany(exams: Exam[]): Promise<void> {
+    await this.prisma.exam.createMany({
+      data: exams.map((exam) => ({
+        id: exam.id,
+        examCode: exam.examCode,
+        examName: exam.examName,
+        examFullName: exam.examFullName,
+        examBoard: exam.examBoard,
+        isActive: exam.isActive,
+        isPopular: exam.isPopular,
+        createdAt: exam.createdAt,
+        updatedAt: exam.updatedAt,
+      })),
+      skipDuplicates: true,
+    });
   }
 }
