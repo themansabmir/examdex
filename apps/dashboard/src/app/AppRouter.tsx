@@ -10,7 +10,9 @@ import { ROUTES } from "./routes.config";
 import { ProtectedRoute } from "./ProtectedRoute";
 import { DashboardLayout } from "./layout";
 import { LoginForm } from "@/features/auth/presentation/LoginForm";
+import { ResetPasswordPage } from "@/features/auth/presentation/ResetPasswordPage";
 import { UserList } from "@/features/users/presentation/UserList";
+import { ProfilePage } from "@/features/users/presentation/ProfilePage";
 import { BulkUpload } from "@/shared/components/BulkUpload";
 
 import { ExamList } from "@/features/exam/presentation/ExamList";
@@ -46,13 +48,9 @@ function UsersPage() {
         title: "Users",
         description:
           "Access and manage all student accounts and administrative users across your platforms.",
-        action: {
-          label: "Add New User",
-          onClick: () => console.log("Add user clicked"),
-        },
       }}
     >
-      <UserList />
+      <UserList excludeStudent={true} />
     </DashboardLayout>
   );
 }
@@ -65,7 +63,7 @@ function AdminsPage() {
         description: "Manage administrative users",
       }}
     >
-      <div className="p-8 text-center text-muted-foreground">Admins List Coming Soon</div>
+      <UserList userType="admin" />
     </DashboardLayout>
   );
 }
@@ -78,7 +76,7 @@ function StudentsPage() {
         description: "Manage student users",
       }}
     >
-      <div className="p-8 text-center text-muted-foreground">Students List Coming Soon</div>
+      <UserList userType="student" />
     </DashboardLayout>
   );
 }
@@ -374,6 +372,10 @@ const router = createBrowserRouter([
     element: <LoginForm />,
   },
   {
+    path: ROUTES.RESET_PASSWORD,
+    element: <ResetPasswordPage />,
+  },
+  {
     element: <ProtectedLayout />,
     children: [
       { path: ROUTES.DASHBOARD, element: <DashboardPage /> },
@@ -405,6 +407,7 @@ const router = createBrowserRouter([
       { path: ROUTES.REPORTS.LIST, element: <ReportsPage /> },
       { path: ROUTES.REPORTS.SCHEDULED, element: <ScheduledReportsPage /> },
       { path: ROUTES.SETTINGS.PREFERENCES, element: <SettingsPage /> },
+      { path: ROUTES.SETTINGS.PROFILE, element: <ProfilePage /> },
       { path: ROUTES.HELP, element: <HelpPage /> },
     ],
   },

@@ -34,3 +34,23 @@ export const refreshTokenSchema = z.object({
     .string({ required_error: "Refresh token is required" })
     .min(1, "Refresh token cannot be empty"),
 });
+
+export const inviteAdminSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  role: z.enum(["admin", "content_manager", "support"]),
+});
+
+export const acceptInviteSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+  fullName: z.string().min(1, "Full name is required"),
+});
+
+export const resetPasswordRequestSchema = z.object({
+  email: z.string().email("Invalid email format"),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  password: z.string().min(6, "Password must be at least 6 characters"),
+});

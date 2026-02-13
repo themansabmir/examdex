@@ -18,6 +18,12 @@ export interface UpdateUserInputDTO {
   isOnboarded?: boolean;
 }
 
+export interface UpdateProfileInputDTO {
+  fullName?: string;
+  email?: string;
+  phone?: string;
+}
+
 export interface UserOutputDTO {
   id: string;
   email: string | null;

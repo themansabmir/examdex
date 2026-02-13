@@ -3,6 +3,7 @@ import { BookOpen, Bot, GalleryVerticalEnd, Settings2, SquareTerminal } from "lu
 export const ROUTES = {
   // Auth
   LOGIN: "/login",
+  RESET_PASSWORD: "/reset-password",
 
   // Main routes
   DASHBOARD: "/",
@@ -69,6 +70,7 @@ export const ROUTES = {
   SETTINGS: {
     ROOT: "/settings",
     PREFERENCES: "/settings",
+    PROFILE: "/settings/profile",
   },
 
   HELP: "/help",

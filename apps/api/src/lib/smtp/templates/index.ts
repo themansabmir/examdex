@@ -35,4 +35,20 @@ export class EmailTemplates {
     const template = this.loadTemplate("welcome-email");
     return template.replace("{{USER_NAME}}", userName).replace("{{APP_URL}}", appUrl);
   }
+
+  /**
+   * Get invitation email HTML
+   */
+  static getInvitationEmail(inviteLink: string, role: string): string {
+    const template = this.loadTemplate("invitation-email");
+    return template.replace("{{INVITE_LINK}}", inviteLink).replace("{{ROLE}}", role);
+  }
+
+  /**
+   * Get reset password email HTML
+   */
+  static getResetPasswordEmail(resetLink: string): string {
+    const template = this.loadTemplate("reset-password-email");
+    return template.replace("{{RESET_LINK}}", resetLink);
+  }
 }
