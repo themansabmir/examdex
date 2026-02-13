@@ -36,3 +36,23 @@ export interface OtpSentOutputDTO {
   expiresAt: Date;
   isNewUser: boolean;
 }
+
+export interface InviteAdminInputDTO {
+  email: string;
+  role: "admin" | "content_manager" | "support";
+}
+
+export interface AcceptInviteInputDTO {
+  token: string;
+  password: string;
+  fullName: string;
+}
+
+export interface ResetPasswordRequestInputDTO {
+  email: string;
+}
+
+export interface ResetPasswordInputDTO {
+  token: string;
+  password: string;
+}

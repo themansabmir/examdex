@@ -6,6 +6,7 @@ export interface UpdateUserData {
   fullName?: string;
   email?: string | null;
   phoneNumber?: string | null;
+  passwordHash?: string;
   isActive?: boolean;
   isOnboarded?: boolean;
   lastLoginAt?: Date;
@@ -23,7 +24,11 @@ export interface IUserRepository {
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   findByPhone(phone: string): Promise<User | null>;
-  findAll(options?: { userType?: string; onlyActive?: boolean }): Promise<User[]>;
+  findAll(options?: {
+    userType?: string | string[];
+    excludeStudent?: boolean;
+    onlyActive?: boolean;
+  }): Promise<User[]>;
   update(id: string, data: UpdateUserData): Promise<User>;
   delete(id: string): Promise<void>;
   upsertExamPreference(userId: string, examId: string): Promise<void>;
@@ -184,12 +189,39 @@ export class PrismaUserRepository implements IUserRepository {
     });
   }
 
-  async findAll(options?: { userType?: string; onlyActive?: boolean }): Promise<User[]> {
+  async findAll(options?: {
+    userType?: string | string[];
+    excludeStudent?: boolean;
+    onlyActive?: boolean;
+  }): Promise<User[]> {
+    const where: any = {};
+
+    if (options?.userType || options?.excludeStudent || options?.onlyActive) {
+      const conditions: any[] = [];
+
+      if (options?.userType) {
+        conditions.push({
+          userType: Array.isArray(options.userType)
+            ? { in: options.userType as any }
+            : (options.userType as any),
+        });
+      }
+
+      if (options?.excludeStudent) {
+        conditions.push({ userType: { not: "student" } });
+      }
+
+      if (options?.onlyActive) {
+        conditions.push({ isActive: true });
+      }
+
+      if (conditions.length > 0) {
+        where.AND = conditions;
+      }
+    }
+
     const users = await this.prisma.user.findMany({
-      where: {
-        ...(options?.userType && { userType: options.userType as any }),
-        ...(options?.onlyActive && { isActive: true }),
-      },
+      where,
       orderBy: { createdAt: "desc" },
     });
 
@@ -233,6 +265,9 @@ export class PrismaUserRepository implements IUserRepository {
     }
     if (data.isOnboarded !== undefined) {
       updateData.isOnboarded = data.isOnboarded;
+    }
+    if (data.passwordHash !== undefined) {
+      updateData.passwordHash = data.passwordHash;
     }
 
     const user = await this.prisma.user.update({

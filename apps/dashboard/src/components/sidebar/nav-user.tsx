@@ -1,6 +1,9 @@
 "use client";
 
 import { BadgeCheck, Bell, ChevronsUpDown, CreditCard, LogOut, Sparkles } from "lucide-react";
+import { Link } from "react-router-dom";
+import { ROUTES } from "@/app/routes.config";
+import { useAuth } from "@/app/AuthContext";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import {
@@ -15,7 +18,7 @@ import {
 import { SidebarMenu, SidebarMenuButton, SidebarMenuItem, useSidebar } from "@/shared/ui/sidebar";
 
 export function NavUser({
-  user,
+  user: userProp,
 }: {
   user: {
     name: string;
@@ -24,6 +27,13 @@ export function NavUser({
   };
 }) {
   const { isMobile } = useSidebar();
+  const { user: authUser, logout } = useAuth();
+
+  const user = {
+    name: authUser?.fullName || userProp.name,
+    email: authUser?.email || userProp.email,
+    avatar: userProp.avatar,
+  };
 
   return (
     <SidebarMenu>
@@ -72,9 +82,11 @@ export function NavUser({
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
             <DropdownMenuGroup>
-              <DropdownMenuItem>
-                <BadgeCheck />
-                Account
+              <DropdownMenuItem asChild>
+                <Link to={ROUTES.SETTINGS.PROFILE}>
+                  <BadgeCheck />
+                  Account
+                </Link>
               </DropdownMenuItem>
               <DropdownMenuItem>
                 <CreditCard />
@@ -86,7 +98,7 @@ export function NavUser({
               </DropdownMenuItem>
             </DropdownMenuGroup>
             <DropdownMenuSeparator />
-            <DropdownMenuItem>
+            <DropdownMenuItem onClick={logout}>
               <LogOut />
               Log out
             </DropdownMenuItem>

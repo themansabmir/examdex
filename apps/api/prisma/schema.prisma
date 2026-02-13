@@ -588,6 +588,22 @@ enum UserType {
 }
 
 // ============================================
+// ADMIN INVITATIONS
+// ============================================
+
+model AdminTeamInvite {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique @db.VarChar(255)
+  role      UserType
+  token     String   @unique @db.VarChar(255)
+  expiresAt DateTime @map("expires_at") @db.Timestamp(6)
+  invitedBy String   @map("invited_by") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  @@map("admin_team_invites")
+}
+
+// ============================================
 // OTP STORAGE
 // ============================================
 

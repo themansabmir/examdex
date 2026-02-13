@@ -27,11 +27,12 @@ export class UserController {
   };
 
   getAllUsers = async (req: Request, res: Response): Promise<void> => {
-    const { userType, onlyActive } = req.query;
+    const { userType, onlyActive, excludeStudent } = req.query;
 
     const result = await this.userService.getAllUsers({
-      userType: userType as string | undefined,
+      userType: userType as string | string[] | undefined,
       onlyActive: onlyActive === "true",
+      excludeStudent: excludeStudent === "true",
     });
 
     res.status(HttpStatus.OK).json({
@@ -56,5 +57,26 @@ export class UserController {
     await this.userService.deleteUser(id);
 
     res.status(HttpStatus.NO_CONTENT).send();
+  };
+
+  getMe = async (req: Request, res: Response): Promise<void> => {
+    const userId = (req as any).user.userId;
+    const result = await this.userService.getMe(userId);
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      data: result,
+    });
+  };
+
+  updateMe = async (req: Request, res: Response): Promise<void> => {
+    const userId = (req as any).user.userId;
+    const input: UpdateUserInputDTO = req.body;
+    const result = await this.userService.updateMe(userId, input);
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      data: result,
+    });
   };
 }

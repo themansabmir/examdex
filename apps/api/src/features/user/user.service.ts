@@ -6,9 +6,15 @@ import { User } from "./user.entity";
 export interface IUserService {
   createUser(input: CreateUserInputDTO): Promise<UserOutputDTO>;
   getUserById(id: string): Promise<UserOutputDTO>;
-  getAllUsers(options?: { userType?: string; onlyActive?: boolean }): Promise<UserOutputDTO[]>;
+  getAllUsers(options?: {
+    userType?: string | string[];
+    excludeStudent?: boolean;
+    onlyActive?: boolean;
+  }): Promise<UserOutputDTO[]>;
   updateUser(id: string, input: UpdateUserInputDTO): Promise<UserOutputDTO>;
   deleteUser(id: string): Promise<void>;
+  getMe(id: string): Promise<UserOutputDTO>;
+  updateMe(id: string, input: UpdateUserInputDTO): Promise<UserOutputDTO>;
 }
 
 export class UserService implements IUserService {
@@ -60,7 +66,8 @@ export class UserService implements IUserService {
   }
 
   async getAllUsers(options?: {
-    userType?: string;
+    userType?: string | string[];
+    excludeStudent?: boolean;
     onlyActive?: boolean;
   }): Promise<UserOutputDTO[]> {
     const users = await this.userRepository.findAll(options);
@@ -108,6 +115,14 @@ export class UserService implements IUserService {
     }
 
     await this.userRepository.delete(id);
+  }
+
+  async getMe(id: string): Promise<UserOutputDTO> {
+    return this.getUserById(id);
+  }
+
+  async updateMe(id: string, input: UpdateUserInputDTO): Promise<UserOutputDTO> {
+    return this.updateUser(id, input);
   }
 
   private toOutputDTO(user: User): UserOutputDTO {

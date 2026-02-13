@@ -99,4 +99,46 @@ export class AuthController {
       message: "Logged out successfully",
     });
   };
+
+  inviteAdmin = async (req: Request, res: Response): Promise<void> => {
+    const invitedBy = (req as any).user?.userId;
+    await this.authService.inviteAdmin(req.body, invitedBy);
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "Invitation sent successfully",
+    });
+  };
+
+  acceptInvite = async (req: Request, res: Response): Promise<void> => {
+    const result = await this.authService.acceptInvite(req.body);
+
+    res.cookie("refreshToken", result.refreshToken, this.cookieOptions);
+
+    res.status(HttpStatus.CREATED).json({
+      success: true,
+      data: {
+        accessToken: result.accessToken,
+        user: result.user,
+      },
+    });
+  };
+
+  requestPasswordReset = async (req: Request, res: Response): Promise<void> => {
+    await this.authService.requestPasswordReset(req.body);
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "If an account exists with this email, a reset link has been sent.",
+    });
+  };
+
+  resetPassword = async (req: Request, res: Response): Promise<void> => {
+    await this.authService.resetPassword(req.body);
+
+    res.status(HttpStatus.OK).json({
+      success: true,
+      message: "Password reset successfully",
+    });
+  };
 }

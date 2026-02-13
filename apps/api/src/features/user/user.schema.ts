@@ -24,3 +24,9 @@ export const updateUserSchema = z.object({
 export const userIdParamSchema = z.object({
   id: z.string().uuid("Invalid user ID format"),
 });
+
+export const updateProfileSchema = z.object({
+  fullName: z.string().min(1).max(255).optional(),
+  email: z.string().email().optional(),
+  phone: z.string().min(10).optional(),
+});

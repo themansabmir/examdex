@@ -78,6 +78,34 @@ export class SmtpService {
   }
 
   /**
+   * Send invitation email
+   */
+  async sendInvitationEmail(to: string, inviteLink: string, role: string): Promise<EmailResult> {
+    const html = EmailTemplates.getInvitationEmail(inviteLink, role);
+
+    return this.sendEmail({
+      to,
+      subject: "You're invited to join ExamDex",
+      html,
+      text: `You have been invited to join ExamDex as a ${role}. Follow this link to set up your account: ${inviteLink}`,
+    });
+  }
+
+  /**
+   * Send reset password email
+   */
+  async sendResetPasswordEmail(to: string, resetLink: string): Promise<EmailResult> {
+    const html = EmailTemplates.getResetPasswordEmail(resetLink);
+
+    return this.sendEmail({
+      to,
+      subject: "Reset your ExamDex password",
+      html,
+      text: `Please use the following link to reset your password: ${resetLink}`,
+    });
+  }
+
+  /**
    * Verify SMTP connection
    */
   async verifyConnection(): Promise<boolean> {
