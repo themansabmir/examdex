@@ -33,6 +33,26 @@ export const ROUTES = {
       CREATE: "/master/chapters/create",
       EDIT: "/master/chapters/edit/:id",
     },
+    CLASSES: {
+      LIST: "/master/classes",
+      CREATE: "/master/classes/create",
+      EDIT: "/master/classes/edit/:id",
+    },
+    EXAM_SUBJECTS: {
+      LIST: "/master/exam-subjects",
+      CREATE: "/master/exam-subjects/create",
+      EDIT: "/master/exam-subjects/edit/:id",
+    },
+    SUBJECT_CHAPTERS: {
+      LIST: "/master/subject-chapters",
+      CREATE: "/master/subject-chapters/create",
+      EDIT: "/master/subject-chapters/edit/:id",
+    },
+    PRICING_TIERS: {
+      LIST: "/master/pricing-tiers",
+      CREATE: "/master/pricing-tiers/create",
+      EDIT: "/master/pricing-tiers/edit/:id",
+    },
   },
 
   // Exams
@@ -120,6 +140,22 @@ export const SidebarRoutes = {
         {
           title: "Chapters",
           url: ROUTES.MASTER.CHAPTERS.LIST,
+        },
+        {
+          title: "Classes",
+          url: ROUTES.MASTER.CLASSES.LIST,
+        },
+        {
+          title: "Exam-Subject Mappings",
+          url: ROUTES.MASTER.EXAM_SUBJECTS.LIST,
+        },
+        {
+          title: "Subject-Chapter Mappings",
+          url: ROUTES.MASTER.SUBJECT_CHAPTERS.LIST,
+        },
+        {
+          title: "Pricing Tiers",
+          url: ROUTES.MASTER.PRICING_TIERS.LIST,
         },
       ],
     },

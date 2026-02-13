@@ -25,6 +25,22 @@ import { ChapterList } from "@/features/chapter/presentation/ChapterList";
 import { ChapterForm } from "@/features/chapter/presentation/ChapterForm";
 import { useChapter } from "@/features/chapter/application/useChapters";
 
+import { ClassList } from "@/features/class/presentation/ClassList";
+import { ClassForm } from "@/features/class/presentation/ClassForm";
+import { useClass } from "@/features/class/application/useClasses";
+
+import { ExamSubjectList } from "@/features/exam-subject/presentation/ExamSubjectList";
+import { ExamSubjectForm } from "@/features/exam-subject/presentation/ExamSubjectForm";
+import { useExamSubject } from "@/features/exam-subject/application/useExamSubjects";
+
+import { SubjectChapterList } from "@/features/subject-chapter/presentation/SubjectChapterList";
+import { SubjectChapterForm } from "@/features/subject-chapter/presentation/SubjectChapterForm";
+import { useSubjectChapter } from "@/features/subject-chapter/application/useSubjectChapters";
+
+import { PricingTierList } from "@/features/pricing-tier/presentation/PricingTierList";
+import { PricingTierForm } from "@/features/pricing-tier/presentation/PricingTierForm";
+import { usePricingTier } from "@/features/pricing-tier/application/usePricingTiers";
+
 // Page components (will create placeholders)
 function DashboardPage() {
   return (
@@ -228,6 +244,206 @@ function EditChapterPage() {
   );
 }
 
+function ClassesPage() {
+  const navigate = useNavigate();
+  return (
+    <DashboardLayout
+      header={{
+        title: "Classes",
+        description: "View and manage all educational classes",
+        action: {
+          label: "Create Class",
+          onClick: () => navigate(ROUTES.MASTER.CLASSES.CREATE),
+        },
+      }}
+    >
+      <div className="container mx-auto py-6 space-y-6">
+        <BulkUpload moduleName="Class" />
+        <ClassList />
+      </div>
+    </DashboardLayout>
+  );
+}
+
+function CreateClassPage() {
+  return (
+    <DashboardLayout
+      header={{
+        title: "Create Class",
+        description: "Create a new educational class",
+      }}
+    >
+      <ClassForm />
+    </DashboardLayout>
+  );
+}
+
+function EditClassPage() {
+  const { id } = useParams();
+  const { data: cls, isLoading } = useClass(id);
+
+  return (
+    <DashboardLayout
+      header={{
+        title: "Edit Class",
+        description: `Edit details for ${cls?.className || "class"}`,
+      }}
+    >
+      {isLoading ? <div>Loading...</div> : <ClassForm initialData={cls} />}
+    </DashboardLayout>
+  );
+}
+
+function ExamSubjectsPage() {
+  const navigate = useNavigate();
+  return (
+    <DashboardLayout
+      header={{
+        title: "Exam-Subject Mappings",
+        description: "Manage mappings between exams and subjects",
+        action: {
+          label: "Create Mapping",
+          onClick: () => navigate(ROUTES.MASTER.EXAM_SUBJECTS.CREATE),
+        },
+      }}
+    >
+      <div className="container mx-auto py-6 space-y-6">
+        <BulkUpload moduleName="ExamSubject" />
+        <ExamSubjectList />
+      </div>
+    </DashboardLayout>
+  );
+}
+
+function CreateExamSubjectPage() {
+  return (
+    <DashboardLayout
+      header={{
+        title: "Create Exam-Subject Mapping",
+        description: "Map a subject to an exam",
+      }}
+    >
+      <ExamSubjectForm />
+    </DashboardLayout>
+  );
+}
+
+function EditExamSubjectPage() {
+  const { id } = useParams();
+  const { data: mapping, isLoading } = useExamSubject(id);
+
+  return (
+    <DashboardLayout
+      header={{
+        title: "Edit Exam-Subject Mapping",
+        description: "Update mapping details",
+      }}
+    >
+      {isLoading ? <div>Loading...</div> : <ExamSubjectForm initialData={mapping} />}
+    </DashboardLayout>
+  );
+}
+
+function SubjectChaptersPage() {
+  const navigate = useNavigate();
+  return (
+    <DashboardLayout
+      header={{
+        title: "Subject-Chapter Mappings",
+        description: "Manage mappings between subjects and chapters",
+        action: {
+          label: "Create Mapping",
+          onClick: () => navigate(ROUTES.MASTER.SUBJECT_CHAPTERS.CREATE),
+        },
+      }}
+    >
+      <div className="container mx-auto py-6 space-y-6">
+        <BulkUpload moduleName="SubjectChapter" />
+        <SubjectChapterList />
+      </div>
+    </DashboardLayout>
+  );
+}
+
+function CreateSubjectChapterPage() {
+  return (
+    <DashboardLayout
+      header={{
+        title: "Create Subject-Chapter Mapping",
+        description: "Map a chapter to an exam-subject",
+      }}
+    >
+      <SubjectChapterForm />
+    </DashboardLayout>
+  );
+}
+
+function EditSubjectChapterPage() {
+  const { id } = useParams();
+  const { data: mapping, isLoading } = useSubjectChapter(id);
+
+  return (
+    <DashboardLayout
+      header={{
+        title: "Edit Subject-Chapter Mapping",
+        description: "Update mapping details",
+      }}
+    >
+      {isLoading ? <div>Loading...</div> : <SubjectChapterForm initialData={mapping} />}
+    </DashboardLayout>
+  );
+}
+
+function PricingTiersPage() {
+  const navigate = useNavigate();
+  return (
+    <DashboardLayout
+      header={{
+        title: "Pricing Tiers",
+        description: "Manage pricing tiers and credit packages",
+        action: {
+          label: "Create Tier",
+          onClick: () => navigate(ROUTES.MASTER.PRICING_TIERS.CREATE),
+        },
+      }}
+    >
+      <div className="container mx-auto py-6 space-y-6">
+        <BulkUpload moduleName="PricingTier" />
+        <PricingTierList />
+      </div>
+    </DashboardLayout>
+  );
+}
+
+function CreatePricingTierPage() {
+  return (
+    <DashboardLayout
+      header={{
+        title: "Create Pricing Tier",
+        description: "Create a new pricing tier",
+      }}
+    >
+      <PricingTierForm />
+    </DashboardLayout>
+  );
+}
+
+function EditPricingTierPage() {
+  const { id } = useParams();
+  const { data: tier, isLoading } = usePricingTier(id);
+
+  return (
+    <DashboardLayout
+      header={{
+        title: "Edit Pricing Tier",
+        description: `Edit details for ${tier?.tierName || "tier"}`,
+      }}
+    >
+      {isLoading ? <div>Loading...</div> : <PricingTierForm initialData={tier} />}
+    </DashboardLayout>
+  );
+}
+
 function ExamResultsPage() {
   return (
     <DashboardLayout
@@ -393,6 +609,22 @@ const router = createBrowserRouter([
       { path: ROUTES.MASTER.CHAPTERS.LIST, element: <ChaptersPage /> },
       { path: ROUTES.MASTER.CHAPTERS.CREATE, element: <CreateChapterPage /> },
       { path: ROUTES.MASTER.CHAPTERS.EDIT, element: <EditChapterPage /> },
+
+      { path: ROUTES.MASTER.CLASSES.LIST, element: <ClassesPage /> },
+      { path: ROUTES.MASTER.CLASSES.CREATE, element: <CreateClassPage /> },
+      { path: ROUTES.MASTER.CLASSES.EDIT, element: <EditClassPage /> },
+
+      { path: ROUTES.MASTER.EXAM_SUBJECTS.LIST, element: <ExamSubjectsPage /> },
+      { path: ROUTES.MASTER.EXAM_SUBJECTS.CREATE, element: <CreateExamSubjectPage /> },
+      { path: ROUTES.MASTER.EXAM_SUBJECTS.EDIT, element: <EditExamSubjectPage /> },
+
+      { path: ROUTES.MASTER.SUBJECT_CHAPTERS.LIST, element: <SubjectChaptersPage /> },
+      { path: ROUTES.MASTER.SUBJECT_CHAPTERS.CREATE, element: <CreateSubjectChapterPage /> },
+      { path: ROUTES.MASTER.SUBJECT_CHAPTERS.EDIT, element: <EditSubjectChapterPage /> },
+
+      { path: ROUTES.MASTER.PRICING_TIERS.LIST, element: <PricingTiersPage /> },
+      { path: ROUTES.MASTER.PRICING_TIERS.CREATE, element: <CreatePricingTierPage /> },
+      { path: ROUTES.MASTER.PRICING_TIERS.EDIT, element: <EditPricingTierPage /> },
 
       { path: ROUTES.EXAMS.LIST, element: <ExamsPage /> },
       { path: ROUTES.EXAMS.CREATE, element: <CreateExamPage /> },
