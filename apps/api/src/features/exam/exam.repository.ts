@@ -6,6 +6,7 @@ export interface IExamRepository {
   findById(id: string): Promise<Exam | null>;
   findByCode(examCode: string): Promise<Exam | null>;
   findAll(options?: { onlyActive?: boolean; onlyPopular?: boolean }): Promise<Exam[]>;
+  findByUserId(userId: string): Promise<Exam[]>;
   update(id: string, data: Partial<Exam>): Promise<Exam>;
   delete(id: string): Promise<void>;
   saveMany(exams: Exam[]): Promise<void>;
@@ -135,6 +136,30 @@ export class PrismaExamRepository implements IExamRepository {
       where: { id },
     });
   }
+  async findByUserId(userId: string): Promise<Exam[]> {
+    const exams = await this.prisma.exam.findMany({
+      where: {
+        userExamPreferences: {
+          some: {
+            userId,
+          },
+        },
+      },
+    });
+    return exams.map(
+      (exam) =>
+        new Exam({
+          id: exam.id,
+          examCode: exam.examCode,
+          examName: exam.examName,
+          examFullName: exam.examFullName,
+          examBoard: exam.examBoard,
+          isActive: exam.isActive,
+          isPopular: exam.isPopular,
+          createdAt: exam.createdAt,
+          updatedAt: exam.updatedAt,
+        })
+    );
 
   async saveMany(exams: Exam[]): Promise<void> {
     await this.prisma.exam.createMany({

@@ -5,6 +5,16 @@ import { NotFoundError, HttpStatus } from "../../utils";
 export class ExamController {
   constructor(private readonly examService: ExamService) {}
 
+  async getStudentExams(req: Request, res: Response): Promise<void> {
+    const { id } = req.params;
+    const exams = await this.examService.getStudentExams(id);
+
+    res.json({
+      success: true,
+      data: exams,
+    });
+  }
+
   async create(req: Request, res: Response): Promise<void> {
     const exam = await this.examService.createExam(req.body);
 
