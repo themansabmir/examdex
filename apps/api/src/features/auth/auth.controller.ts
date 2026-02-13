@@ -101,7 +101,7 @@ export class AuthController {
   };
 
   inviteAdmin = async (req: Request, res: Response): Promise<void> => {
-    const invitedBy = (req as any).user?.userId;
+    const invitedBy = (req as any).user?.id;
     await this.authService.inviteAdmin(req.body, invitedBy);
 
     res.status(HttpStatus.OK).json({
