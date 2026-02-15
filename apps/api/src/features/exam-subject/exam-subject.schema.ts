@@ -8,6 +8,18 @@ export const createExamSubjectSchema = z.object({
   displayOrder: z.number().int().positive("Display order must be positive").optional(),
 });
 
+export const createBulkExamSubjectSchema = z.object({
+  examId: z.string({ required_error: "Exam ID is required" }).uuid("Invalid exam ID format"),
+  items: z.array(
+    z.object({
+      subjectId: z
+        .string({ required_error: "Subject ID is required" })
+        .uuid("Invalid subject ID format"),
+      displayOrder: z.number().int().positive("Display order must be positive").optional(),
+    })
+  ).min(1, "At least one item is required"),
+});
+
 export const updateExamSubjectSchema = z.object({
   displayOrder: z.number().int().positive("Display order must be positive").optional(),
   isActive: z.boolean().optional(),
@@ -29,5 +41,6 @@ export const examSubjectSubjectIdParamSchema = z.object({
 
 
 export type CreateExamSubjectInput = z.infer<typeof createExamSubjectSchema>;
+export type CreateBulkExamSubjectInput = z.infer<typeof createBulkExamSubjectSchema>;
 export type UpdateExamSubjectInput = z.infer<typeof updateExamSubjectSchema>;
 export type ExamSubjectIdParam = z.infer<typeof examSubjectIdParamSchema>;

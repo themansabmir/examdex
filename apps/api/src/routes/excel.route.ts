@@ -37,7 +37,39 @@ router.post("/:moduleName", protect, upload.single("file"), async (req, res, nex
       case "chapter":
         // Validate required headers
         ExcelService.validateHeaders(data, ["subjectCode", "chapterCode", "chapterName"]);
-        result = await chapterService.bulkCreateChapters(data);
+
+        // Group chapters by subjectCode
+        const chaptersBySubject = new Map<string, any[]>();
+        for (const row of data) {
+          const subjectCode = row.subjectCode;
+          if (!chaptersBySubject.has(subjectCode)) {
+            chaptersBySubject.set(subjectCode, []);
+          }
+          chaptersBySubject.get(subjectCode)!.push({
+            chapterCode: row.chapterCode,
+            chapterName: row.chapterName,
+            classId: row.classId,
+          });
+        }
+
+        // Process each subject's chapters
+        let totalCount = 0;
+        for (const [subjectCode, chapters] of chaptersBySubject.entries()) {
+          // Look up subject by code
+          const subject = await subjectService.getSubjectByCode(subjectCode);
+          if (!subject) {
+            throw new BadRequestError(`Subject not found: ${subjectCode}`);
+          }
+
+          // Call bulk create with proper format
+          const bulkResult = await chapterService.bulkCreateChapters({
+            subjectId: subject.id,
+            chapters,
+          });
+          totalCount += bulkResult.count;
+        }
+
+        result = { count: totalCount };
         break;
       default:
         throw new BadRequestError(`Invalid module name: ${moduleName}`);

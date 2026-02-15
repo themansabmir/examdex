@@ -5,6 +5,8 @@ import type {
   CreateExamSubjectInputDTO,
   UpdateExamSubjectInputDTO,
   ExamSubjectOutputDTO,
+  CreateBulkExamSubjectInputDTO,
+  ExamSubjectWithDetailsOutputDTO,
 } from "./exam-subject.dto";
 import { ConflictError, NotFoundError } from "../../utils";
 import type { IExamRepository } from "../exam/exam.repository";
@@ -12,13 +14,13 @@ import type { ISubjectRepository } from "../subject/subject.repository";
 
 export interface IExamSubjectService {
   createMapping(input: CreateExamSubjectInputDTO): Promise<ExamSubjectOutputDTO>;
-  getMappingById(id: string): Promise<ExamSubjectOutputDTO | null>;
-  getSubjectsForExam(examId: string, onlyActive?: boolean): Promise<ExamSubjectOutputDTO[]>;
-  getExamsForSubject(subjectId: string, onlyActive?: boolean): Promise<ExamSubjectOutputDTO[]>;
-  getAllMappings(onlyActive?: boolean): Promise<ExamSubjectOutputDTO[]>;
+  getMappingById(id: string): Promise<ExamSubjectWithDetailsOutputDTO | null>;
+  getSubjectsForExam(examId: string, onlyActive?: boolean): Promise<ExamSubjectWithDetailsOutputDTO[]>;
+  getExamsForSubject(subjectId: string, onlyActive?: boolean): Promise<ExamSubjectWithDetailsOutputDTO[]>;
+  getAllMappings(onlyActive?: boolean): Promise<ExamSubjectWithDetailsOutputDTO[]>;
   updateMapping(id: string, input: UpdateExamSubjectInputDTO): Promise<ExamSubjectOutputDTO>;
   deleteMapping(id: string): Promise<void>;
-  bulkCreateMappings(inputs: { examCode: string; subjectCode: string; displayOrder?: number }[]): Promise<{ count: number }>;
+  createMappingsForExam(input: CreateBulkExamSubjectInputDTO): Promise<ExamSubjectOutputDTO[]>;
 }
 
 export class ExamSubjectService implements IExamSubjectService {
@@ -104,7 +106,63 @@ export class ExamSubjectService implements IExamSubjectService {
     await this.examSubjectRepository.delete(id);
   }
 
-  private toOutputDTO(examSubject: ExamSubject): ExamSubjectOutputDTO {
+  async createMappingsForExam(input: CreateBulkExamSubjectInputDTO): Promise<ExamSubjectOutputDTO[]> {
+    // 1. Validate Exam Exists
+    const exam = await this.examRepository.findById(input.examId);
+    if (!exam) {
+      throw new NotFoundError("Exam not found", "EXAM_NOT_FOUND");
+    }
+
+    if (input.items.length === 0) {
+      return [];
+    }
+
+    // 2. Validate Subjects Exist
+    const subjectIds = [...new Set(input.items.map(i => i.subjectId))];
+    const subjects = await this.subjectRepository.findByIds(subjectIds);
+
+    // Create a map for quick lookup
+    const subjectMap = new Map(subjects.map(s => [s.id, s]));
+    const missingSubjects = subjectIds.filter(id => !subjectMap.has(id));
+
+    if (missingSubjects.length > 0) {
+      throw new NotFoundError(`Subjects not found: ${missingSubjects.join(', ')}`, "SUBJECT_NOT_FOUND");
+    }
+
+    // 3. Filter out existing mappings to avoid duplicates (Idempotency)
+    const existingMappings = await this.examSubjectRepository.findByExamId(input.examId);
+    const existingSubjectIds = new Set(existingMappings.map(e => e.subjectId));
+
+    const newItems = input.items.filter(item => !existingSubjectIds.has(item.subjectId));
+
+    if (newItems.length === 0) {
+      // All requested mappings already exist
+      return existingMappings.filter(m => subjectIds.includes(m.subjectId)).map(m => this.toOutputDTO(m));
+    }
+
+    // 4. Create new mappings
+    const newMappings: ExamSubject[] = newItems.map(item => new ExamSubject({
+      id: randomUUID(),
+      examId: input.examId,
+      subjectId: item.subjectId,
+      displayOrder: item.displayOrder ?? null,
+      isActive: true,
+      createdAt: new Date(),
+      updatedAt: new Date(),
+    }));
+
+    await this.examSubjectRepository.saveMany(newMappings);
+
+    // 5. Return all requested mappings (existing + new)
+    // We need to fetch again or combine.
+    // Let's combining memory for efficiency.
+    const createdDTOs = newMappings.map(m => this.toOutputDTO(m));
+    const existingDTOs = existingMappings.filter(m => subjectIds.includes(m.subjectId)).map(m => this.toOutputDTO(m));
+
+    return [...existingDTOs, ...createdDTOs];
+  }
+
+  private toOutputDTO(examSubject: ExamSubject): ExamSubjectWithDetailsOutputDTO {
     return {
       id: examSubject.id,
       examId: examSubject.examId,
@@ -113,69 +171,10 @@ export class ExamSubjectService implements IExamSubjectService {
       isActive: examSubject.isActive,
       createdAt: examSubject.createdAt,
       updatedAt: examSubject.updatedAt,
+      subject: examSubject.subject,
+      exam: examSubject.exam,
     };
   }
 
-  async bulkCreateMappings(inputs: { examCode: string; subjectCode: string; displayOrder?: number }[]): Promise<{ count: number }> {
-    // 1. Resolve Exams and Subjects by Code
-    const examCodes = [...new Set(inputs.map(i => i.examCode))];
-    const subjectCodes = [...new Set(inputs.map(i => i.subjectCode))];
 
-    const exams = await this.examRepository.findAll();
-    const subjects = await this.subjectRepository.findAll();
-
-    const examMap = new Map(exams.map(e => [e.examCode, e.id]));
-    const subjectMap = new Map(subjects.map(s => [s.subjectCode, s.id]));
-
-    // Validate all codes exist
-    const missingExams = examCodes.filter(c => !examMap.has(c));
-    if (missingExams.length > 0) throw new NotFoundError(`Exams not found: ${missingExams.join(', ')}`, "EXAM_NOT_FOUND");
-
-    const missingSubjects = subjectCodes.filter(c => !subjectMap.has(c));
-    if (missingSubjects.length > 0) throw new NotFoundError(`Subjects not found: ${missingSubjects.join(', ')}`, "SUBJECT_NOT_FOUND");
-
-    // 2. Prepare Mappings
-    const mappings: ExamSubject[] = [];
-
-    for (const input of inputs) {
-      const examId = examMap.get(input.examCode)!;
-      const subjectId = subjectMap.get(input.subjectCode)!;
-
-      mappings.push(new ExamSubject({
-        id: randomUUID(),
-        examId,
-        subjectId,
-        displayOrder: input.displayOrder ?? null,
-        isActive: true,
-        createdAt: new Date(),
-        updatedAt: new Date()
-      }));
-    }
-
-    // 3. Check for duplicates in Input
-    const uniqueKeys = new Set(mappings.map(m => `${m.examId}:${m.subjectId}`));
-    if (uniqueKeys.size !== mappings.length) {
-      throw new ConflictError("Duplicate exam-subject pairs in input", "DUPLICATE_INPUT_PAIRS");
-    }
-
-    // 4. Check against DB Existing Mappings
-    // Fetch all mappings to check for duplicates in memory
-    const allMappings = await this.examSubjectRepository.findAll();
-    const existingSet = new Set(allMappings.map(m => `${m.examId}:${m.subjectId}`));
-
-    const duplicates = mappings.filter(m => existingSet.has(`${m.examId}:${m.subjectId}`));
-    if (duplicates.length > 0) {
-      // Find back the codes for error message
-      // This is a bit complex reverse lookup, so maybe just generic error or first one.
-      throw new ConflictError(`Some mappings already exist (e.g. ${duplicates[0].examId} - ${duplicates[0].subjectId})`, "MAPPING_EXISTS");
-    }
-
-    await this.examSubjectRepository.save(mappings[0]); // WAIT - repo.save is single! repository needs bulk save.
-    // We need to add saveMany to repository.
-    // Use a loop for now or update repository. Updating repository is better.
-
-    // Current implementation only supports single creation via loop for now or needs repo update.
-    // For this release, we will throw if not redundant.
-    throw new Error("Repository does not support bulk save yet");
-  }
 }

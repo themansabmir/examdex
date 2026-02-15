@@ -9,6 +9,16 @@ export interface UpdateExamSubjectInputDTO {
   isActive?: boolean;
 }
 
+export interface CreateExamSubjectMappingItemDTO {
+  subjectId: string;
+  displayOrder?: number;
+}
+
+export interface CreateBulkExamSubjectInputDTO {
+  examId: string;
+  items: CreateExamSubjectMappingItemDTO[];
+}
+
 export interface ExamSubjectOutputDTO {
   id: string;
   examId: string;

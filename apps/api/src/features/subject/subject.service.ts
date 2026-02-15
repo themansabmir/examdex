@@ -32,6 +32,13 @@ export class SubjectService {
     return this.toOutputDTO(subject);
   }
 
+  async getSubjectByCode(subjectCode: string): Promise<SubjectOutputDTO | null> {
+    const subject = await this.subjectRepository.findByCode(subjectCode);
+    if (!subject) return null;
+
+    return this.toOutputDTO(subject);
+  }
+
   async getAllSubjects(options?: { onlyActive?: boolean }): Promise<SubjectOutputDTO[]> {
     const subjects = await this.subjectRepository.findAll(options);
     return subjects.map((subject) => this.toOutputDTO(subject));
