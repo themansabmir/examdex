@@ -4,6 +4,7 @@ import { Subject } from "./subject.entity";
 export interface ISubjectRepository {
   save(subject: Subject): Promise<Subject>;
   findById(id: string): Promise<Subject | null>;
+  findByIds(ids: string[]): Promise<Subject[]>;
   findByCode(subjectCode: string): Promise<Subject | null>;
   findAll(options?: { onlyActive?: boolean }): Promise<Subject[]>;
   update(id: string, data: Partial<Subject>): Promise<Subject>;
@@ -12,7 +13,7 @@ export interface ISubjectRepository {
 }
 
 export class PrismaSubjectRepository implements ISubjectRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) { }
 
   async save(subject: Subject): Promise<Subject> {
     const savedSubject = await this.prisma.subject.create({
@@ -45,6 +46,22 @@ export class PrismaSubjectRepository implements ISubjectRepository {
       subjectName: subject.subjectName,
       isActive: subject.isActive,
     });
+  }
+
+  async findByIds(ids: string[]): Promise<Subject[]> {
+    const subjects = await this.prisma.subject.findMany({
+      where: { id: { in: ids } },
+    });
+
+    return subjects.map(
+      (subject) =>
+        new Subject({
+          id: subject.id,
+          subjectCode: subject.subjectCode,
+          subjectName: subject.subjectName,
+          isActive: subject.isActive,
+        })
+    );
   }
 
   async findByCode(subjectCode: string): Promise<Subject | null> {

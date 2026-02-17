@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { examController } from "../container/index";
 import { validateBody, validateParams } from "../middleware";
-import { createExamSchema, examIdParamSchema } from "../features/exam/exam.schema";
+import { createExamSchema, updateExamSchema, examIdParamSchema } from "../features/exam/exam.schema";
 
 const router = Router();
 
@@ -15,6 +15,19 @@ router.get("/", (req, res, next) => {
 
 router.get("/:id", validateParams(examIdParamSchema), (req, res, next) => {
   examController.getById(req, res).catch(next);
+});
+
+router.patch(
+  "/:id",
+  validateParams(examIdParamSchema),
+  validateBody(updateExamSchema),
+  (req, res, next) => {
+    examController.update(req, res).catch(next);
+  }
+);
+
+router.delete("/:id", validateParams(examIdParamSchema), (req, res, next) => {
+  examController.delete(req, res).catch(next);
 });
 
 export const examRoutes = router;

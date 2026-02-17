@@ -501,6 +501,28 @@
           "response": []
         },
         {
+          "name": "Bulk Create Chapters",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"subjectId\": \"<SUBJECT_UUID>\",\n    \"chapters\": [\n        {\n            \"chapterCode\": \"CH_01\",\n            \"chapterName\": \"Chapter 1\"\n        },\n        {\n            \"chapterCode\": \"CH_02\",\n            \"chapterName\": \"Chapter 2\"\n        }\n    ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/chapters/bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["chapters", "bulk"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get All Chapters",
           "request": {
             "method": "GET",
@@ -677,6 +699,24 @@
           "response": []
         },
         {
+          "name": "Bulk Create Mappings",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"examId\": \"<EXAM_UUID>\",\n    \"items\": [\n        {\n            \"subjectId\": \"<SUBJECT_1_UUID>\",\n            \"displayOrder\": 1\n        },\n        {\n            \"subjectId\": \"<SUBJECT_2_UUID>\",\n            \"displayOrder\": 2\n        }\n    ]\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exam-subject/bulk",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-subject", "bulk"]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Get All Mappings",
           "request": {
             "method": "GET",
@@ -685,6 +725,25 @@
               "raw": "{{baseUrl}}/exam-subject",
               "host": ["{{baseUrl}}"],
               "path": ["exam-subject"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update Mapping",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"displayOrder\": 2,\n    \"isActive\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/exam-subject/:id",
+              "host": ["{{baseUrl}}"],
+              "path": ["exam-subject", ":id"],
+              "variable": [{ "key": "id", "value": "" }]
             }
           },
           "response": []
@@ -733,70 +792,7 @@
         }
       ]
     },
-    {
-      "name": "Subject-Chapter Mapping",
-      "item": [
-        {
-          "name": "Create Mapping",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n    \"examSubjectId\": \"<EXAM_SUBJECT_MAPPING_UUID>\",\n    \"chapterId\": \"<CHAPTER_UUID>\",\n    \"weightagePercentage\": 10.5,\n    \"chapterNumber\": 1\n}",
-              "options": { "raw": { "language": "json" } }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/subject-chapter",
-              "host": ["{{baseUrl}}"],
-              "path": ["subject-chapter"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get All Mappings",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/subject-chapter",
-              "host": ["{{baseUrl}}"],
-              "path": ["subject-chapter"]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Get Chapters by Exam-Subject",
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/subject-chapter/by-exam-subject/:examSubjectId",
-              "host": ["{{baseUrl}}"],
-              "path": ["subject-chapter", "by-exam-subject", ":examSubjectId"],
-              "variable": [{ "key": "examSubjectId", "value": "" }]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Delete Mapping",
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/subject-chapter/:id",
-              "host": ["{{baseUrl}}"],
-              "path": ["subject-chapter", ":id"],
-              "variable": [{ "key": "id", "value": "" }]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
+
     {
       "name": "Bulk Upload (Excel)",
       "item": [

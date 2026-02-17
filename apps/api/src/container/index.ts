@@ -7,5 +7,5 @@ export * from "./chapter.container";
 export * from "./dev.container";
 export * from "./class.container";
 export * from "./exam-subject.container";
-export * from "./subject-chapter.container";
+
 export * from "./pricing-tier.container";

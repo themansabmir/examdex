@@ -3,6 +3,7 @@ import { chapterController } from "../container/index";
 import { validateBody, validateParams } from "../middleware";
 import {
   createChapterSchema,
+  bulkCreateChapterSchema,
   updateChapterSchema,
   chapterIdParamSchema,
 } from "../features/chapter/chapter.schema";
@@ -11,6 +12,10 @@ const router = Router();
 
 router.post("/", validateBody(createChapterSchema), (req, res, next) => {
   chapterController.create(req, res).catch(next);
+});
+
+router.post("/bulk", validateBody(bulkCreateChapterSchema), (req, res, next) => {
+  chapterController.bulkCreate(req, res).catch(next);
 });
 
 router.get("/", (req, res, next) => {

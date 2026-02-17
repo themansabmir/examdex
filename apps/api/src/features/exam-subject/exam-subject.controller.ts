@@ -3,7 +3,7 @@ import type { IExamSubjectService } from "./exam-subject.service";
 import { HttpStatus, NotFoundError } from "../../utils";
 
 export class ExamSubjectController {
-  constructor(private readonly examSubjectService: IExamSubjectService) {}
+  constructor(private readonly examSubjectService: IExamSubjectService) { }
 
   async createMapping(req: Request, res: Response): Promise<void> {
     const mapping = await this.examSubjectService.createMapping(req.body);
@@ -11,6 +11,15 @@ export class ExamSubjectController {
     res.status(HttpStatus.CREATED).json({
       success: true,
       data: mapping,
+    });
+  }
+
+  async createBulkMappings(req: Request, res: Response): Promise<void> {
+    const mappings = await this.examSubjectService.createMappingsForExam(req.body);
+
+    res.status(HttpStatus.CREATED).json({
+      success: true,
+      data: mappings,
     });
   }
 

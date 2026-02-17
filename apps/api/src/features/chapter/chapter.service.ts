@@ -1,6 +1,6 @@
 import type { IChapterRepository } from "./chapter.repository";
 import { Chapter } from "./chapter.entity";
-import type { CreateChapterInputDTO, UpdateChapterInputDTO, ChapterOutputDTO } from "./chapter.dto";
+import type { CreateChapterInputDTO, BulkCreateChapterInputDTO, UpdateChapterInputDTO, ChapterOutputDTO } from "./chapter.dto";
 import { ConflictError, NotFoundError } from "../../utils";
 import { randomUUID } from "crypto";
 import type { ISubjectRepository } from "../subject/subject.repository";
@@ -72,68 +72,39 @@ export class ChapterService {
     await this.chapterRepository.delete(id);
   }
 
-  async bulkCreateChapters(inputs: (CreateChapterInputDTO & { subjectCode?: string })[]): Promise<{ count: number }> {
-    // 1. Group inputs by subject (either ID or Code)
-    const subjectMap = new Map<string, string>(); // Code -> ID
-
-    // Collect all subject codes needed
-    const subjectCodes = inputs
-      .filter(i => i.subjectCode && !i.subjectId)
-      .map(i => i.subjectCode as string);
-
-    if (subjectCodes.length > 0) {
-      const subjects = await this.subjectRepository.findAll();
-      subjects.forEach(s => subjectMap.set(s.subjectCode, s.id));
+  async bulkCreateChapters(input: BulkCreateChapterInputDTO): Promise<{ count: number }> {
+    // 1. Verify Subject Exists
+    const subject = await this.subjectRepository.findById(input.subjectId);
+    if (!subject) {
+      throw new NotFoundError("Subject not found", "SUBJECT_NOT_FOUND");
     }
 
-    // 2. Prepare chapters with resolved IDs
-    const chaptersToCreate: Chapter[] = [];
-
-    for (const input of inputs) {
-      let subjectId = input.subjectId;
-
-      // Resolve subject code if ID is missing
-      if (!subjectId && input.subjectCode) {
-        const resolvedId = subjectMap.get(input.subjectCode);
-        if (!resolvedId) {
-          throw new NotFoundError(
-            `Subject code not found: ${input.subjectCode}`,
-            "SUBJECT_NOT_FOUND"
-          );
-        }
-        subjectId = resolvedId;
-      } else if (!subjectId) {
-        throw new ConflictError("Either subjectId or subjectCode must be provided", "MISSING_SUBJECT_IDENTIFIER");
-      }
-
-      chaptersToCreate.push(
-        new Chapter({
-          id: randomUUID(),
-          subjectId: subjectId!, // Assert non-null because valid ID is guaranteed by checks above
-          chapterCode: input.chapterCode,
-          chapterName: input.chapterName,
-          classId: input.classId ?? null,
-          isActive: true,
-        })
-      );
+    const collection = input.chapters;
+    if (collection.length === 0) {
+      return { count: 0 };
     }
 
-    // Check for duplicates within input
+    // 2. Prepare chapters
+    const chaptersToCreate: Chapter[] = collection.map(c => new Chapter({
+      id: randomUUID(),
+      subjectId: input.subjectId,
+      chapterCode: c.chapterCode,
+      chapterName: c.chapterName,
+      classId: c.classId ?? null,
+      isActive: true,
+    }));
+
+    // 3. Check for duplicates within input
     const uniqueKeys = new Set(chaptersToCreate.map(c => `${c.subjectId}:${c.chapterCode}`));
     if (uniqueKeys.size !== chaptersToCreate.length) {
       throw new ConflictError("Duplicate chapter codes for same subject in input", "DUPLICATE_INPUT_CHAPTERS");
     }
 
-    // Check against DB
-    const involvedSubjectIds = new Set(chaptersToCreate.map(c => c.subjectId));
-    const allExistingChapters = await this.chapterRepository.findAll();
-    const existingSet = new Set(
-      allExistingChapters
-        .filter(c => involvedSubjectIds.has(c.subjectId))
-        .map(c => `${c.subjectId}:${c.chapterCode}`)
-    );
+    // 4. Check against DB
+    const existingChapters = await this.chapterRepository.findAll({ subjectId: input.subjectId });
+    const existingCodes = new Set(existingChapters.map(c => c.chapterCode));
 
-    const duplicates = chaptersToCreate.filter(c => existingSet.has(`${c.subjectId}:${c.chapterCode}`));
+    const duplicates = chaptersToCreate.filter(c => existingCodes.has(c.chapterCode));
     if (duplicates.length > 0) {
       throw new ConflictError(
         `Chapters already exist: ${duplicates.map(d => d.chapterCode).join(", ")}`,

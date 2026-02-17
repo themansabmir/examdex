@@ -5,6 +5,15 @@ export interface CreateChapterInputDTO {
   classId?: string;
 }
 
+export interface BulkCreateChapterInputDTO {
+  subjectId: string;
+  chapters: {
+    chapterCode: string;
+    chapterName: string;
+    classId?: string;
+  }[];
+}
+
 export interface UpdateChapterInputDTO {
   chapterName?: string;
   classId?: string;
