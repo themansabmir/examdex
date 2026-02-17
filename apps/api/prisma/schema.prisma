@@ -174,7 +174,7 @@ model ExamSubject {
   // Relations
   exam              Exam               @relation(fields: [examId], references: [id], onDelete: Cascade)
   subject           Subject            @relation(fields: [subjectId], references: [id], onDelete: Cascade)
-  subjectChapters   SubjectChapter[]
+
   generatedPapers   GeneratedPaper[]
   aiPromptTemplates AiPromptTemplate[]
 
@@ -196,7 +196,7 @@ model Chapter {
   // Relations
   subject         Subject           @relation(fields: [subjectId], references: [id], onDelete: Cascade)
   class           Class?            @relation(fields: [classId], references: [id])
-  subjectChapters SubjectChapter[]
+
   uploadedContent UploadedContent[]
 
   @@unique([subjectId, chapterCode])
@@ -206,23 +206,8 @@ model Chapter {
 }
 
 // Exam-specific chapter configuration (weightage varies by exam)
-model SubjectChapter {
-  id                  String  @id @default(uuid()) @db.Uuid
-  examSubjectId       String  @map("exam_subject_id") @db.Uuid
-  chapterId           String  @map("chapter_id") @db.Uuid
-  chapterNumber       Int?    @map("chapter_number")
-  weightagePercentage Decimal @default(0.00) @map("weightage_percentage") @db.Decimal(5, 2)
-  isActive            Boolean @default(true) @map("is_active")
+// REMOVED SubjectChapter model
 
-  // Relations
-  examSubject ExamSubject @relation(fields: [examSubjectId], references: [id], onDelete: Cascade)
-  chapter     Chapter     @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-
-  @@unique([examSubjectId, chapterId])
-  @@index([examSubjectId])
-  @@index([chapterId])
-  @@map("subject_chapters")
-}
 
 // Optional: Educational class/grade level (e.g., Class 11, Class 12)
 model Class {

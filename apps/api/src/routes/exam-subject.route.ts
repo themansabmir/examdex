@@ -3,6 +3,7 @@ import { examSubjectController } from "../container";
 import { validateBody, validateParams } from "../middleware";
 import {
   createExamSubjectSchema,
+  createBulkExamSubjectSchema,
   updateExamSubjectSchema,
   examSubjectIdParamSchema,
   examSubjectExamIdParamSchema,
@@ -14,6 +15,11 @@ const router = Router();
 // Create exam-subject mapping
 router.post("/", validateBody(createExamSubjectSchema), (req, res, next) => {
   examSubjectController.createMapping(req, res).catch(next);
+});
+
+// Bulk create exam-subject mappings
+router.post("/bulk", validateBody(createBulkExamSubjectSchema), (req, res, next) => {
+  examSubjectController.createBulkMappings(req, res).catch(next);
 });
 
 // Get all mappings

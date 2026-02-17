@@ -53,6 +53,22 @@ export class PrismaExamSubjectRepository implements IExamSubjectRepository {
   async findById(id: string): Promise<ExamSubject | null> {
     const examSubject = await this.prisma.examSubject.findUnique({
       where: { id },
+      include: {
+        subject: {
+          select: {
+            id: true,
+            subjectCode: true,
+            subjectName: true,
+          },
+        },
+        exam: {
+          select: {
+            id: true,
+            examCode: true,
+            examName: true,
+          },
+        },
+      },
     });
 
     if (!examSubject) return null;
@@ -65,6 +81,8 @@ export class PrismaExamSubjectRepository implements IExamSubjectRepository {
       isActive: examSubject.isActive,
       createdAt: new Date(),
       updatedAt: new Date(),
+      subject: examSubject.subject,
+      exam: examSubject.exam,
     });
   }
 
@@ -94,6 +112,15 @@ export class PrismaExamSubjectRepository implements IExamSubjectRepository {
         examId,
         ...(options?.onlyActive && { isActive: true }),
       },
+      include: {
+        subject: {
+          select: {
+            id: true,
+            subjectCode: true,
+            subjectName: true,
+          },
+        },
+      },
       orderBy: [{ displayOrder: "asc" }, { subjectId: "asc" }],
     });
 
@@ -107,6 +134,7 @@ export class PrismaExamSubjectRepository implements IExamSubjectRepository {
           isActive: es.isActive,
           createdAt: new Date(),
           updatedAt: new Date(),
+          subject: es.subject,
         })
     );
   }
@@ -119,6 +147,15 @@ export class PrismaExamSubjectRepository implements IExamSubjectRepository {
       where: {
         subjectId,
         ...(options?.onlyActive && { isActive: true }),
+      },
+      include: {
+        exam: {
+          select: {
+            id: true,
+            examCode: true,
+            examName: true,
+          },
+        },
       },
       orderBy: { displayOrder: "asc" },
     });
@@ -133,6 +170,7 @@ export class PrismaExamSubjectRepository implements IExamSubjectRepository {
           isActive: es.isActive,
           createdAt: new Date(),
           updatedAt: new Date(),
+          exam: es.exam,
         })
     );
   }
@@ -141,6 +179,22 @@ export class PrismaExamSubjectRepository implements IExamSubjectRepository {
     const examSubjects = await this.prisma.examSubject.findMany({
       where: {
         ...(options?.onlyActive && { isActive: true }),
+      },
+      include: {
+        subject: {
+          select: {
+            id: true,
+            subjectCode: true,
+            subjectName: true,
+          },
+        },
+        exam: {
+          select: {
+            id: true,
+            examCode: true,
+            examName: true,
+          },
+        },
       },
       orderBy: [{ displayOrder: "asc" }, { subjectId: "asc" }],
     });
@@ -155,6 +209,8 @@ export class PrismaExamSubjectRepository implements IExamSubjectRepository {
           isActive: es.isActive,
           createdAt: new Date(),
           updatedAt: new Date(),
+          subject: es.subject,
+          exam: es.exam,
         })
     );
   }

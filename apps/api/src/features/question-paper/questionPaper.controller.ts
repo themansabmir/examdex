@@ -1,10 +1,10 @@
 import { Request, Response } from "express";
 import { QuestionPaperService } from "./questionPaper.service";
-import { PrismaClient } from "@prisma/client";
 import { PrismaUserRepository } from "../user/user.repository";
 import { PrismaExamRepository } from "../exam/exam.repository";
+import { prisma } from "../../lib";
 
-const prisma = new PrismaClient();
+// const prisma = new PrismaClient(); // REMOVED: Do not instantiate directly
 const questionPaperService = new QuestionPaperService();
 const userRepository = new PrismaUserRepository(prisma);
 const examRepository = new PrismaExamRepository(prisma);

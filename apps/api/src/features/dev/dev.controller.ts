@@ -7,7 +7,7 @@ export class DevController {
   constructor(
     private readonly userService: IUserService,
     private readonly userRepository: IUserRepository
-  ) {}
+  ) { }
 
   seedAdmin = async (_req: Request, res: Response): Promise<void> => {
     if (process.env.NODE_ENV === "production") {

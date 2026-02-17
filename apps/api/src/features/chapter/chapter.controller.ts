@@ -3,7 +3,7 @@ import type { ChapterService } from "./chapter.service";
 import { NotFoundError, HttpStatus } from "../../utils";
 
 export class ChapterController {
-  constructor(private readonly chapterService: ChapterService) {}
+  constructor(private readonly chapterService: ChapterService) { }
 
   async create(req: Request, res: Response): Promise<void> {
     const chapter = await this.chapterService.createChapter(req.body);
@@ -11,6 +11,15 @@ export class ChapterController {
     res.status(HttpStatus.CREATED).json({
       success: true,
       data: chapter,
+    });
+  }
+
+  async bulkCreate(req: Request, res: Response): Promise<void> {
+    const result = await this.chapterService.bulkCreateChapters(req.body);
+
+    res.status(HttpStatus.CREATED).json({
+      success: true,
+      data: result,
     });
   }
 

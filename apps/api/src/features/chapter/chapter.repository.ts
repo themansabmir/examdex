@@ -4,6 +4,7 @@ import { Chapter } from "./chapter.entity";
 export interface IChapterRepository {
   save(chapter: Chapter): Promise<Chapter>;
   findById(id: string): Promise<Chapter | null>;
+  findByIds(ids: string[]): Promise<Chapter[]>;
   findBySubjectAndCode(subjectId: string, chapterCode: string): Promise<Chapter | null>;
   findAll(options?: {
     onlyActive?: boolean;
@@ -16,7 +17,7 @@ export interface IChapterRepository {
 }
 
 export class PrismaChapterRepository implements IChapterRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) { }
 
   async save(chapter: Chapter): Promise<Chapter> {
     const savedChapter = await this.prisma.chapter.create({
@@ -55,6 +56,24 @@ export class PrismaChapterRepository implements IChapterRepository {
       classId: chapter.classId,
       isActive: chapter.isActive,
     });
+  }
+
+  async findByIds(ids: string[]): Promise<Chapter[]> {
+    const chapters = await this.prisma.chapter.findMany({
+      where: { id: { in: ids } },
+    });
+
+    return chapters.map(
+      (chapter) =>
+        new Chapter({
+          id: chapter.id,
+          subjectId: chapter.subjectId,
+          chapterCode: chapter.chapterCode,
+          chapterName: chapter.chapterName,
+          classId: chapter.classId,
+          isActive: chapter.isActive,
+        })
+    );
   }
 
   async findBySubjectAndCode(subjectId: string, chapterCode: string): Promise<Chapter | null> {

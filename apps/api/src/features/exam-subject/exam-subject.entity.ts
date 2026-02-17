@@ -6,6 +6,16 @@ export interface ExamSubjectProps {
   isActive: boolean;
   createdAt: Date;
   updatedAt: Date;
+  subject?: {
+    id: string;
+    subjectCode: string;
+    subjectName: string;
+  };
+  exam?: {
+    id: string;
+    examCode: string;
+    examName: string;
+  };
 }
 
 export class ExamSubject {
@@ -25,5 +35,19 @@ export class ExamSubject {
     this.isActive = props.isActive;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
+    this.subject = props.subject;
+    this.exam = props.exam;
   }
+
+  readonly subject?: {
+    id: string;
+    subjectCode: string;
+    subjectName: string;
+  };
+
+  readonly exam?: {
+    id: string;
+    examCode: string;
+    examName: string;
+  };
 }
