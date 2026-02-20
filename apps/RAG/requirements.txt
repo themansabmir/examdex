@@ -1,0 +1,33 @@
+# Core RAG dependencies
+pydantic-settings==2.7.1
+langchain==0.3.20
+langchain-openai==0.3.8
+langchain-pinecone==0.2.5
+langchain-community==0.3.19
+
+# PDF & DOCX processing
+pypdf==5.3.1
+python-docx==1.1.2
+
+# Vector DB
+pinecone-client==5.0.1
+
+# OpenAI
+openai==1.59.9
+
+# Queue (async job processing - BullMQ-compatible via Redis)
+redis==5.2.1
+rq==2.3.3
+
+# Config & utilities
+python-dotenv==1.0.1
+pydantic==2.10.6
+tenacity==9.0.0
+
+# Logging
+structlog==25.1.0
+
+# HTTP (for health check server)
+fastapi==0.115.8
+uvicorn==0.34.0
+httpx==0.28.1
