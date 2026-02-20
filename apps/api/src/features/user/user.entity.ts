@@ -12,10 +12,11 @@ export interface UserProps {
   deviceFingerprint: string | null;
   lastLoginAt: Date | null;
   createdAt: Date;
+  currentExam?: { id: string; name: string };
 }
 
 export class User {
-  constructor(private readonly props: UserProps) {}
+  constructor(private readonly props: UserProps) { }
 
   get id(): string {
     return this.props.id;
@@ -67,5 +68,9 @@ export class User {
 
   get createdAt(): Date {
     return this.props.createdAt;
+  }
+
+  get currentExam(): { id: string; name: string } | undefined {
+    return this.props.currentExam;
   }
 }

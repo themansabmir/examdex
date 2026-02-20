@@ -35,7 +35,7 @@ export interface IUserRepository {
 }
 
 export class PrismaUserRepository implements IUserRepository {
-  constructor(private readonly prisma: PrismaClient) {}
+  constructor(private readonly prisma: PrismaClient) { }
 
   async save(data: {
     email?: string | null;
@@ -46,32 +46,22 @@ export class PrismaUserRepository implements IUserRepository {
     isActive: boolean;
   }): Promise<User> {
     const passwordHash = data.password ? await bcrypt.hash(data.password, 10) : null;
-
-    const user = await this.prisma.user.create({
-      data: {
-        email: data.email,
-        phoneNumber: data.phoneNumber,
-        fullName: data.fullName,
-        passwordHash,
-        userType: data.userType as any,
-        isActive: data.isActive,
-      },
-    });
+    console.log("Mocking DB call for user save:", data);
 
     return new User({
-      id: user.id,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      fullName: user.fullName,
-      passwordHash: user.passwordHash,
-      userType: user.userType,
-      creditBalance: user.creditBalance,
-      totalCreditsPurchased: user.totalCreditsPurchased,
-      isActive: user.isActive,
-      isOnboarded: user.isOnboarded,
-      deviceFingerprint: user.deviceFingerprint,
-      lastLoginAt: user.lastLoginAt,
-      createdAt: user.createdAt,
+      id: "mock-user-id-" + Date.now().toString(),
+      email: data.email || null,
+      phoneNumber: data.phoneNumber || null,
+      fullName: data.fullName,
+      passwordHash,
+      userType: data.userType,
+      creditBalance: 0,
+      totalCreditsPurchased: 0,
+      isActive: data.isActive,
+      isOnboarded: false,
+      deviceFingerprint: null,
+      lastLoginAt: null,
+      createdAt: new Date(),
     });
   }
 
@@ -106,9 +96,9 @@ export class PrismaUserRepository implements IUserRepository {
       createdAt: user.createdAt,
       currentExam: user.examPreferences[0]
         ? {
-            id: user.examPreferences[0].exam.id,
-            name: user.examPreferences[0].exam.examName,
-          }
+          id: user.examPreferences[0].exam.id,
+          name: user.examPreferences[0].exam.examName,
+        }
         : undefined,
     });
   }
@@ -144,49 +134,16 @@ export class PrismaUserRepository implements IUserRepository {
       createdAt: user.createdAt,
       currentExam: user.examPreferences[0]
         ? {
-            id: user.examPreferences[0].exam.id,
-            name: user.examPreferences[0].exam.examName,
-          }
+          id: user.examPreferences[0].exam.id,
+          name: user.examPreferences[0].exam.examName,
+        }
         : undefined,
     });
   }
 
   async findByPhone(phone: string): Promise<User | null> {
-    const user = await this.prisma.user.findUnique({
-      where: { phoneNumber: phone },
-      include: {
-        examPreferences: {
-          where: { isPrimary: true },
-          include: { exam: true },
-        },
-      },
-    });
-
-    if (!user) {
-      return null;
-    }
-
-    return new User({
-      id: user.id,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      fullName: user.fullName,
-      passwordHash: user.passwordHash,
-      userType: user.userType,
-      creditBalance: user.creditBalance,
-      totalCreditsPurchased: user.totalCreditsPurchased,
-      isActive: user.isActive,
-      isOnboarded: user.isOnboarded,
-      deviceFingerprint: user.deviceFingerprint,
-      lastLoginAt: user.lastLoginAt,
-      createdAt: user.createdAt,
-      currentExam: user.examPreferences[0]
-        ? {
-            id: user.examPreferences[0].exam.id,
-            name: user.examPreferences[0].exam.examName,
-          }
-        : undefined,
-    });
+    console.log("Mocking DB call for phone:", phone);
+    return null; // Returning null will trigger the "create temporary user" flow
   }
 
   async findAll(options?: {

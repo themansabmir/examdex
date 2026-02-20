@@ -15,7 +15,7 @@ const upload = multer({ storage: multer.memoryStorage() });
 router.post("/:moduleName", protect, upload.single("file"), async (req, res, next) => {
   try {
     const { moduleName } = req.params;
-    const file = req.file;
+    const file = (req as any).file;
 
     if (!file) {
       throw new BadRequestError("No file uploaded");

@@ -12,6 +12,7 @@ import { devRoutes } from "./dev.route";
 import { excelRoutes } from "./excel.route";
 import { protect } from "../middleware";
 import { questionPaperApiRoutes } from "./question-paper.route";
+import { studentRoutes } from "./student.route";
 
 const router = Router();
 
@@ -28,6 +29,7 @@ router.use("/chapters", protect, chapterRoutes);
 router.use("/classes", protect, classRoutes);
 router.use("/pricing-tiers", protect, pricingTierRoutes);
 router.use("/exam-subject", protect, examSubjectRoutes);
+router.use("/student", studentRoutes);
 
 router.use("/dev", protect, devRoutes);
 router.use("/excel", excelRoutes);
