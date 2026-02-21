@@ -2,6 +2,11 @@ import { Request, Response, NextFunction } from "express";
 import { jwtService } from "../container";
 import { UnauthorizedError } from "../utils";
 
+export function authMiddleware(req: Request, _res: Response, next: NextFunction) {
+  // alias for compatibility
+  return protect(req, _res, next);
+}
+
 export function protect(req: Request, _res: Response, next: NextFunction) {
   try {
     let token: string | undefined;
@@ -36,15 +41,15 @@ export function protect(req: Request, _res: Response, next: NextFunction) {
   }
 }
 
-// Extend Request type to include user
-declare global {
-  namespace Express {
-    interface Request {
-      user?: {
-        id: string;
-        email?: string | null;
-        userType: string;
-      };
-    }
+// Extend Request type to include user using ES2015 module syntax
+import "express";
+
+declare module "express" {
+  interface Request {
+    user?: {
+      id: string;
+      email?: string | null;
+      userType: string;
+    };
   }
 }
