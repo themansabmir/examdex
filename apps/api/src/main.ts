@@ -29,7 +29,7 @@ app.use(requestLogger);
 
 // Routes
 
-app.use(router);
+app.use("/api/v1", router);
 
 // 404 handler
 app.use(notFoundHandler);
