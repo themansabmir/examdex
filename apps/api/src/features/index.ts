@@ -13,13 +13,14 @@ export * from "./subject";
 // Chapter Feature
 export * from "./chapter";
 
-// Exam-Subject Mapping Feature 
+// Exam-Subject Mapping Feature
 export * from "./exam-subject";
-
-
 
 // Class Master Feature
 export * from "./class";
 
 // Pricing Tier Feature
 export * from "./pricing-tier";
+
+// Credit Feature
+export * from "./credit";

@@ -47,6 +47,14 @@ export class PrismaUserRepository implements IUserRepository {
   }): Promise<User> {
     const passwordHash = data.password ? await bcrypt.hash(data.password, 10) : null;
 
+    // Get default credits from master data
+    const defaultConfig = await (this.prisma as any).defaultCreditConfig.findFirst({
+      where: { isActive: true },
+      orderBy: { updatedAt: "desc" },
+    });
+
+    const defaultCredits = defaultConfig?.creditsPerNewStudent ?? 10;
+
     const user = await this.prisma.user.create({
       data: {
         email: data.email,
@@ -55,6 +63,7 @@ export class PrismaUserRepository implements IUserRepository {
         passwordHash,
         userType: data.userType as any,
         isActive: data.isActive,
+        creditBalance: defaultCredits,
       },
     });
 

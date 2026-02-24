@@ -3,6 +3,7 @@ export {
   AppError,
   BadRequestError,
   UnauthorizedError,
+  PaymentRequiredError,
   ForbiddenError,
   NotFoundError,
   ConflictError,

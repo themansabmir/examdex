@@ -589,6 +589,25 @@ model AdminTeamInvite {
 }
 
 // ============================================
+// MASTER DATA FOR DEFAULT CREDITS
+// ============================================
+
+model DefaultCreditConfig {
+  id                    String   @id @default(uuid()) @db.Uuid
+  creditsPerNewStudent  Int      @default(10) @map("credits_per_new_student")
+  description           String?  @map("description") @db.Text
+  isActive              Boolean  @default(true) @map("is_active")
+  updatedById           String?  @map("updated_by") @db.Uuid
+  updatedAt             DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamp(6)
+  createdAt             DateTime @default(now()) @map("created_at") @db.Timestamp(6)
+
+  // Relations
+  updatedBy User? @relation(fields: [updatedById], references: [id])
+
+  @@map("default_credit_config")
+}
+
+// ============================================
 // OTP STORAGE
 // ============================================
 
@@ -610,3 +629,4 @@ model OtpStorage {
   @@index([expiresAt])
   @@map("otp_storage")
 }
+
