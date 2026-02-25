@@ -1,21 +1,7 @@
-import { prisma } from "../lib";
-import {
-  UserService,
-  UserController,
-  PrismaUserRepository,
-  DefaultCreditConfigService,
-  PrismaDefaultCreditConfigRepository,
-} from "../features";
-import { DefaultCreditConfigController } from "../features/user/default-credit-config.controller";
-
+import { BcryptService, prisma } from "../lib";
+import { UserService, UserController, PrismaUserRepository } from "../features";
+import { creditMasterService } from "./credit-master.container";
+const hashService = new BcryptService();
 export const userRepository = new PrismaUserRepository(prisma);
-export const userService = new UserService(userRepository);
+export const userService = new UserService(userRepository, creditMasterService, hashService);
 export const userController = new UserController(userService);
-
-export const defaultCreditConfigRepository = new PrismaDefaultCreditConfigRepository(prisma);
-export const defaultCreditConfigService = new DefaultCreditConfigService(
-  defaultCreditConfigRepository
-);
-export const defaultCreditConfigController = new DefaultCreditConfigController(
-  defaultCreditConfigService
-);

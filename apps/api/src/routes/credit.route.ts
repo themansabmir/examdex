@@ -1,22 +1,26 @@
 import { Router } from "express";
-import { asyncHandler } from "../middleware";
 import { creditController } from "../container";
 
 const router = Router();
 
 // GET /credits/balance - Get current balance
-router.get("/balance", asyncHandler(creditController.getBalance.bind(creditController)));
+router.get("/balance", (req, res, next) => {
+  creditController.getBalance(req, res).catch(next);
+});
 
 // GET /credits/transactions - Get transaction history
-router.get("/transactions", asyncHandler(creditController.getTransactions.bind(creditController)));
+router.get("/transactions", (req, res, next) => {
+  creditController.getTransactions(req, res).catch(next);
+});
 
 // GET /credits/verify-integrity - Verify ledger integrity (dev/debug)
-router.get(
-  "/verify-integrity",
-  asyncHandler(creditController.verifyIntegrity.bind(creditController))
-);
+router.get("/verify-integrity", (req, res, next) => {
+  creditController.verifyIntegrity(req, res).catch(next);
+});
 
 // POST /credits/add - Add credits (admin only - should add role check)
-router.post("/add", asyncHandler(creditController.addCredits.bind(creditController)));
+router.post("/add", (req, res, next) => {
+  creditController.addCredits(req, res).catch(next);
+});
 
-export { router as creditRoutes };
+export const creditRoutes = router;
