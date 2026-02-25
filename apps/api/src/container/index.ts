@@ -9,3 +9,5 @@ export * from "./class.container";
 export * from "./exam-subject.container";
 
 export * from "./pricing-tier.container";
+export * from "./credit.container";
+export * from "./credit-master.container";

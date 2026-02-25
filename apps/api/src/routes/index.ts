@@ -7,6 +7,8 @@ import { chapterRoutes } from "./chapter.route";
 import { classRoutes } from "./class.route";
 import { pricingTierRoutes } from "./pricing-tier.route";
 import { examSubjectRoutes } from "./exam-subject.route";
+import { creditRoutes } from "./credit.route";
+import { creditMasterRoutes } from "./credit-master.route";
 
 import { devRoutes } from "./dev.route";
 import { excelRoutes } from "./excel.route";
@@ -28,6 +30,8 @@ router.use("/chapters", protect, chapterRoutes);
 router.use("/classes", protect, classRoutes);
 router.use("/pricing-tiers", protect, pricingTierRoutes);
 router.use("/exam-subject", protect, examSubjectRoutes);
+router.use("/credits", protect, creditRoutes);
+router.use("/credit-master", protect, creditMasterRoutes);
 
 router.use("/dev", protect, devRoutes);
 router.use("/excel", excelRoutes);

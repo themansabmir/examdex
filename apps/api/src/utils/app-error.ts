@@ -3,6 +3,7 @@ export enum HttpStatus {
   CREATED = 201,
   BAD_REQUEST = 400,
   UNAUTHORIZED = 401,
+  PAYMENT_REQUIRED = 402,
   FORBIDDEN = 403,
   NOT_FOUND = 404,
   CONFLICT = 409,
@@ -50,6 +51,15 @@ export class UnauthorizedError extends AppError {
   public readonly isOperational = true;
 
   constructor(message: string = "Unauthorized", code: string = "UNAUTHORIZED") {
+    super(message, code);
+  }
+}
+
+export class PaymentRequiredError extends AppError {
+  public readonly statusCode = HttpStatus.PAYMENT_REQUIRED;
+  public readonly isOperational = true;
+
+  constructor(message: string = "Payment required", code: string = "PAYMENT_REQUIRED") {
     super(message, code);
   }
 }

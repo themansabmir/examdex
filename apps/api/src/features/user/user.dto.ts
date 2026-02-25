@@ -1,9 +1,11 @@
+import { UserType } from "@prisma/client";
+
 export interface CreateUserInputDTO {
   email?: string | null;
   phone?: string | null;
   fullName: string;
   password?: string;
-  userType: string;
+  userType: UserType;
   roles?: string[];
   isActive?: boolean;
   examId?: string;
@@ -30,10 +32,17 @@ export interface UserOutputDTO {
   email: string | null;
   phone: string | null;
   fullName: string;
-  userType: string;
+  userType: UserType;
   roles: string[];
   isActive: boolean;
   isOnboarded: boolean;
+  creditBalance: number;
+  totalCreditsPurchased: number;
+  deviceFingerprint: string | null;
   lastLoginAt: Date | null;
   createdAt: Date;
+  currentExam?: {
+    id: string;
+    name: string;
+  };
 }

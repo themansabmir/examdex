@@ -1,10 +1,12 @@
+import { UserType } from "@prisma/client";
+
 export interface UserProps {
   id: string;
   email: string | null;
   phoneNumber: string | null;
   fullName: string;
   passwordHash: string | null;
-  userType: string;
+  userType: UserType;
   creditBalance: number;
   totalCreditsPurchased: number;
   isActive: boolean;
@@ -12,6 +14,10 @@ export interface UserProps {
   deviceFingerprint: string | null;
   lastLoginAt: Date | null;
   createdAt: Date;
+  currentExam?: {
+    id: string;
+    name: string;
+  };
 }
 
 export class User {
@@ -37,7 +43,7 @@ export class User {
     return this.props.passwordHash;
   }
 
-  get userType(): string {
+  get userType(): UserType {
     return this.props.userType;
   }
 
@@ -67,5 +73,9 @@ export class User {
 
   get createdAt(): Date {
     return this.props.createdAt;
+  }
+
+  get currentExam() {
+    return this.props.currentExam;
   }
 }

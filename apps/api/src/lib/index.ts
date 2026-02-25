@@ -4,3 +4,4 @@ export * from "./smtp";
 export * from "./twilio";
 export * from "./otp";
 export * from "./excel/excel.service";
+export * from "./hash";
