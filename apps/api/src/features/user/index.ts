@@ -6,15 +6,3 @@ export { UserService } from "./user.service";
 export { UserController } from "./user.controller";
 export * from "./user.dto";
 export * from "./user.schema";
-
-// Default Credit Config
-export type {
-  DefaultCreditConfig,
-  IDefaultCreditConfigRepository,
-  IDefaultCreditConfigService,
-} from "./default-credit-config.service";
-export {
-  PrismaDefaultCreditConfigRepository,
-  DefaultCreditConfigService,
-} from "./default-credit-config.service";
-export { DefaultCreditConfigController } from "./default-credit-config.controller";

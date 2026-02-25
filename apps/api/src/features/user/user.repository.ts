@@ -1,6 +1,19 @@
-import { PrismaClient } from "@prisma/client";
-import bcrypt from "bcryptjs";
+import { PrismaClient, UserType } from "@prisma/client";
 import { User } from "./user.entity";
+
+export interface SaveUserData {
+  email?: string | null;
+  phoneNumber?: string | null;
+  fullName: string;
+  passwordHash?: string | null;
+  userType: UserType;
+  isActive: boolean;
+  creditBalance: number;
+  totalCreditsPurchased: number;
+  isOnboarded: boolean;
+  deviceFingerprint: string | null;
+  lastLoginAt: Date | null;
+}
 
 export interface UpdateUserData {
   fullName?: string;
@@ -13,19 +26,12 @@ export interface UpdateUserData {
 }
 
 export interface IUserRepository {
-  save(data: {
-    email?: string | null;
-    phoneNumber?: string | null;
-    fullName: string;
-    password?: string;
-    userType: string;
-    isActive: boolean;
-  }): Promise<User>;
+  save(data: SaveUserData): Promise<User>;
   findById(id: string): Promise<User | null>;
   findByEmail(email: string): Promise<User | null>;
   findByPhone(phone: string): Promise<User | null>;
   findAll(options?: {
-    userType?: string | string[];
+    userType?: UserType | UserType[];
     excludeStudent?: boolean;
     onlyActive?: boolean;
   }): Promise<User[]>;
@@ -37,43 +43,40 @@ export interface IUserRepository {
 export class PrismaUserRepository implements IUserRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
-  async save(data: {
-    email?: string | null;
-    phoneNumber?: string | null;
-    fullName: string;
-    password?: string;
-    userType: string;
-    isActive: boolean;
-  }): Promise<User> {
-    const passwordHash = data.password ? await bcrypt.hash(data.password, 10) : null;
-
-    // Get default credits from master data
-    const defaultConfig = await (this.prisma as any).defaultCreditConfig.findFirst({
-      where: { isActive: true },
-      orderBy: { updatedAt: "desc" },
-    });
-
-    const defaultCredits = defaultConfig?.creditsPerNewStudent ?? 10;
-
+  async save(data: SaveUserData): Promise<User> {
     const user = await this.prisma.user.create({
       data: {
         email: data.email,
         phoneNumber: data.phoneNumber,
         fullName: data.fullName,
-        passwordHash,
-        userType: data.userType as any,
+        passwordHash: data.passwordHash,
+        userType: data.userType,
         isActive: data.isActive,
-        creditBalance: defaultCredits,
+        creditBalance: data.creditBalance,
+        totalCreditsPurchased: data.totalCreditsPurchased,
+        isOnboarded: data.isOnboarded,
+        deviceFingerprint: data.deviceFingerprint,
+        lastLoginAt: data.lastLoginAt,
+      },
+      include: {
+        examPreferences: {
+          where: { isPrimary: true },
+          include: { exam: true },
+        },
       },
     });
 
+    return this.mapToEntity(user);
+  }
+
+  private mapToEntity(user: any): User {
     return new User({
       id: user.id,
       email: user.email,
       phoneNumber: user.phoneNumber,
       fullName: user.fullName,
       passwordHash: user.passwordHash,
-      userType: user.userType,
+      userType: user.userType as UserType,
       creditBalance: user.creditBalance,
       totalCreditsPurchased: user.totalCreditsPurchased,
       isActive: user.isActive,
@@ -81,6 +84,12 @@ export class PrismaUserRepository implements IUserRepository {
       deviceFingerprint: user.deviceFingerprint,
       lastLoginAt: user.lastLoginAt,
       createdAt: user.createdAt,
+      currentExam: user.examPreferences?.[0]?.exam
+        ? {
+            id: user.examPreferences[0].exam.id,
+            name: user.examPreferences[0].exam.examName,
+          }
+        : undefined,
     });
   }
 
@@ -99,27 +108,7 @@ export class PrismaUserRepository implements IUserRepository {
       return null;
     }
 
-    return new User({
-      id: user.id,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      fullName: user.fullName,
-      passwordHash: user.passwordHash,
-      userType: user.userType,
-      creditBalance: user.creditBalance,
-      totalCreditsPurchased: user.totalCreditsPurchased,
-      isActive: user.isActive,
-      isOnboarded: user.isOnboarded,
-      deviceFingerprint: user.deviceFingerprint,
-      lastLoginAt: user.lastLoginAt,
-      createdAt: user.createdAt,
-      currentExam: user.examPreferences[0]
-        ? {
-            id: user.examPreferences[0].exam.id,
-            name: user.examPreferences[0].exam.examName,
-          }
-        : undefined,
-    });
+    return this.mapToEntity(user);
   }
 
   async findByEmail(email: string): Promise<User | null> {
@@ -137,27 +126,7 @@ export class PrismaUserRepository implements IUserRepository {
       return null;
     }
 
-    return new User({
-      id: user.id,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      fullName: user.fullName,
-      passwordHash: user.passwordHash,
-      userType: user.userType,
-      creditBalance: user.creditBalance,
-      totalCreditsPurchased: user.totalCreditsPurchased,
-      isActive: user.isActive,
-      isOnboarded: user.isOnboarded,
-      deviceFingerprint: user.deviceFingerprint,
-      lastLoginAt: user.lastLoginAt,
-      createdAt: user.createdAt,
-      currentExam: user.examPreferences[0]
-        ? {
-            id: user.examPreferences[0].exam.id,
-            name: user.examPreferences[0].exam.examName,
-          }
-        : undefined,
-    });
+    return this.mapToEntity(user);
   }
 
   async findByPhone(phone: string): Promise<User | null> {
@@ -175,31 +144,11 @@ export class PrismaUserRepository implements IUserRepository {
       return null;
     }
 
-    return new User({
-      id: user.id,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      fullName: user.fullName,
-      passwordHash: user.passwordHash,
-      userType: user.userType,
-      creditBalance: user.creditBalance,
-      totalCreditsPurchased: user.totalCreditsPurchased,
-      isActive: user.isActive,
-      isOnboarded: user.isOnboarded,
-      deviceFingerprint: user.deviceFingerprint,
-      lastLoginAt: user.lastLoginAt,
-      createdAt: user.createdAt,
-      currentExam: user.examPreferences[0]
-        ? {
-            id: user.examPreferences[0].exam.id,
-            name: user.examPreferences[0].exam.examName,
-          }
-        : undefined,
-    });
+    return this.mapToEntity(user);
   }
 
   async findAll(options?: {
-    userType?: string | string[];
+    userType?: UserType | UserType[];
     excludeStudent?: boolean;
     onlyActive?: boolean;
   }): Promise<User[]> {
@@ -210,14 +159,12 @@ export class PrismaUserRepository implements IUserRepository {
 
       if (options?.userType) {
         conditions.push({
-          userType: Array.isArray(options.userType)
-            ? { in: options.userType as any }
-            : (options.userType as any),
+          userType: Array.isArray(options.userType) ? { in: options.userType } : options.userType,
         });
       }
 
       if (options?.excludeStudent) {
-        conditions.push({ userType: { not: "student" } });
+        conditions.push({ userType: { not: UserType.student } });
       }
 
       if (options?.onlyActive) {
@@ -231,27 +178,16 @@ export class PrismaUserRepository implements IUserRepository {
 
     const users = await this.prisma.user.findMany({
       where,
+      include: {
+        examPreferences: {
+          where: { isPrimary: true },
+          include: { exam: true },
+        },
+      },
       orderBy: { createdAt: "desc" },
     });
 
-    return users.map(
-      (user) =>
-        new User({
-          id: user.id,
-          email: user.email,
-          phoneNumber: user.phoneNumber,
-          fullName: user.fullName,
-          passwordHash: user.passwordHash,
-          userType: user.userType,
-          creditBalance: user.creditBalance,
-          totalCreditsPurchased: user.totalCreditsPurchased,
-          isActive: user.isActive,
-          isOnboarded: user.isOnboarded,
-          deviceFingerprint: user.deviceFingerprint,
-          lastLoginAt: user.lastLoginAt,
-          createdAt: user.createdAt,
-        })
-    );
+    return users.map((user) => this.mapToEntity(user));
   }
 
   async update(id: string, data: UpdateUserData): Promise<User> {
@@ -282,23 +218,15 @@ export class PrismaUserRepository implements IUserRepository {
     const user = await this.prisma.user.update({
       where: { id },
       data: updateData,
+      include: {
+        examPreferences: {
+          where: { isPrimary: true },
+          include: { exam: true },
+        },
+      },
     });
 
-    return new User({
-      id: user.id,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      fullName: user.fullName,
-      passwordHash: user.passwordHash,
-      userType: user.userType,
-      creditBalance: user.creditBalance,
-      totalCreditsPurchased: user.totalCreditsPurchased,
-      isActive: user.isActive,
-      isOnboarded: user.isOnboarded,
-      deviceFingerprint: user.deviceFingerprint,
-      lastLoginAt: user.lastLoginAt,
-      createdAt: user.createdAt,
-    });
+    return this.mapToEntity(user);
   }
 
   async delete(id: string): Promise<void> {

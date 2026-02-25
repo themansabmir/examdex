@@ -24,3 +24,6 @@ export * from "./pricing-tier";
 
 // Credit Feature
 export * from "./credit";
+
+// Credit Master Feature
+export * from "./creditMaster";

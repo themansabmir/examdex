@@ -1,13 +1,16 @@
+import { UserType } from "@prisma/client";
 import { IUserRepository } from "./user.repository";
 import { CreateUserInputDTO, UpdateUserInputDTO, UserOutputDTO } from "./user.dto";
 import { ConflictError, NotFoundError } from "../../utils/app-error";
 import { User } from "./user.entity";
+import { CreditMasterService } from "../creditMaster";
+import { IHashService } from "../../lib/hash";
 
 export interface IUserService {
   createUser(input: CreateUserInputDTO): Promise<UserOutputDTO>;
   getUserById(id: string): Promise<UserOutputDTO>;
   getAllUsers(options?: {
-    userType?: string | string[];
+    userType?: UserType | UserType[];
     excludeStudent?: boolean;
     onlyActive?: boolean;
   }): Promise<UserOutputDTO[]>;
@@ -18,7 +21,11 @@ export interface IUserService {
 }
 
 export class UserService implements IUserService {
-  constructor(private readonly userRepository: IUserRepository) {}
+  constructor(
+    private readonly userRepository: IUserRepository,
+    private readonly creditMasterService: CreditMasterService,
+    private readonly hashService: IHashService
+  ) {}
 
   async createUser(input: CreateUserInputDTO): Promise<UserOutputDTO> {
     if (!input.email && !input.phone) {
@@ -39,18 +46,24 @@ export class UserService implements IUserService {
       }
     }
 
+    const defaultConfig = await this.creditMasterService.getActiveConfig();
+    const defaultCredits = defaultConfig?.creditsPerNewStudent ?? 10;
+
+    const passwordHash = input.password ? await this.hashService.hash(input.password, 10) : null;
+
     const user = await this.userRepository.save({
       email: input.email || null,
       phoneNumber: input.phone || null,
       fullName: input.fullName,
-      password: input.password,
+      passwordHash,
       userType: input.userType,
       isActive: input.isActive ?? true,
+      creditBalance: defaultCredits,
+      totalCreditsPurchased: 0,
+      isOnboarded: false,
+      deviceFingerprint: null,
+      lastLoginAt: null,
     });
-
-    if (input.examId) {
-      await this.userRepository.upsertExamPreference(user.id, input.examId);
-    }
 
     return this.toOutputDTO(user);
   }
@@ -66,7 +79,7 @@ export class UserService implements IUserService {
   }
 
   async getAllUsers(options?: {
-    userType?: string | string[];
+    userType?: UserType | UserType[];
     excludeStudent?: boolean;
     onlyActive?: boolean;
   }): Promise<UserOutputDTO[]> {
@@ -133,6 +146,10 @@ export class UserService implements IUserService {
       fullName: user.fullName,
       userType: user.userType,
       roles: [],
+      creditBalance: user.creditBalance,
+      totalCreditsPurchased: user.totalCreditsPurchased,
+      currentExam: user.currentExam,
+      deviceFingerprint: user.deviceFingerprint,
       isActive: user.isActive,
       isOnboarded: user.isOnboarded,
       lastLoginAt: user.lastLoginAt,

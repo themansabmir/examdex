@@ -25,6 +25,7 @@ import {
 } from "../../utils/app-error";
 import { User } from "../user/user.entity";
 import { env } from "../../config";
+import { IUserService } from "../user";
 
 export interface IAuthService {
   adminLogin(input: AdminLoginInputDTO): Promise<AuthTokensOutputDTO>;
@@ -40,6 +41,7 @@ export interface IAuthService {
 export class AuthService implements IAuthService {
   constructor(
     private readonly userRepository: IUserRepository,
+    private readonly userService: IUserService,
     private readonly otpService: OtpService,
     private readonly jwtService: JwtService,
     private readonly invitationRepository: IInvitationRepository,
@@ -208,9 +210,9 @@ export class AuthService implements IAuthService {
 
     if (!user) {
       try {
-        const tempUser = await this.userRepository.save({
-          email: isEmail ? phoneOrEmail : null,
-          phoneNumber: isEmail ? null : this.normalizePhone(phoneOrEmail, countryCode),
+        const tempUser = await this.userService.createUser({
+          email: isEmail ? phoneOrEmail : undefined,
+          phone: isEmail ? undefined : this.normalizePhone(phoneOrEmail, countryCode),
           fullName: isEmail ? phoneOrEmail.split("@")[0] : "Student",
           userType: "student",
           isActive: false,
@@ -286,7 +288,7 @@ export class AuthService implements IAuthService {
       throw new BadRequestError("Invitation token has expired");
     }
 
-    const user = await this.userRepository.save({
+    const user = await this.userService.createUser({
       email: invite.email,
       fullName: input.fullName,
       password: input.password,
@@ -296,7 +298,7 @@ export class AuthService implements IAuthService {
 
     await this.invitationRepository.delete(invite.id);
 
-    return this.generateTokens(user);
+    return this.generateTokens(user as unknown as User);
   }
 
   async requestPasswordReset(input: ResetPasswordRequestInputDTO): Promise<void> {

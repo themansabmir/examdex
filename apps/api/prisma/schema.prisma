@@ -81,6 +81,7 @@ model User {
   aiPromptTemplates   AiPromptTemplate[]
   systemConfigUpdates SystemConfig[]
   otpAttempts         OtpStorage[]
+  defaultCreditConfigUpdates DefaultCreditConfig[]
 
   @@index([phoneNumber])
   @@index([email])
