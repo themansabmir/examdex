@@ -71,9 +71,10 @@ jobs:
       - name: Build Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
-          file: ./apps/${{ matrix.service }}/Dockerfile
+          context: ${{ github.workspace }}
+          file: ${{ github.workspace }}/apps/${{ matrix.service }}/Dockerfile
           push: false
+          load: true
           tags: test-${{ matrix.service }}:latest
           cache-from: type=gha,scope=${{ matrix.service }}
           cache-to: type=gha,mode=max,scope=${{ matrix.service }}
