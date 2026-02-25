@@ -22,7 +22,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "18"
+          node-version: "20"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
@@ -111,7 +111,7 @@ jobs:
       - name: Run Trivy vulnerability scanner
         uses: aquasecurity/trivy-action@master
         with:
-          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}/api:${{ env.IMAGE_TAG }}
+          image-ref: ${{ env.REGISTRY }}/${{ github.repository }}/api:${{ github.ref_name }}-${{ env.IMAGE_TAG }}
           format: "sarif"
           output: "trivy-results.sarif"
 
@@ -162,6 +162,7 @@ jobs:
 
       - name: Start services with Docker Compose
         run: |
+          docker-compose -f docker-compose.yml build
           docker-compose -f docker-compose.yml up -d
           sleep 60  # Wait for services to be healthy
 
@@ -178,9 +179,9 @@ jobs:
 
   # Notify on Success/Failure
   notify:
-    needs: [test-and-lint, build-and-push, deploy-staging, deploy-production]
+    needs: [test-and-lint, build-and-push]
     runs-on: ubuntu-latest
-    if: always()
+    if: always() && !cancelled()
 
     steps:
       - name: Notify on success

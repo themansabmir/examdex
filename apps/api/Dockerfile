@@ -1,4 +1,4 @@
-FROM node:18-alpine AS base
+FROM node:20-alpine AS base
 RUN npm install -g pnpm
 
 # Build stage
@@ -38,6 +38,7 @@ COPY --from=builder /app/packages/shared ./packages/shared
 
 # Install only production dependencies
 COPY --from=builder /app/pnpm-lock.yaml ./
+COPY --from=builder /app/pnpm-workspace.yaml ./
 RUN pnpm install --prod --frozen-lockfile
 
 # Expose port (adjust if your API uses a different port)
