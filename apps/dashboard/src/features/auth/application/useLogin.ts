@@ -3,6 +3,7 @@ import { authApi } from "../infrastructure/auth.api";
 import type { LoginInput } from "../domain/Login";
 import { toast } from "sonner";
 import { useAuth } from "@/app/AuthContext";
+import type { AxiosError } from "axios";
 
 export function useLogin() {
   const { login } = useAuth();
@@ -14,7 +15,7 @@ export function useLogin() {
       login(accessToken, user);
       toast.success(`Welcome back, ${user.fullName}!`);
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ error?: { message: string }; message: string }>) => {
       const message =
         error.response?.data?.error?.message ||
         error.response?.data?.message ||

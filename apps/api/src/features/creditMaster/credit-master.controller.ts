@@ -23,7 +23,7 @@ export class CreditMasterController {
     });
   }
 
-  async getAll(req: Request, res: Response): Promise<void> {
+  async getAll(_: Request, res: Response): Promise<void> {
     const result = await this.service.getAll();
     res.json({
       success: true,

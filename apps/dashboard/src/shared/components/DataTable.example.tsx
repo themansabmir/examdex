@@ -59,7 +59,7 @@ const data: Payment[] = [
 ];
 
 // Example columns with all features
-export const columns: ColumnDef<Payment>[] = [
+export const exampleColumns: ColumnDef<Payment>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -146,7 +146,7 @@ export default function DataTableExample() {
       <h1 className="text-2xl font-bold mb-6">DataTable Example</h1>
 
       <DataTable
-        columns={columns}
+        columns={exampleColumns}
         data={data}
         enableRowSelection
         enableGlobalFilter
@@ -178,7 +178,7 @@ export default function DataTableExample() {
 export function DataTableBasicExample() {
   return (
     <DataTable
-      columns={columns.filter((col) => col.id !== "select" && col.id !== "actions")}
+      columns={exampleColumns.filter((col) => col.id !== "select" && col.id !== "actions")}
       data={data}
       enableGlobalFilter
       globalFilterPlaceholder="Search payments..."

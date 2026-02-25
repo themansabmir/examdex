@@ -1,7 +1,15 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CreateSubjectChapterSchema, UpdateSubjectChapterSchema, type SubjectChapterFormInput, type SubjectChapter } from "../domain/SubjectChapter";
-import { useCreateSubjectChapter, useUpdateSubjectChapter } from "../application/useSubjectChapters";
+import {
+  CreateSubjectChapterSchema,
+  UpdateSubjectChapterSchema,
+  type SubjectChapterFormInput,
+  type SubjectChapter,
+} from "../domain/SubjectChapter";
+import {
+  useCreateSubjectChapter,
+  useUpdateSubjectChapter,
+} from "../application/useSubjectChapters";
 import { useExamSubjects } from "../../exam-subject/application/useExamSubjects";
 import { useExams } from "../../exam/application/useExams";
 import { useSubjects } from "../../subject/application/useSubjects";
@@ -18,13 +26,7 @@ import {
 } from "@/shared/ui/form";
 import { Input } from "@/shared/ui/input";
 import { Switch } from "@/shared/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { useNavigate } from "react-router-dom";
 import { ROUTES } from "@/app/routes.config";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
@@ -45,7 +47,7 @@ export function SubjectChapterForm({ initialData }: SubjectChapterFormProps) {
 
   const isEditing = !!initialData;
 
-  const getESDisplay = (es: any) => {
+  const getESDisplay = (es: { examId: string; subjectId: string }) => {
     const examName = exams?.find((e) => e.id === es.examId)?.examName || es.examId;
     const subjectName = subjects?.find((s) => s.id === es.subjectId)?.subjectName || es.subjectId;
     return `${examName} - ${subjectName}`;
@@ -88,7 +90,9 @@ export function SubjectChapterForm({ initialData }: SubjectChapterFormProps) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{isEditing ? "Edit Subject-Chapter Mapping" : "Create Subject-Chapter Mapping"}</CardTitle>
+        <CardTitle>
+          {isEditing ? "Edit Subject-Chapter Mapping" : "Create Subject-Chapter Mapping"}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         <Form {...form}>
@@ -161,7 +165,9 @@ export function SubjectChapterForm({ initialData }: SubjectChapterFormProps) {
                         type="number"
                         placeholder="e.g. 1"
                         {...field}
-                        onChange={(e) => field.onChange(e.target.value ? parseInt(e.target.value) : undefined)}
+                        onChange={(e) =>
+                          field.onChange(e.target.value ? parseInt(e.target.value) : undefined)
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -180,7 +186,9 @@ export function SubjectChapterForm({ initialData }: SubjectChapterFormProps) {
                         step="0.01"
                         placeholder="e.g. 5.5"
                         {...field}
-                        onChange={(e) => field.onChange(e.target.value ? parseFloat(e.target.value) : 0)}
+                        onChange={(e) =>
+                          field.onChange(e.target.value ? parseFloat(e.target.value) : 0)
+                        }
                       />
                     </FormControl>
                     <FormMessage />
@@ -196,15 +204,10 @@ export function SubjectChapterForm({ initialData }: SubjectChapterFormProps) {
                     <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                       <div className="space-y-0.5">
                         <FormLabel className="text-base">Active Status</FormLabel>
-                        <FormDescription>
-                          Is this mapping currently active?
-                        </FormDescription>
+                        <FormDescription>Is this mapping currently active?</FormDescription>
                       </div>
                       <FormControl>
-                        <Switch
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                        />
+                        <Switch checked={field.value} onCheckedChange={field.onChange} />
                       </FormControl>
                     </FormItem>
                   )}

@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/sha
 import { Upload, FileSpreadsheet, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { uploadExcel } from "../lib/excel-upload";
+import type { AxiosError } from "axios";
 
 interface BulkUploadProps {
   moduleName: string;
@@ -37,8 +38,10 @@ export function BulkUpload({ moduleName, onSuccess }: BulkUploadProps) {
       if (input) input.value = "";
 
       if (onSuccess) onSuccess();
-    } catch (error: any) {
-      const message = error.response?.data?.message || error.message || "Failed to upload file";
+    } catch (error: unknown) {
+      const axiosError = error as AxiosError<{ message: string }>;
+      const message =
+        axiosError.response?.data?.message || axiosError.message || "Failed to upload file";
       toast.error(message);
     } finally {
       setIsUploading(false);

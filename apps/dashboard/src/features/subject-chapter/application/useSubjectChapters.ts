@@ -1,7 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { subjectChapterApi } from "../infrastructure/subject-chapter.api";
-import type { CreateSubjectChapterInput, UpdateSubjectChapterInput } from "../domain/SubjectChapter";
+import type {
+  CreateSubjectChapterInput,
+  UpdateSubjectChapterInput,
+} from "../domain/SubjectChapter";
 import { toast } from "sonner";
+import type { AxiosError } from "axios";
 
 export const subjectChapterKeys = {
   all: ["subject-chapters"] as const,
@@ -44,7 +48,7 @@ export function useCreateSubjectChapter() {
       queryClient.invalidateQueries({ queryKey: subjectChapterKeys.all });
       toast.success("Subject-Chapter mapping created successfully");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data?.message || "Failed to create mapping");
     },
   });
@@ -61,7 +65,7 @@ export function useUpdateSubjectChapter() {
       queryClient.invalidateQueries({ queryKey: subjectChapterKeys.detail(data.id) });
       toast.success("Subject-Chapter mapping updated successfully");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data?.message || "Failed to update mapping");
     },
   });
@@ -76,7 +80,7 @@ export function useDeleteSubjectChapter() {
       queryClient.invalidateQueries({ queryKey: subjectChapterKeys.all });
       toast.success("Subject-Chapter mapping deleted successfully");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data?.message || "Failed to delete mapping");
     },
   });

@@ -2,6 +2,7 @@ import { useMutation } from "@tanstack/react-query";
 import { authApi } from "../infrastructure/auth.api";
 import type { ResetPasswordRequestInput, ResetPasswordInput } from "../domain/Login";
 import { toast } from "sonner";
+import type { AxiosError } from "axios";
 
 export function useResetPassword() {
   const requestReset = useMutation({
@@ -9,7 +10,7 @@ export function useResetPassword() {
     onSuccess: () => {
       toast.success("Reset link sent to your email");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data?.message || "Failed to send reset link");
     },
   });
@@ -19,7 +20,7 @@ export function useResetPassword() {
     onSuccess: () => {
       toast.success("Password reset successfully");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data?.message || "Failed to reset password");
     },
   });
