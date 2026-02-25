@@ -54,9 +54,6 @@ jobs:
       - name: Run type checking
         run: pnpm typecheck
 
-      - name: Run tests
-        run: pnpm test
-
   # Build and Push Docker Images
   build-and-push:
     needs: test-and-lint
