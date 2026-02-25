@@ -16,14 +16,14 @@ RUN apt-get update && apt-get install -y \
 WORKDIR /app
 
 # Copy requirements first for better caching
-COPY requirements.txt .
+COPY apps/rag/requirements.txt .
 
 # Install Python dependencies
 RUN pip install --upgrade pip && \
     pip install -r requirements.txt
 
 # Copy application code
-COPY . .
+COPY apps/rag .
 
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app && \

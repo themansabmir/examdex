@@ -1,30 +1,38 @@
-# Build stage
-FROM node:20-alpine AS builder
+# ---------- base ----------
+FROM node:20-alpine AS base
+RUN npm install -g pnpm
 
+
+# ---------- builder ----------
+FROM base AS builder
 WORKDIR /app
 
-# Copy package files
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY apps/dashboard/package.json ./apps/dashboard/
+# copy workspace metadata first (max cache reuse)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 
-# Install dependencies
-RUN npm install -g pnpm
-RUN pnpm install --frozen-lockfile
+# copy dashboard manifest
+COPY apps/dashboard/package.json ./apps/dashboard/package.json
 
-# Copy source code
+# install ONLY dashboard + its workspace deps
+RUN pnpm install --filter dashboard... --frozen-lockfile --ignore-scripts
+
+# copy source
 COPY apps/dashboard ./apps/dashboard
 
-# Build the dashboard
-WORKDIR /app/apps/dashboard
-RUN pnpm build
+# optimize for free plan resources and disable git hooks
+ENV NODE_OPTIONS=--max-old-space-size=1536
+ENV HUSKY=0
 
-# Production stage
+# build dashboard (vite transpiles only, skips tsc type-check)
+RUN cd apps/dashboard && pnpm exec vite build
+
+# ---------- runner ----------
 FROM nginx:alpine AS runner
 
-# Copy built files to nginx
+# copy built files to nginx
 COPY --from=builder /app/apps/dashboard/dist /usr/share/nginx/html
 
-# Copy nginx configuration
+# copy nginx configuration
 COPY apps/dashboard/nginx.conf /etc/nginx/conf.d/default.conf
 
 # Expose port
