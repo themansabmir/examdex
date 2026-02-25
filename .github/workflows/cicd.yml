@@ -66,7 +66,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          echo "Building ${ matrix.service } image..."
+          echo "Building ${{ matrix.service }} image..."
           ls -la ./apps/${{ matrix.service }}/
           docker build -f ./apps/${{ matrix.service }}/Dockerfile -t test-${{ matrix.service }}:latest . --no-cache
-          echo "Build completed for ${ matrix.service }"
+          echo "Build completed for ${{ matrix.service }}"
