@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { usersApi } from "../infrastructure/users.api";
 import type { User, UpdateProfileInput } from "../domain/User";
 import { toast } from "sonner";
+import type { AxiosError } from "axios";
 
 export function useUsers(options?: { userType?: string; excludeStudent?: boolean }) {
   return useQuery<User[]>({
@@ -24,7 +25,7 @@ export function useProfile() {
       queryClient.invalidateQueries({ queryKey: ["profile", "me"] });
       toast.success("Profile updated successfully");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data?.message || "Failed to update profile");
     },
   });

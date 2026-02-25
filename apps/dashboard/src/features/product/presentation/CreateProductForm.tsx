@@ -5,7 +5,7 @@ import type { UseCategoryList } from "../domain/contracts";
 interface Props {
   // 2. Injection: We ask for the capability, not the implementation
   useCategories: UseCategoryList;
-  onSubmit: (data: any) => void;
+  onSubmit: (data: { name: string; categoryId: string; price: number }) => void;
 }
 
 export function CreateProductForm({ useCategories, onSubmit }: Props) {
@@ -38,7 +38,10 @@ export function CreateProductForm({ useCategories, onSubmit }: Props) {
           )}
         </div>
 
-        <Button className="btn-primary w-full" onClick={() => onSubmit({})}>
+        <Button
+          className="btn-primary w-full"
+          onClick={() => onSubmit({ name: "", categoryId: "", price: 0 })}
+        >
           Create Product
         </Button>
       </CardContent>

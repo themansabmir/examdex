@@ -2,18 +2,19 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { pricingTierApi } from "../infrastructure/pricing-tier.api";
 import type { CreatePricingTierInput, UpdatePricingTierInput } from "../domain/PricingTier";
 import { toast } from "sonner";
+import type { AxiosError } from "axios";
 
 export const pricingTierKeys = {
   all: ["pricing-tiers"] as const,
   lists: () => [...pricingTierKeys.all, "list"] as const,
-  list: (filters: any) => [...pricingTierKeys.lists(), { filters }] as const,
+  list: (filters: { active?: boolean }) => [...pricingTierKeys.lists(), { filters }] as const,
   details: () => [...pricingTierKeys.all, "detail"] as const,
   detail: (id: string) => [...pricingTierKeys.details(), id] as const,
 };
 
 export function usePricingTiers(params?: { active?: boolean }) {
   return useQuery({
-    queryKey: pricingTierKeys.list(params),
+    queryKey: pricingTierKeys.list(params || {}),
     queryFn: () => pricingTierApi.getAll(params),
   });
 }
@@ -35,7 +36,7 @@ export function useCreatePricingTier() {
       queryClient.invalidateQueries({ queryKey: pricingTierKeys.all });
       toast.success("Pricing tier created successfully");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data?.message || "Failed to create pricing tier");
     },
   });
@@ -52,7 +53,7 @@ export function useUpdatePricingTier() {
       queryClient.invalidateQueries({ queryKey: pricingTierKeys.detail(data.id) });
       toast.success("Pricing tier updated successfully");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data?.message || "Failed to update pricing tier");
     },
   });
@@ -67,7 +68,7 @@ export function useDeletePricingTier() {
       queryClient.invalidateQueries({ queryKey: pricingTierKeys.all });
       toast.success("Pricing tier deleted successfully");
     },
-    onError: (error: any) => {
+    onError: (error: AxiosError<{ message: string }>) => {
       toast.error(error.response?.data?.message || "Failed to delete pricing tier");
     },
   });

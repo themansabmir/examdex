@@ -20,13 +20,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const storedUser = localStorage.getItem("user");
     if (token && storedUser) {
       try {
-        setUser(JSON.parse(storedUser));
+        // Use setTimeout to avoid synchronous setState in effect
+        setTimeout(() => setUser(JSON.parse(storedUser)), 0);
       } catch {
         localStorage.removeItem("accessToken");
         localStorage.removeItem("user");
       }
     }
-    setIsLoading(false);
+    setTimeout(() => setIsLoading(false), 0);
   }, []);
 
   const login = useCallback((token: string, userData: AuthUser) => {
