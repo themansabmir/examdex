@@ -54,6 +54,7 @@ jobs:
   build:
     needs: test-and-lint
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     strategy:
       matrix:
@@ -63,15 +64,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
       - name: Build Docker image
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./apps/${{ matrix.service }}/Dockerfile
-          push: false
-          tags: test-${{ matrix.service }}:latest
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
+        run: |
+          echo "Building ${ matrix.service } image..."
+          ls -la ./apps/${{ matrix.service }}/
+          docker build -f ./apps/${{ matrix.service }}/Dockerfile -t test-${{ matrix.service }}:latest . --no-cache
+          echo "Build completed for ${ matrix.service }"
