@@ -23,8 +23,8 @@ COPY apps/dashboard ./apps/dashboard
 ENV NODE_OPTIONS=--max-old-space-size=1536
 ENV HUSKY=0
 
-# build dashboard (vite transpiles only, skips tsc type-check)
-RUN cd apps/dashboard && pnpm exec vite build
+# build dashboard
+RUN TURBO_TELEMETRY_DISABLED=1 pnpm --filter dashboard run build
 
 # ---------- runner ----------
 FROM nginx:alpine AS runner
