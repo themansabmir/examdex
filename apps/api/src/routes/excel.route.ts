@@ -1,11 +1,7 @@
 import { Router } from "express";
 import multer from "multer";
 import { ExcelService } from "../lib";
-import {
-  examService,
-  subjectService,
-  chapterService,
-} from "../container";
+import { examService, subjectService, chapterService } from "../container";
 import { BadRequestError, logger } from "../utils";
 import { protect } from "../middleware";
 
@@ -34,7 +30,7 @@ router.post("/:moduleName", protect, upload.single("file"), async (req, res, nex
         result = await subjectService.bulkCreateSubjects(data);
         break;
 
-      case "chapter":
+      case "chapter": {
         // Validate required headers
         ExcelService.validateHeaders(data, ["subjectCode", "chapterCode", "chapterName"]);
 
@@ -71,6 +67,7 @@ router.post("/:moduleName", protect, upload.single("file"), async (req, res, nex
 
         result = { count: totalCount };
         break;
+      }
       default:
         throw new BadRequestError(`Invalid module name: ${moduleName}`);
     }
