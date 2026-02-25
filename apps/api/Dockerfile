@@ -1,49 +1,50 @@
+# ---------- base ----------
 FROM node:20-alpine AS base
 RUN npm install -g pnpm
 
-# Build stage
+
+# ---------- builder ----------
 FROM base AS builder
 WORKDIR /app
 
-# Copy workspace configuration
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
-COPY turbo.json ./
+# copy workspace metadata first (max cache reuse)
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml turbo.json ./
 
-# Copy package.json files for all workspaces
-COPY apps/api/package.json ./apps/api/
+# copy api manifest
+COPY apps/api/package.json ./apps/api/package.json
 
-# Install dependencies
-RUN pnpm install --frozen-lockfile
+# install ONLY api + its workspace deps
+RUN pnpm install --filter api... --frozen-lockfile --ignore-scripts
 
-# Copy source code
+# copy source
 COPY apps/api ./apps/api
 
-# Build the API and shared packages
+# prevent TypeScript OOM in CI and disable git hooks
+ENV NODE_OPTIONS=--max-old-space-size=4096
+ENV HUSKY=0
+
+# build api
 RUN pnpm --filter api build
 
-# Production stage
+
+# ---------- runner ----------
 FROM base AS runner
 WORKDIR /app
-
 ENV NODE_ENV=production
 
-# Copy built files and necessary dependencies
+# runtime artifacts
 COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/apps/api/package.json ./package.json
-
-# Install only production dependencies
 COPY --from=builder /app/pnpm-lock.yaml ./
 COPY --from=builder /app/pnpm-workspace.yaml ./
-RUN pnpm install --prod --frozen-lockfile
 
-# Expose port (adjust if your API uses a different port)
+# install only production deps for api
+RUN pnpm install --prod --filter api... --frozen-lockfile --ignore-scripts
+
 EXPOSE 3000
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
+  CMD node -e "require('http').get('http://localhost:3000/health',(r)=>{process.exit(r.statusCode===200?0:1)})"
 
-# Run as non-root user for security
 USER node
-
-CMD ["node", "dist/index.js"]
+CMD ["node","dist/index.js"]
