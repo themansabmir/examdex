@@ -11,14 +11,12 @@ COPY turbo.json ./
 
 # Copy package.json files for all workspaces
 COPY apps/api/package.json ./apps/api/
-COPY packages/shared/package.json ./packages/shared/
 
 # Install dependencies
 RUN pnpm install --frozen-lockfile
 
 # Copy source code
 COPY apps/api ./apps/api
-COPY packages/shared ./packages/shared
 
 # Build the API and shared packages
 RUN pnpm --filter api build
@@ -32,9 +30,6 @@ ENV NODE_ENV=production
 # Copy built files and necessary dependencies
 COPY --from=builder /app/apps/api/dist ./dist
 COPY --from=builder /app/apps/api/package.json ./package.json
-
-# Copy shared package if needed at runtime
-COPY --from=builder /app/packages/shared ./packages/shared
 
 # Install only production dependencies
 COPY --from=builder /app/pnpm-lock.yaml ./
