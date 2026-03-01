@@ -35,25 +35,39 @@ def extract_text(file_path: str, document_id: str) -> str:
         UnsupportedFileTypeError: If file extension is not supported.
         TextExtractionError: If the file is corrupt or unreadable.
     """
-    extension = os.path.splitext(file_path)[1].lower()
+    # Normalize and validate path
+    clean_path = os.path.normpath(file_path)
+    if not os.path.exists(clean_path):
+        raise TextExtractionError(
+            f"File not found at: {clean_path}",
+            document_id=document_id,
+        )
+    
+    if not os.path.isfile(clean_path):
+        raise TextExtractionError(
+            f"Path is not a file (might be a directory): {clean_path}",
+            document_id=document_id,
+        )
+
+    extension = os.path.splitext(clean_path)[1].lower()
 
     if extension not in SUPPORTED_EXTENSIONS:
         raise UnsupportedFileTypeError(
-            f"File type '{extension}' is not supported. Accepted: {SUPPORTED_EXTENSIONS}",
+            f"File type '{extension}' is not supported for path: {clean_path}. Accepted: {SUPPORTED_EXTENSIONS}",
             document_id=document_id,
         )
 
     logger.info(
         "extraction_started",
         document_id=document_id,
-        file_path=file_path,
+        file_path=clean_path,
         file_type=extension,
     )
 
     if extension == ".pdf":
-        text = _extract_pdf(file_path, document_id)
+        text = _extract_pdf(clean_path, document_id)
     else:
-        text = _extract_docx(file_path, document_id)
+        text = _extract_docx(clean_path, document_id)
 
     if not text.strip():
         raise TextExtractionError(
