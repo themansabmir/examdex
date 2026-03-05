@@ -17,6 +17,21 @@ const app = express();
 app.use(helmet());
 app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 
+// Raw body parsing for webhook verification (must be before JSON parsing)
+app.use(
+  express.raw({ type: "application/json", limit: "10kb" }),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  (req: any, _res, next) => {
+    if (req.path.includes("/webhooks")) {
+      // Store raw body for webhook signature verification
+      req.rawBody = req.body;
+      // Convert to string for JSON parsing
+      req.body = JSON.parse(req.body.toString());
+    }
+    next();
+  }
+);
+
 // Body parsing
 app.use(express.json({ limit: "10kb" }));
 app.use(express.urlencoded({ extended: true, limit: "10kb" }));
