@@ -27,3 +27,6 @@ export * from "./credit";
 
 // Credit Master Feature
 export * from "./creditMaster";
+
+// Payment Feature
+export * from "./payments";
