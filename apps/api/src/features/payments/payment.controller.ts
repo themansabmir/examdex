@@ -1,8 +1,9 @@
 import type { Request, Response } from "express";
 import type { IPaymentService } from "./payment.service";
 import { CreateOrderOutputDTO } from "./payment.dto";
+import { CreatePaymentOrderInput } from "./payment.schema";
 import { asyncHandler } from "../../utils/async-handler";
-import { UnauthorizedError, BadRequestError } from "../../utils";
+import { UnauthorizedError } from "../../utils";
 import { logger } from "../../utils";
 
 export class PaymentController {
@@ -14,17 +15,8 @@ export class PaymentController {
    * Authenticated route - requires valid JWT
    */
   createOrder = asyncHandler(async (req: Request, res: Response) => {
-    const userId = req.user?.id;
-
-    if (!userId) {
-      throw new UnauthorizedError("User not authenticated", "UNAUTHORIZED");
-    }
-
-    const { creditPackId } = req.body;
-
-    if (!creditPackId || typeof creditPackId !== "string") {
-      throw new BadRequestError("creditPackId is required and must be a string", "INVALID_INPUT");
-    }
+    const userId = this.getAuthenticatedUserId(req);
+    const { creditPackId } = req.body as CreatePaymentOrderInput;
 
     logger.info("Creating payment order", {
       userId,
@@ -46,4 +38,14 @@ export class PaymentController {
       },
     });
   });
+
+  private getAuthenticatedUserId(req: Request): string {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedError("User not authenticated", "UNAUTHORIZED");
+    }
+
+    return userId;
+  }
 }

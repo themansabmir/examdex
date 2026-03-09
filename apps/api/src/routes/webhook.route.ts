@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { paymentWebhookController } from "../container";
+import { validateBody } from "../middleware";
+import { razorpayWebhookSchema } from "../features/payments/payment.schema";
 
 const router = Router();
 
@@ -13,16 +15,16 @@ const router = Router();
  *   - payment.failed: Logged, no action taken
  *   - Other events: Acknowledged but not processed
  */
-router.post("/razorpay", (req, res, next) => {
-  void paymentWebhookController.handlePaymentWebhook(req, res).catch(next);
-});
+router.post(
+  "/razorpay",
+  validateBody(razorpayWebhookSchema),
+  paymentWebhookController.handlePaymentWebhook
+);
 
 /**
  * GET /webhooks/razorpay/health
  * Health check endpoint - verify webhook endpoint is active
  */
-router.get("/razorpay/health", (req, res, next) => {
-  void paymentWebhookController.health(req, res).catch(next);
-});
+router.get("/razorpay/health", paymentWebhookController.health);
 
 export const webhookRoutes = router;

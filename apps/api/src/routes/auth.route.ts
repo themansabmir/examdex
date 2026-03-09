@@ -5,6 +5,7 @@ import {
   adminLoginSchema,
   studentAuthSchema,
   verifyOtpSchema,
+  refreshTokenSchema,
   inviteAdminSchema,
   acceptInviteSchema,
   resetPasswordRequestSchema,
@@ -13,44 +14,38 @@ import {
 
 const router = Router();
 
-router.post("/admin/login", validateBody(adminLoginSchema), (req, res, next) => {
-  authController.adminLogin(req, res).catch(next);
-});
+router.post("/admin/login", validateBody(adminLoginSchema), authController.adminLogin);
 
-router.post("/student", validateBody(studentAuthSchema), (req, res, next) => {
-  authController.studentAuth(req, res).catch(next);
-});
+router.post("/student", validateBody(studentAuthSchema), authController.studentAuth);
 
-router.post("/verify-otp", validateBody(verifyOtpSchema), (req, res, next) => {
-  authController.verifyOtp(req, res).catch(next);
-});
+router.post("/verify-otp", validateBody(verifyOtpSchema), authController.verifyOtp);
 
-router.post("/refresh", (req, res, next) => {
-  authController.refreshToken(req, res).catch(next);
-});
+router.post(
+  "/refresh",
+  (req, _res, next) => {
+    const body = req.body && typeof req.body === "object" ? req.body : {};
+    req.body = {
+      ...body,
+      refreshToken: body.refreshToken ?? req.cookies?.refreshToken,
+    };
+    next();
+  },
+  validateBody(refreshTokenSchema),
+  authController.refreshToken
+);
 
-router.post("/logout", (req, res, next) => {
-  authController.logout(req, res).catch(next);
-});
+router.post("/logout", authController.logout);
 
-router.post("/invite", protect, validateBody(inviteAdminSchema), (req, res, next) => {
-  authController.inviteAdmin(req, res).catch(next);
-});
+router.post("/invite", protect, validateBody(inviteAdminSchema), authController.inviteAdmin);
 
-router.post("/accept-invite", validateBody(acceptInviteSchema), (req, res, next) => {
-  authController.acceptInvite(req, res).catch(next);
-});
+router.post("/accept-invite", validateBody(acceptInviteSchema), authController.acceptInvite);
 
 router.post(
   "/password-reset-request",
   validateBody(resetPasswordRequestSchema),
-  (req, res, next) => {
-    authController.requestPasswordReset(req, res).catch(next);
-  }
+  authController.requestPasswordReset
 );
 
-router.post("/reset-password", validateBody(resetPasswordSchema), (req, res, next) => {
-  authController.resetPassword(req, res).catch(next);
-});
+router.post("/reset-password", validateBody(resetPasswordSchema), authController.resetPassword);
 
 export const authRoutes = router;

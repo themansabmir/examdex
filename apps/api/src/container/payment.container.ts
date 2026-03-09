@@ -1,21 +1,23 @@
 import { prisma } from "../lib";
 import { creditRepository } from "./credit.container";
 import { env } from "../config/env";
-import { PaymentService, PaymentController, PaymentWebhookController } from "../features";
+import Razorpay from "razorpay";
+import {
+  PaymentService,
+  PaymentController,
+  PaymentWebhookController,
+  PaymentWebhookService,
+} from "../features";
 import { logger } from "../utils";
 
 // ============================================
 // Razorpay Client Setup
 // ============================================
 
-// Dynamic import for Razorpay (CommonJS module)
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 let razorpayClient: any = null;
 
 try {
-  // eslint-disable-next-line @typescript-eslint/no-require-imports
-  const Razorpay = require("razorpay");
-
   if (!env.RAZORPAY_KEY_ID || !env.RAZORPAY_KEY_SECRET) {
     logger.warn("⚠️  Razorpay credentials not configured. Payment features will be unavailable.");
   }
@@ -46,7 +48,9 @@ export const paymentService = new PaymentService(
 
 export const paymentController = new PaymentController(paymentService);
 
-export const paymentWebhookController = new PaymentWebhookController(
+export const paymentWebhookService = new PaymentWebhookService(
   paymentService,
   env.RAZORPAY_WEBHOOK_SECRET || ""
 );
+
+export const paymentWebhookController = new PaymentWebhookController(paymentWebhookService);
