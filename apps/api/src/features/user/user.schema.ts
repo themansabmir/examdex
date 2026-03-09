@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { UserType } from "@prisma/client";
 
 export const createUserSchema = z.object({
   email: z.string().email("Invalid email format").optional(),
@@ -30,3 +31,25 @@ export const updateProfileSchema = z.object({
   email: z.string().email().optional(),
   phone: z.string().min(10).optional(),
 });
+
+const booleanQuerySchema = z.preprocess((value) => {
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return value;
+}, z.boolean().default(false));
+
+export const userListQuerySchema = z.object({
+  userType: z
+    .preprocess(
+      (value) => {
+        if (value === undefined) return undefined;
+        return Array.isArray(value) ? value : [value];
+      },
+      z.array(z.nativeEnum(UserType)).optional()
+    )
+    .optional(),
+  onlyActive: booleanQuerySchema,
+  excludeStudent: booleanQuerySchema,
+});
+
+export type UserListQueryInput = z.infer<typeof userListQuerySchema>;

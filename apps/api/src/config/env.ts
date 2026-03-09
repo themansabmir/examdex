@@ -40,6 +40,11 @@ export const env = {
   RATE_LIMIT_WINDOW_MS: parseInt(process.env.RATE_LIMIT_WINDOW_MS || "900000", 10), // 15 minutes
   RATE_LIMIT_MAX: parseInt(process.env.RATE_LIMIT_MAX || "100", 10),
 
+  // Razorpay
+  RAZORPAY_KEY_ID: process.env.RAZORPAY_KEY_ID || "",
+  RAZORPAY_KEY_SECRET: process.env.RAZORPAY_KEY_SECRET || "",
+  RAZORPAY_WEBHOOK_SECRET: process.env.RAZORPAY_WEBHOOK_SECRET || "",
+
   isDevelopment: process.env.NODE_ENV === "development",
   isProduction: process.env.NODE_ENV === "production",
   isTest: process.env.NODE_ENV === "test",
@@ -56,6 +61,9 @@ export function validateEnv(): void {
     "TWILIO_ACCOUNT_SID",
     "TWILIO_AUTH_TOKEN",
     "TWILIO_PHONE_NUMBER",
+    "RAZORPAY_KEY_ID",
+    "RAZORPAY_KEY_SECRET",
+    "RAZORPAY_WEBHOOK_SECRET",
   ];
 
   const missing = required.filter((key) => !process.env[key]);
@@ -68,10 +76,12 @@ export function validateEnv(): void {
   }
 
   if (missingProduction.length > 0) {
+    // eslint-disable-next-line no-console
     console.warn(`⚠️  Missing production environment variables: ${missingProduction.join(", ")}`);
   }
 
   if (missing.length > 0) {
+    // eslint-disable-next-line no-console
     console.warn(`⚠️  Missing environment variables: ${missing.join(", ")}`);
   }
 }
