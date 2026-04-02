@@ -1,4 +1,4 @@
-import jwt, { TokenExpiredError, JsonWebTokenError, Secret, SignOptions } from "jsonwebtoken";
+import jwt, { type Secret, type SignOptions } from "jsonwebtoken";
 import { JwtPayload, TokenPair, JwtConfig, DecodedToken } from "./jwt.types";
 
 export class JwtService {
@@ -66,10 +66,10 @@ export class JwtService {
     try {
       return jwt.verify(token, this.getSecret("access")) as DecodedToken;
     } catch (error) {
-      if (error instanceof TokenExpiredError) {
+      if (error instanceof jwt.TokenExpiredError) {
         throw new Error("Access token expired");
       }
-      if (error instanceof JsonWebTokenError) {
+      if (error instanceof jwt.JsonWebTokenError) {
         throw new Error("Invalid access token");
       }
       throw error;
@@ -83,10 +83,10 @@ export class JwtService {
     try {
       return jwt.verify(token, this.getSecret("refresh")) as DecodedToken;
     } catch (error) {
-      if (error instanceof TokenExpiredError) {
+      if (error instanceof jwt.TokenExpiredError) {
         throw new Error("Refresh token expired");
       }
-      if (error instanceof JsonWebTokenError) {
+      if (error instanceof jwt.JsonWebTokenError) {
         throw new Error("Invalid refresh token");
       }
       throw error;
