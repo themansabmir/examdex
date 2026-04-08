@@ -1,75 +1,81 @@
 """
 Stage 3: Embedding + indexing.
-Embeds chunks via OpenAI and upserts into Pinecone with full metadata.
+Embeds text chunks using HuggingFace sentence-transformers and stores them in pgvector.
 """
 
 from __future__ import annotations
 
-from app.clients.openai_client import OpenAIClient
-from app.clients.pinecone_client import PineconeClient
+import numpy as np
+from sentence_transformers import SentenceTransformer
+
+from app.clients.pgvector_client import ChunkRow, PgVectorClient
+from app.core.config import get_settings
 from app.core.logging import get_logger
-from app.models.schemas import ChunkVector, DocumentMetadata
+from app.models.schemas import IngestRequest
 
 logger = get_logger(__name__)
 
 
 def embed_and_index(
     chunks: list[str],
-    metadata: DocumentMetadata,
-    openai_client: OpenAIClient,
-    pinecone_client: PineconeClient,
+    request: IngestRequest,
+    embedder: SentenceTransformer,
+    pgvector_client: PgVectorClient,
 ) -> int:
     """
-    Embeds chunks and upserts them to Pinecone.
+    Embed text chunks and store them in pgvector.
 
-    1. Generate embeddings in batches (up to 100 per call — OpenAI + Epic 18).
-    2. Build ChunkVector objects with metadata.
-    3. Upsert to Pinecone.
+    1. Generate embeddings in batches (batch_size from settings).
+    2. Build ChunkRow objects with full metadata.
+    3. Upsert into postgres via pgvector_client.
 
     Args:
-        chunks: List of text chunks to embed.
-        metadata: Exam/subject/topic/document metadata.
-        openai_client: Injected OpenAI adapter.
-        pinecone_client: Injected Pinecone adapter.
+        chunks:          List of text chunks from the chunker.
+        request:         The original IngestRequest (carries metadata).
+        embedder:        Loaded SentenceTransformer model (shared, not re-loaded).
+        pgvector_client: Injected database client.
 
     Returns:
-        Number of vectors successfully upserted.
+        Number of chunks successfully inserted.
     """
+    settings = get_settings()
+
     logger.info(
-        "indexing_started",
-        document_id=metadata.document_id,
+        "embedding_started",
+        document_id=request.document_id,
         chunk_count=len(chunks),
+        model=settings.hf_embedding_model,
     )
 
-    # Embed all chunks (internally batched to ≤ 100 per call)
-    vectors = openai_client.embed_texts(chunks, document_id=metadata.document_id)
+    # Encode in batches — returns a numpy array of shape (n_chunks, 384)
+    vectors: np.ndarray = embedder.encode(
+        chunks,
+        batch_size=settings.embedding_batch_size,
+        show_progress_bar=False,
+        normalize_embeddings=True,
+    )
 
-    # Build ChunkVector objects
-    chunk_vectors: list[ChunkVector] = []
-    for i, (chunk, vector) in enumerate(zip(chunks, vectors)):
-        vector_id = PineconeClient.make_vector_id(metadata.document_id, i)
-        chunk_vectors.append(
-            ChunkVector(
-                vector_id=vector_id,
-                values=vector,
-                metadata={
-                    "document_id": metadata.document_id,
-                    "exam": metadata.exam,
-                    "subject": metadata.subject,
-                    "topic": metadata.topic,
-                    "chunk_index": i,
-                    "file_name": metadata.file_name,
-                    "text": chunk,  # Store text for retrieval display
-                },
-            )
+    # Build ChunkRow objects
+    chunk_rows: list[ChunkRow] = [
+        ChunkRow(
+            document_id=request.document_id,
+            exam=request.exam,
+            subject=request.subject,
+            topic=request.topic,
+            chunk_index=i,
+            file_name=request.file_name,
+            text=chunk,
+            embedding=vectors[i].tolist(),
         )
+        for i, chunk in enumerate(chunks)
+    ]
 
-    # Upsert to Pinecone
-    pinecone_client.upsert_chunks(chunk_vectors, metadata.document_id)
+    # Insert into pgvector (pipeline already deleted old rows before calling this)
+    pgvector_client.upsert_chunks(chunk_rows)
 
     logger.info(
-        "indexing_complete",
-        document_id=metadata.document_id,
-        vectors_upserted=len(chunk_vectors),
+        "embedding_complete",
+        document_id=request.document_id,
+        vectors_inserted=len(chunk_rows),
     )
-    return len(chunk_vectors)
+    return len(chunk_rows)

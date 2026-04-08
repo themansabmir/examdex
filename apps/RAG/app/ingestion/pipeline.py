@@ -1,34 +1,22 @@
 """
 Ingestion pipeline orchestrator.
-Coordinates all stages: extract → chunk → index.
-Implements retry with exponential backoff and rollback on failure (Epic 18).
+Coordinates all stages: extract → chunk → embed → store.
+
+Triggered synchronously by the POST /ingest HTTP endpoint.
+No background jobs, no queues — Node.js calls this directly and waits for the result.
 """
 
 from __future__ import annotations
 
-import time
+from sentence_transformers import SentenceTransformer
 
-from tenacity import (
-    RetryError,
-    retry,
-    stop_after_attempt,
-    wait_exponential,
-)
-
-from app.clients.openai_client import OpenAIClient
-from app.clients.pinecone_client import PineconeClient
+from app.clients.pgvector_client import PgVectorClient
 from app.core.exceptions import RAGBaseError, TextExtractionError
 from app.core.logging import get_logger
-from app.models.schemas import (
-    DocumentMetadata,
-    DocumentStatus,
-    IngestionFailure,
-    IngestionJob,
-    IngestionResult,
-)
 from app.ingestion.chunker import chunk_text
 from app.ingestion.extractor import extract_text
 from app.ingestion.indexer import embed_and_index
+from app.models.schemas import IngestRequest, IngestionFailure, IngestionResult
 
 logger = get_logger(__name__)
 
@@ -37,125 +25,99 @@ class IngestionPipeline:
     """
     Orchestrates the full document ingestion pipeline.
 
-    Follows hexagonal design: receives injected clients, never creates them.
-    Can be invoked from a worker, a test, or directly.
+    Dependencies are injected at construction — the pipeline never creates
+    its own connections or models, making it easy to test and extend.
     """
 
     def __init__(
         self,
-        openai_client: OpenAIClient,
-        pinecone_client: PineconeClient,
+        embedder: SentenceTransformer,
+        pgvector_client: PgVectorClient,
     ) -> None:
-        self._openai = openai_client
-        self._pinecone = pinecone_client
+        self._embedder = embedder
+        self._pgvector = pgvector_client
 
-    def run(self, job: IngestionJob) -> IngestionResult | IngestionFailure:
+    def run(self, request: IngestRequest) -> IngestionResult | IngestionFailure:
         """
-        Execute the full pipeline with up to 3 retry attempts.
-        On any failure after retries, rollback Pinecone vectors and return IngestionFailure.
+        Execute the full pipeline for one document.
+
+        Stages:
+          1. Extract  — pull raw text from PDF/DOCX
+          2. Chunk    — split into semantically coherent pieces
+          3. Delete   — remove any previously indexed chunks for this document
+          4. Embed    — generate 384-dim HuggingFace vectors
+          5. Store    — bulk-insert into pgvector
+
+        Returns IngestionResult on success, IngestionFailure on any error.
         """
         logger.info(
             "pipeline_started",
-            document_id=job.document_id,
-            file_name=job.file_name,
-            attempt=job.attempt,
+            document_id=request.document_id,
+            file_name=request.file_name,
         )
-        t0 = time.perf_counter()
 
         try:
-            result = self._run_with_retry(job)
-            elapsed = round((time.perf_counter() - t0) / 60, 2)
-            logger.info(
-                "pipeline_succeeded",
-                document_id=job.document_id,
-                chunk_count=result.chunk_count,
-                elapsed_minutes=elapsed,
-            )
-            return result
-        except Exception as exc:
-            elapsed = round((time.perf_counter() - t0) / 60, 2)
-            error_code = getattr(exc, "code", "UNKNOWN_ERROR")
-            error_message = str(exc)
-
-            logger.error(
-                "pipeline_failed_terminal",
-                document_id=job.document_id,
-                error_code=error_code,
-                error=error_message,
-                elapsed_minutes=elapsed,
-            )
-            return IngestionFailure(
-                document_id=job.document_id,
-                error_code=error_code,
-                error_message=error_message,
-                status=DocumentStatus.FAILED,
-            )
-
-    @retry(
-        wait=wait_exponential(multiplier=2, min=5, max=60),
-        stop=stop_after_attempt(3),
-        reraise=True,
-    )
-    def _run_with_retry(self, job: IngestionJob) -> IngestionResult:
-        """
-        Single attempt of the ingestion pipeline.
-        On failure, rolls back any partial Pinecone upserts before raising
-        so the retry starts from a clean slate.
-        """
-        document_id = job.document_id
-        partial_indexed = False
-
-        try:
-            # Stage 1: Extract
-            text = extract_text(job.file_path, document_id)
+            # Stage 1: Extract text
+            text = extract_text(request.file_path, request.document_id)
 
             # Stage 2: Chunk
-            chunks = chunk_text(text, document_id)
+            chunks = chunk_text(text, request.document_id)
 
-            # Stage 3: Rollback any previous partial upsert before re-indexing
-            logger.info("partial_rollback_start", document_id=document_id)
-            self._pinecone.delete_by_document_id(document_id)
+            # Stage 3: Delete old vectors (ensures idempotent re-ingestion)
+            self._pgvector.delete_by_document_id(request.document_id)
 
-            # Stage 4: Embed + index
-            partial_indexed = True
+            # Stage 4 & 5: Embed + store
             chunk_count = embed_and_index(
                 chunks=chunks,
-                metadata=DocumentMetadata(
-                    document_id=document_id,
-                    exam=job.exam,
-                    subject=job.subject,
-                    topic=job.topic,
-                    chunk_index=0,  # Placeholder; indexer assigns per chunk
-                    file_name=job.file_name,
-                ),
-                openai_client=self._openai,
-                pinecone_client=self._pinecone,
+                request=request,
+                embedder=self._embedder,
+                pgvector_client=self._pgvector,
             )
 
-            return IngestionResult(
-                document_id=document_id,
+            logger.info(
+                "pipeline_succeeded",
+                document_id=request.document_id,
                 chunk_count=chunk_count,
-                status=DocumentStatus.INDEXED,
+            )
+            return IngestionResult(
+                document_id=request.document_id,
+                chunk_count=chunk_count,
             )
 
-        except TextExtractionError:
-            # Extraction errors are terminal — don't retry a corrupt file
-            raise
+        except TextExtractionError as exc:
+            # Terminal — a corrupt/image-only file won't succeed on retry
+            logger.error(
+                "pipeline_extraction_failed",
+                document_id=request.document_id,
+                error=str(exc),
+            )
+            return IngestionFailure(
+                document_id=request.document_id,
+                error_code=exc.code,
+                error_message=str(exc),
+            )
 
         except RAGBaseError as exc:
-            # Non-extraction errors: rollback partial state if indexing started
-            if partial_indexed:
-                logger.warning(
-                    "rolling_back_partial_upsert",
-                    document_id=document_id,
-                    error=str(exc),
-                )
-                try:
-                    self._pinecone.delete_by_document_id(document_id)
-                except Exception as rollback_exc:
-                    logger.error(
-                        "rollback_failed",
-                        document_id=document_id,
-                        rollback_error=str(rollback_exc),
-                    )
-            raise
+            logger.error(
+                "pipeline_failed",
+                document_id=request.document_id,
+                error_code=exc.code,
+                error=str(exc),
+            )
+            return IngestionFailure(
+                document_id=request.document_id,
+                error_code=exc.code,
+                error_message=str(exc),
+            )
+
+        except Exception as exc:
+            logger.exception(
+                "pipeline_unexpected_error",
+                document_id=request.document_id,
+                error=str(exc),
+            )
+            return IngestionFailure(
+                document_id=request.document_id,
+                error_code="UNEXPECTED_ERROR",
+                error_message=str(exc),
+            )

@@ -1,33 +1,25 @@
-# Core RAG dependencies
-pydantic-settings==2.7.1
-langchain==0.3.20
-langchain-openai==0.3.8
-langchain-pinecone==0.2.5
-langchain-community==0.3.19
+# Web framework
+fastapi==0.115.8
+uvicorn==0.34.0
 
-# PDF & DOCX processing
+# PDF & DOCX extraction
 pypdf==5.3.1
 python-docx==1.1.2
 
-# Vector DB
-pinecone-client==5.0.1
+# Text chunking
+langchain-text-splitters==0.3.8
 
-# OpenAI
-openai==1.59.9
+# HuggingFace embeddings
+sentence-transformers==3.4.1
 
-# Queue (async job processing - BullMQ-compatible via Redis)
-redis==5.2.1
-rq==2.3.3
+# PostgreSQL + pgvector
+psycopg2-binary==2.9.10
+pgvector==0.3.6
 
-# Config & utilities
-python-dotenv==1.0.1
+# Config & validation
 pydantic==2.10.6
-tenacity==9.0.0
+pydantic-settings==2.7.1
+python-dotenv==1.0.1
 
 # Logging
 structlog==25.1.0
-
-# HTTP (for health check server)
-fastapi==0.115.8
-uvicorn==0.34.0
-httpx==0.28.1
