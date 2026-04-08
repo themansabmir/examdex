@@ -27,3 +27,4 @@ export * from "./credit";
 
 // Credit Master Feature
 export * from "./creditMaster";
+export * from "./student";

@@ -2,6 +2,8 @@ import { Router } from "express";
 import { authRoutes } from "./auth.route";
 import { userRoutes } from "./user.route";
 import { examRoutes } from "./exam.route";
+import { studentRoutes } from "./student.route";
+
 import { subjectRoutes } from "./subject.route";
 import { chapterRoutes } from "./chapter.route";
 import { classRoutes } from "./class.route";
@@ -23,6 +25,8 @@ const router = Router();
 router.use("/auth", authRoutes);
 
 // Protected routes
+router.use("/student", protect, studentRoutes);
+
 router.use("/users", protect, userRoutes);
 router.use("/exams", protect, examRoutes);
 router.use("/subjects", protect, subjectRoutes);
@@ -33,7 +37,7 @@ router.use("/exam-subject", protect, examSubjectRoutes);
 router.use("/credits", protect, creditRoutes);
 router.use("/credit-master", protect, creditMasterRoutes);
 
-router.use("/dev", protect, devRoutes);
+router.use("/dev", devRoutes);
 router.use("/excel", excelRoutes);
 router.use("/", protect, questionPaperApiRoutes);
 

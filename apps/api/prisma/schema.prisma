@@ -109,6 +109,7 @@ model UserExamPreference {
   userId         String    @map("user_id") @db.Uuid
   examId         String    @map("exam_id") @db.Uuid
   subjectId      String    @map("subject_id") @db.Uuid
+  classId        String?    @map("class_id") @db.Uuid
   isPrimary      Boolean   @default(false) @map("is_primary")
   targetExamDate DateTime? @map("target_exam_date") @db.Date
   createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamp(6)
