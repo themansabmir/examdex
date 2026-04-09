@@ -9,6 +9,8 @@ import { pricingTierRoutes } from "./pricing-tier.route";
 import { examSubjectRoutes } from "./exam-subject.route";
 import { creditRoutes } from "./credit.route";
 import { creditMasterRoutes } from "./credit-master.route";
+import { paymentRoutes } from "./payment.route";
+import { webhookRoutes } from "./webhook.route";
 
 import { devRoutes } from "./dev.route";
 import { excelRoutes } from "./excel.route";
@@ -16,6 +18,12 @@ import { protect } from "../middleware";
 import { questionPaperApiRoutes } from "./question-paper.route";
 
 const router = Router();
+
+// ============================================
+// Public Webhook Routes (NO auth required)
+// ============================================
+// Must be before protect middleware to avoid authentication
+router.use("/webhooks", webhookRoutes);
 
 // ============================================
 // Module Routes
@@ -32,6 +40,7 @@ router.use("/pricing-tiers", protect, pricingTierRoutes);
 router.use("/exam-subject", protect, examSubjectRoutes);
 router.use("/credits", protect, creditRoutes);
 router.use("/credit-master", protect, creditMasterRoutes);
+router.use("/payments", protect, paymentRoutes);
 
 router.use("/dev", protect, devRoutes);
 router.use("/excel", excelRoutes);

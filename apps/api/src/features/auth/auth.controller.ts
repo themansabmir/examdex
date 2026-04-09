@@ -7,6 +7,8 @@ import {
   RefreshTokenInputDTO,
 } from "./auth.dto";
 import { HttpStatus } from "../../utils/app-error";
+import { asyncHandler } from "../../utils/async-handler";
+import { UnauthorizedError } from "../../utils";
 
 export class AuthController {
   private readonly cookieOptions: CookieOptions = {
@@ -20,7 +22,7 @@ export class AuthController {
 
   constructor(private readonly authService: IAuthService) {}
 
-  adminLogin = async (req: Request, res: Response): Promise<void> => {
+  adminLogin = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const input: AdminLoginInputDTO = req.body;
     const result = await this.authService.adminLogin(input);
 
@@ -33,9 +35,9 @@ export class AuthController {
         user: result.user,
       },
     });
-  };
+  });
 
-  studentAuth = async (req: Request, res: Response): Promise<void> => {
+  studentAuth = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const input: StudentAuthInputDTO = req.body;
     const result = await this.authService.studentAuth(input);
 
@@ -43,9 +45,9 @@ export class AuthController {
       success: true,
       data: result,
     });
-  };
+  });
 
-  verifyOtp = async (req: Request, res: Response): Promise<void> => {
+  verifyOtp = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const input: VerifyOtpInputDTO = req.body;
     const result = await this.authService.verifyOtp(input);
 
@@ -58,20 +60,10 @@ export class AuthController {
         user: result.user,
       },
     });
-  };
+  });
 
-  refreshToken = async (req: Request, res: Response): Promise<void> => {
-    const refreshToken = req.cookies.refreshToken || req.body.refreshToken;
-
-    if (!refreshToken) {
-      res.status(HttpStatus.UNAUTHORIZED).json({
-        success: false,
-        message: "Refresh token not provided",
-      });
-      return;
-    }
-
-    const input: RefreshTokenInputDTO = { refreshToken };
+  refreshToken = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const input: RefreshTokenInputDTO = req.body;
     const result = await this.authService.refreshToken(input);
 
     res.cookie("refreshToken", result.refreshToken, this.cookieOptions);
@@ -83,9 +75,9 @@ export class AuthController {
         user: result.user,
       },
     });
-  };
+  });
 
-  logout = async (_: Request, res: Response): Promise<void> => {
+  logout = asyncHandler(async (_: Request, res: Response): Promise<void> => {
     res.clearCookie("refreshToken", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -98,19 +90,19 @@ export class AuthController {
       success: true,
       message: "Logged out successfully",
     });
-  };
+  });
 
-  inviteAdmin = async (req: Request, res: Response): Promise<void> => {
-    const invitedBy = (req as any).user?.id;
+  inviteAdmin = asyncHandler(async (req: Request, res: Response): Promise<void> => {
+    const invitedBy = this.getAuthenticatedUserId(req);
     await this.authService.inviteAdmin(req.body, invitedBy);
 
     res.status(HttpStatus.OK).json({
       success: true,
       message: "Invitation sent successfully",
     });
-  };
+  });
 
-  acceptInvite = async (req: Request, res: Response): Promise<void> => {
+  acceptInvite = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     const result = await this.authService.acceptInvite(req.body);
 
     res.cookie("refreshToken", result.refreshToken, this.cookieOptions);
@@ -122,23 +114,33 @@ export class AuthController {
         user: result.user,
       },
     });
-  };
+  });
 
-  requestPasswordReset = async (req: Request, res: Response): Promise<void> => {
+  requestPasswordReset = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     await this.authService.requestPasswordReset(req.body);
 
     res.status(HttpStatus.OK).json({
       success: true,
       message: "If an account exists with this email, a reset link has been sent.",
     });
-  };
+  });
 
-  resetPassword = async (req: Request, res: Response): Promise<void> => {
+  resetPassword = asyncHandler(async (req: Request, res: Response): Promise<void> => {
     await this.authService.resetPassword(req.body);
 
     res.status(HttpStatus.OK).json({
       success: true,
       message: "Password reset successfully",
     });
-  };
+  });
+
+  private getAuthenticatedUserId(req: Request): string {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      throw new UnauthorizedError("Unauthorized", "UNAUTHORIZED");
+    }
+
+    return userId;
+  }
 }
