@@ -175,6 +175,7 @@ model ExamSubject {
   // Relations
   exam              Exam               @relation(fields: [examId], references: [id], onDelete: Cascade)
   subject           Subject            @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+  examConfigs ExamConfig[]
 
   generatedPapers   GeneratedPaper[]
   aiPromptTemplates AiPromptTemplate[]
@@ -499,12 +500,12 @@ model DailyMetric {
 // ENUMS (for validation reference)
 // ============================================
 
-enum QuestionType {
-  MCQ_single
-  MCQ_multiple
-  Numerical
-  Assertion_Reason
-}
+// enum QuestionType {
+//   MCQ_single
+//   MCQ_multiple
+//   Numerical
+//   Assertion_Reason
+// }
 
 enum Difficulty {
   easy
@@ -631,3 +632,31 @@ model OtpStorage {
   @@map("otp_storage")
 }
 
+
+model QuestionType {
+  id          String   @id @default(cuid())
+  code        String   @unique // MCQ, NUMERICAL
+  name        String
+
+  examConfigs ExamConfig[]
+}
+model ExamConfig {
+  id String @id @default(cuid())
+
+  examSubjectId  String
+  questionTypeId String
+
+  questionCount    Int
+  marksPerQuestion Float
+  negativeMarks    Float?
+
+  displayOrder Int
+
+  difficultyMixJson Json?
+
+  examSubject  ExamSubject  @relation(fields: [examSubjectId], references: [id])
+  questionType QuestionType @relation(fields: [questionTypeId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
