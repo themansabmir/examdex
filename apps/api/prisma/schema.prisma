@@ -634,19 +634,21 @@ model OtpStorage {
 
 
 model QuestionType {
-  id          String   @id @default(cuid())
-  code        String   @unique // MCQ, NUMERICAL
-  name        String
+  id String @id @default(uuid()) @db.Uuid
+
+  code String @unique
+  name String
 
   examConfigs ExamConfig[]
 }
 model ExamConfig {
-  id String @id @default(cuid())
+  id String @id @default(uuid()) @db.Uuid
 
-  examSubjectId  String
-  questionTypeId String
+  examSubjectId  String @db.Uuid
+  questionTypeId String @db.Uuid
 
-  questionCount    Int
+  questionCount Int
+
   marksPerQuestion Float
   negativeMarks    Float?
 
