@@ -7,7 +7,8 @@ export * from "./chapter.container";
 export * from "./dev.container";
 export * from "./class.container";
 export * from "./exam-subject.container";
-
+export * from "./examConfig.container";
 export * from "./pricing-tier.container";
 export * from "./credit.container";
 export * from "./credit-master.container";
+export * from "./generatedPaper.container";
