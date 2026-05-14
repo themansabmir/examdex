@@ -23,6 +23,7 @@ export interface UpdateUserData {
   isActive?: boolean;
   isOnboarded?: boolean;
   lastLoginAt?: Date;
+  creditBalance?: number;
 }
 
 export interface IUserRepository {
@@ -69,25 +70,28 @@ export class PrismaUserRepository implements IUserRepository {
     return this.mapToEntity(user);
   }
 
-  private mapToEntity(user: any): User {
+  private mapToEntity(user: Record<string, unknown>): User {
     return new User({
-      id: user.id,
-      email: user.email,
-      phoneNumber: user.phoneNumber,
-      fullName: user.fullName,
-      passwordHash: user.passwordHash,
+      id: user.id as string,
+      email: user.email as string | null,
+      phoneNumber: user.phoneNumber as string | null,
+      fullName: user.fullName as string,
+      passwordHash: user.passwordHash as string | null,
       userType: user.userType as UserType,
-      creditBalance: user.creditBalance,
-      totalCreditsPurchased: user.totalCreditsPurchased,
-      isActive: user.isActive,
-      isOnboarded: user.isOnboarded,
-      deviceFingerprint: user.deviceFingerprint,
-      lastLoginAt: user.lastLoginAt,
-      createdAt: user.createdAt,
-      currentExam: user.examPreferences?.[0]?.exam
+      creditBalance: user.creditBalance as number,
+      totalCreditsPurchased: user.totalCreditsPurchased as number,
+      isActive: user.isActive as boolean,
+      isOnboarded: user.isOnboarded as boolean,
+      deviceFingerprint: user.deviceFingerprint as string | null,
+      lastLoginAt: user.lastLoginAt as Date | null,
+      createdAt: user.createdAt as Date,
+      currentExam: (user.examPreferences as Array<{ exam: { id: string; examName: string } }>)?.[0]
+        ?.exam
         ? {
-            id: user.examPreferences[0].exam.id,
-            name: user.examPreferences[0].exam.examName,
+            id: (user.examPreferences as Array<{ exam: { id: string; examName: string } }>)[0].exam
+              .id,
+            name: (user.examPreferences as Array<{ exam: { id: string; examName: string } }>)[0]
+              .exam.examName,
           }
         : undefined,
     });
@@ -152,10 +156,10 @@ export class PrismaUserRepository implements IUserRepository {
     excludeStudent?: boolean;
     onlyActive?: boolean;
   }): Promise<User[]> {
-    const where: any = {};
+    const where: Record<string, unknown> = {};
 
     if (options?.userType || options?.excludeStudent || options?.onlyActive) {
-      const conditions: any[] = [];
+      const conditions: Record<string, unknown>[] = [];
 
       if (options?.userType) {
         conditions.push({
@@ -191,7 +195,7 @@ export class PrismaUserRepository implements IUserRepository {
   }
 
   async update(id: string, data: UpdateUserData): Promise<User> {
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
 
     if (data.fullName !== undefined) {
       updateData.fullName = data.fullName;
@@ -213,6 +217,9 @@ export class PrismaUserRepository implements IUserRepository {
     }
     if (data.passwordHash !== undefined) {
       updateData.passwordHash = data.passwordHash;
+    }
+    if (data.creditBalance !== undefined) {
+      updateData.creditBalance = data.creditBalance;
     }
 
     const user = await this.prisma.user.update({

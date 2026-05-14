@@ -29,4 +29,5 @@ export const updateProfileSchema = z.object({
   fullName: z.string().min(1).max(255).optional(),
   email: z.string().email().optional(),
   phone: z.string().min(10).optional(),
+  examId: z.string().uuid().optional(),
 });
