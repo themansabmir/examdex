@@ -7,6 +7,7 @@ import { QuestionService } from "../questionData/questionData.service";
 import { IExamConfigRepository } from "../examConfig/examConfig.repositary";
 import { IExamSubjectRepository } from "../exam-subject";
 import { NotFoundError } from "../../utils/app-error";
+import { IUserRepository } from "../user/user.repository";
 
 export class GeneratedPaperService {
   constructor(
@@ -14,17 +15,21 @@ export class GeneratedPaperService {
     private readonly userExamPrefrence: IUserExamRepositary,
     private readonly questionService: QuestionService,
     private readonly examConfig: IExamConfigRepository,
-    private readonly examSubject: IExamSubjectRepository
+    private readonly examSubject: IExamSubjectRepository,
+    private readonly userRepository: IUserRepository
   ) {}
 
   async createGeneratedPaper(
     input: CreateGeneratedPaperInputDTO,
     userId: string
   ): Promise<GeneratedPaperOutputDTO> {
-    let questions: any[] = [];
+    let questions: Record<string, unknown>[] = [];
 
     if (input.type === "mock") {
-      questions = await this.questionService.getQuestions();
+      questions = await this.questionService.getQuestions(
+        input.selectedTopics,
+        input.difficultyDistribution
+      );
     }
 
     const prefrence = await this.userExamPrefrence.findPrimaryById(userId);
@@ -49,11 +54,23 @@ export class GeneratedPaperService {
 
     const maxMarks = config.marksPerQuestion * questions.length;
     const totalTimeSeconds = questions.reduce(
-      (sum, question: any) => sum + question.estimatedTimeSeconds,
+      (sum, question: Record<string, unknown>) => sum + (question.estimatedTimeSeconds as number),
       0
     );
 
     const timeLimitMinutes = totalTimeSeconds / 60;
+
+    const userRepo = await this.userRepository.findById(userId);
+
+    const userBalance = userRepo!.creditBalance;
+
+    if (userBalance >= questions.length) {
+      await this.userRepository.update(userId, {
+        creditBalance: userBalance - questions.length,
+      });
+    } else {
+      throw new Error("User does not have enough credits to generate the paper.");
+    }
 
     const generatedPaper = new GeneratedPaper({
       id: randomUUID(),

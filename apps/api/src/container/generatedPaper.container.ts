@@ -11,11 +11,14 @@ export const generatedPaperRepository = new PrismaGeneratedPaperRepository(prism
 export const userExamRepository = new PrismaUserExamReposiary(prisma);
 export const questionService = new QuestionService();
 
+import { userRepository } from "./user.container";
+
 export const generatedPaperService = new GeneratedPaperService(
   generatedPaperRepository,
   userExamRepository,
   questionService,
   examConfigRepository,
-  examSubjectRepository
+  examSubjectRepository,
+  userRepository
 );
 export const generatedPaperController = new GeneratedPaperController(generatedPaperService);

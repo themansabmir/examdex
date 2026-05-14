@@ -1,5 +1,8 @@
 export class QuestionService {
-  async getQuestions(): Promise<object[]> {
+  async getQuestions(
+    _selectedTopics: string[],
+    _difficultyDistribution: Record<string, unknown>
+  ): Promise<Record<string, unknown>[]> {
     return [
       {
         questionNumber: 1,
