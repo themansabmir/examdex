@@ -1,6 +1,6 @@
 """
 Typed domain exceptions for the RAG service.
-Every exception must have a code and a human-readable message.
+Every exception carries a machine-readable code and a human-readable message.
 """
 
 from __future__ import annotations
@@ -23,36 +23,30 @@ class RAGBaseError(Exception):
 
 
 class UnsupportedFileTypeError(RAGBaseError):
-    """Raised when a file with an unsupported extension is provided."""
-
+    """Raised when file extension is not supported."""
     code = "UNSUPPORTED_FILE_TYPE"
 
 
 class TextExtractionError(RAGBaseError):
     """Raised when text extraction fails (corrupt or unreadable file)."""
-
     code = "TEXT_EXTRACTION_FAILED"
 
 
 class EmbeddingError(RAGBaseError):
-    """Raised when OpenAI embedding call fails after retries."""
-
+    """Raised when embedding generation fails."""
     code = "EMBEDDING_FAILED"
 
 
 class VectorStoreError(RAGBaseError):
-    """Raised when Pinecone upsert or delete fails after retries."""
-
+    """Raised when pgvector upsert or delete fails."""
     code = "VECTOR_STORE_ERROR"
-
-
-class RetrievalError(RAGBaseError):
-    """Raised when Pinecone similarity search fails."""
-
-    code = "RETRIEVAL_FAILED"
 
 
 class ConfigurationError(RAGBaseError):
     """Raised at startup when required environment variables are missing."""
-
     code = "CONFIGURATION_ERROR"
+
+
+class RetrievalError(RAGBaseError):
+    """Raised when semantic retrieval fails."""
+    code = "RETRIEVAL_FAILED"
