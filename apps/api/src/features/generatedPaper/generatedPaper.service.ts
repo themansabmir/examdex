@@ -6,7 +6,7 @@ import { IUserExamRepositary } from "../userExamPrefrence/userExamPrefrence.repo
 import { QuestionService } from "../questionData/questionData.service";
 import { IExamConfigRepository } from "../examConfig/examConfig.repositary";
 import { IExamSubjectRepository } from "../exam-subject";
-import { NotFoundError } from "../../utils/app-error";
+import { NotFoundError, ForbiddenError } from "../../utils/app-error";
 import { IUserRepository } from "../user/user.repository";
 
 export class GeneratedPaperService {
@@ -139,6 +139,40 @@ export class GeneratedPaperService {
       attemptCount: savedPaper.attemptCount,
 
       createdAt: savedPaper.createdAt,
+    };
+  }
+
+  async getGeneratedPaperById(id: string, userId: string): Promise<GeneratedPaperOutputDTO> {
+    const paper = await this.generatedPaper.findById(id);
+
+    if (!paper) {
+      throw new NotFoundError("Generated paper not found");
+    }
+
+    if (paper.userId !== userId) {
+      throw new ForbiddenError("You do not have permission to view this paper");
+    }
+
+    return {
+      id: paper.id,
+      userId: paper.userId,
+      examId: paper.examId,
+      examSubjectId: paper.examSubjectId,
+      paperTitle: paper.paperTitle,
+      questionsData: paper.questionsData,
+      selectedTopics: paper.selectedTopics,
+      difficultyDistribution: paper.difficultyDistribution,
+      totalQuestions: paper.totalQuestions,
+      maxMarks: paper.maxMarks,
+      timeLimitMinutes: paper.timeLimitMinutes,
+      aiPromptTemplateId: paper.aiPromptTemplateId,
+      aiPromptVersion: paper.aiPromptVersion,
+      generationLatencyMs: paper.generationLatencyMs,
+      generationStatus: paper.generationStatus,
+      studentRating: paper.studentRating,
+      isBookmarked: paper.isBookmarked,
+      attemptCount: paper.attemptCount,
+      createdAt: paper.createdAt,
     };
   }
 }
