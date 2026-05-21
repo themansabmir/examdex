@@ -9,4 +9,8 @@ router.post("/", validateBody(createGeneratedPaperSchema), (req, res, next) => {
   generatedPaperController.create(req, res).catch(next);
 });
 
+router.get("/:id", (req, res, next) => {
+  generatedPaperController.getById(req, res).catch(next);
+});
+
 export const generatedPaperRoutes = router;
