@@ -25,4 +25,20 @@ export class GeneratedPaperController {
       data: paper,
     });
   }
+
+  async getAllGeneratedPaper(req: Request, res: Response): Promise<void> {
+    const page = Number(req.query.page) || 1;
+    const limit = Number(req.query.limit) || 5;
+    const search = req.query.search as string;
+    const papers = await this.generatedPaper.findAllByUserId(
+      (req as any).user.id,
+      page,
+      limit,
+      search
+    );
+    res.status(200).json({
+      success: true,
+      data: papers,
+    });
+  }
 }

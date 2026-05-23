@@ -175,4 +175,13 @@ export class GeneratedPaperService {
       createdAt: paper.createdAt,
     };
   }
+
+  async findAllByUserId(
+    userId: string,
+    page: number,
+    limit: number,
+    search?: string
+  ): Promise<GeneratedPaper[]> {
+    return this.generatedPaper.findAllByUserId(userId, page, limit, search);
+  }
 }
